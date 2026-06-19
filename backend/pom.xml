@@ -84,7 +84,7 @@
     </dependencies>
 
     <build>
-        <finalName>immocalchub</finalName>
+        <finalName>ecinventoryhub</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
