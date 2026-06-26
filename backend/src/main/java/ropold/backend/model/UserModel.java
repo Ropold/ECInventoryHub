@@ -24,6 +24,10 @@ public class UserModel {
     @Column(name = "github_id", nullable = false, unique = true)
     private String githubId;
 
+    @OneToOne
+    @JoinColumn(name = "employee_id", unique = true)
+    private EmployeeModel employee;
+
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
