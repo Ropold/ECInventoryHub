@@ -2,6 +2,7 @@ package ropold.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ropold.backend.exception.notfoundexceptions.EmployeeNotFoundException;
 import ropold.backend.model.EmployeeModel;
 import ropold.backend.repository.EmployeeRepository;
 
