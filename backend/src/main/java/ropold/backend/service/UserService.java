@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public UserModel createOrUpdateFromGitHub(OAuth2User oAuth2User) {
-        String githubId = oAuth2User.getAttribute("id");
+        String githubId = String.valueOf(oAuth2User.getAttribute("id"));
 
         return userRepository.findByGithubId(githubId)
                 .map(existingUser -> {
@@ -46,7 +46,7 @@ public class UserService {
                             oAuth2User.getAttribute("name"),
                             oAuth2User.getAttribute("avatar_url"),
                             oAuth2User.getAttribute("html_url"),
-                            Role.USER,
+                            Role.VIEWER,
                             "de",
                             java.time.LocalDateTime.now(),
                             java.time.LocalDateTime.now()
