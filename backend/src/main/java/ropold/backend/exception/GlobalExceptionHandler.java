@@ -20,8 +20,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             AssignmentNotFoundException.class,
+            AssignmentFileNotFoundException.class,
             DeviceNotFoundException.class,
+            DeviceFileNotFoundException.class,
             EmployeeNotFoundException.class,
+            LocationNotFoundException.class,
             UserNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)

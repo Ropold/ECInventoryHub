@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -53,6 +55,6 @@ public class AssignmentModel {
     @Column(name = "copy_filed_in_personnel_file", nullable = false)
     private boolean copyFiledInPersonnelFile = false;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AssignmentFileModel> files = new ArrayList<>();
 }
