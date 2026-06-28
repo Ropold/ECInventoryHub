@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -46,13 +48,13 @@ public class DeviceModel {
     @Column(name = "defective", nullable = false)
     private boolean defective = false;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "location")
-    private Location location;
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    private LocationModel location;
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DeviceFileModel> files = new ArrayList<>();
 }

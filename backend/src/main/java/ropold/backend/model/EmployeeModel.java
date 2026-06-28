@@ -31,6 +31,9 @@ public class EmployeeModel {
     @Column(name = "phone", unique = true)
     private String phone;
 
+    @Column(name = "address", columnDefinition = "text")
+    private String address;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "department", nullable = false)
     private Department department;
