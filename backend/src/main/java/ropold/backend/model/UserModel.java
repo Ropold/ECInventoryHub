@@ -24,6 +24,10 @@ public class UserModel {
     @Column(name = "github_id", nullable = false, unique = true)
     private String githubId;
 
+    @OneToOne
+    @JoinColumn(name = "employee_id", unique = true)
+    private EmployeeModel employee;
+
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
@@ -38,7 +42,7 @@ public class UserModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role = Role.USER;
+    private Role role = Role.VIEWER;
 
     @Column(name = "preferred_language", length = 2)
     private String preferredLanguage = "de";

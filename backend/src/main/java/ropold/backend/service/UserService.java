@@ -41,6 +41,7 @@ public class UserService {
                     UserModel newUser = new UserModel(
                             UUID.randomUUID(),
                             githubId,
+                            null,
                             oAuth2User.getAttribute("login"),
                             oAuth2User.getAttribute("name"),
                             oAuth2User.getAttribute("avatar_url"),
