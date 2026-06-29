@@ -35,9 +35,8 @@ public class LocationService {
     }
 
     public void deleteLocation(UUID id) {
-        if (!locationRepository.existsById(id)) {
-            throw new LocationNotFoundException("Location not found with id: " + id);
-        }
+        locationRepository.findById(id)
+                .orElseThrow(() -> new LocationNotFoundException("Location not found with id: " + id));
         locationRepository.deleteById(id);
     }
 }
