@@ -20,31 +20,36 @@ public class LocationController {
     private final LocationService locationService;
 
     @GetMapping
-    public List<LocationDTO> getAllLocations() {
-        return locationService.findAllLocations().stream()
-                .map(this::toDto)
-                .toList();
+    public List<LocationModel> getAllLocations() {
+        return locationService.findAllLocations();
     }
 
     @GetMapping("/{id}")
-    public LocationDTO getLocationById(@PathVariable UUID id) {
-        return toDto(locationService.getLocationById(id));
+    public LocationModel getLocationById(@PathVariable UUID id) {
+        return locationService.getLocationById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public LocationDTO addLocation(
+    public LocationModel addLocation(
             @RequestBody LocationDTO locationDTO,
             @AuthenticationPrincipal OAuth2User authentication) {
 
         if (authentication == null) {
             throw new AccessDeniedException("User not authenticated");
         }
-        return toDto(locationService.addLocation(toModel(null, locationDTO)));
+        return locationService.addLocation(new LocationModel(
+                null,
+                locationDTO.name(),
+                locationDTO.address(),
+                locationDTO.phone(),
+                locationDTO.email(),
+                locationDTO.notes()
+        ));
     }
 
     @PutMapping("/{id}")
-    public LocationDTO updateLocation(
+    public LocationModel updateLocation(
             @PathVariable UUID id,
             @RequestBody LocationDTO locationDTO,
             @AuthenticationPrincipal OAuth2User authentication) {
@@ -52,7 +57,14 @@ public class LocationController {
         if (authentication == null) {
             throw new AccessDeniedException("User not authenticated");
         }
-        return toDto(locationService.updateLocation(toModel(id, locationDTO)));
+        return locationService.updateLocation(new LocationModel(
+                id,
+                locationDTO.name(),
+                locationDTO.address(),
+                locationDTO.phone(),
+                locationDTO.email(),
+                locationDTO.notes()
+        ));
     }
 
     @DeleteMapping("/{id}")
@@ -65,27 +77,5 @@ public class LocationController {
             throw new AccessDeniedException("User not authenticated");
         }
         locationService.deleteLocation(id);
-    }
-
-    private LocationDTO toDto(LocationModel model) {
-        return new LocationDTO(
-                model.getId(),
-                model.getName(),
-                model.getAddress(),
-                model.getPhone(),
-                model.getEmail(),
-                model.getNotes()
-        );
-    }
-
-    private LocationModel toModel(UUID id, LocationDTO dto) {
-        return new LocationModel(
-                id,
-                dto.name(),
-                dto.address(),
-                dto.phone(),
-                dto.email(),
-                dto.notes()
-        );
     }
 }

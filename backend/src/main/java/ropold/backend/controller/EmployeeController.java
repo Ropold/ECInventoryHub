@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ropold.backend.dto.EmployeeDTO;
 import ropold.backend.model.EmployeeModel;
+import ropold.backend.service.CloudinaryService;
 import ropold.backend.service.EmployeeService;
 import ropold.backend.service.ImageUploadUtil;
 
@@ -21,23 +22,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EmployeeController {
     private final EmployeeService employeeService;
+    private final CloudinaryService cloudinaryService;
     private final ImageUploadUtil imageUploadUtil;
 
     @GetMapping
-    public List<EmployeeDTO> getAllEmployees() {
-        return employeeService.findAllEmployees().stream()
-                .map(this::toDto)
-                .toList();
+    public List<EmployeeModel> getAllEmployees() {
+        return employeeService.findAllEmployees();
     }
 
     @GetMapping("/{id}")
-    public EmployeeDTO getEmployeeById(@PathVariable UUID id) {
-        return toDto(employeeService.getEmployeeById(id));
+    public EmployeeModel getEmployeeById(@PathVariable UUID id) {
+        return employeeService.getEmployeeById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public EmployeeDTO addEmployee(
+    public EmployeeModel addEmployee(
             @RequestPart("employeeDTO") EmployeeDTO employeeDTO,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal OAuth2User authentication) throws IOException {
@@ -48,14 +48,25 @@ public class EmployeeController {
 
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
-            imageUrl = imageUploadUtil.determineImageUrl(image, null, null);
+            imageUrl = cloudinaryService.uploadImage(image);
         }
 
-        return toDto(employeeService.addEmployee(toModel(null, employeeDTO, imageUrl)));
+        return employeeService.addEmployee(new EmployeeModel(
+                null,
+                employeeDTO.personnelNumber(),
+                employeeDTO.name(),
+                employeeDTO.email(),
+                employeeDTO.phone(),
+                employeeDTO.address(),
+                employeeDTO.department(),
+                employeeDTO.active(),
+                employeeDTO.notes(),
+                imageUrl
+        ));
     }
 
     @PutMapping("/{id}")
-    public EmployeeDTO updateEmployee(
+    public EmployeeModel updateEmployee(
             @PathVariable UUID id,
             @RequestPart("employeeDTO") EmployeeDTO employeeDTO,
             @RequestPart(value = "image", required = false) MultipartFile image,
@@ -69,7 +80,18 @@ public class EmployeeController {
         String newImageUrl = imageUploadUtil.determineImageUrl(image, employeeDTO.imageUrl(), existing.getImageUrl());
         imageUploadUtil.cleanupOldImageIfNeeded(existing.getImageUrl(), newImageUrl);
 
-        return toDto(employeeService.updateEmployee(toModel(id, employeeDTO, newImageUrl)));
+        return employeeService.updateEmployee(new EmployeeModel(
+                existing.getId(),
+                employeeDTO.personnelNumber(),
+                employeeDTO.name(),
+                employeeDTO.email(),
+                employeeDTO.phone(),
+                employeeDTO.address(),
+                employeeDTO.department(),
+                employeeDTO.active(),
+                employeeDTO.notes(),
+                newImageUrl
+        ));
     }
 
     @DeleteMapping("/{id}")
@@ -82,35 +104,5 @@ public class EmployeeController {
             throw new AccessDeniedException("User not authenticated");
         }
         employeeService.deleteEmployee(id);
-    }
-
-    private EmployeeDTO toDto(EmployeeModel model) {
-        return new EmployeeDTO(
-                model.getId(),
-                model.getPersonnelNumber(),
-                model.getName(),
-                model.getEmail(),
-                model.getPhone(),
-                model.getAddress(),
-                model.getDepartment(),
-                model.isActive(),
-                model.getNotes(),
-                model.getImageUrl()
-        );
-    }
-
-    private EmployeeModel toModel(UUID id, EmployeeDTO dto, String imageUrl) {
-        return new EmployeeModel(
-                id,
-                dto.personnelNumber(),
-                dto.name(),
-                dto.email(),
-                dto.phone(),
-                dto.address(),
-                dto.department(),
-                dto.active(),
-                dto.notes(),
-                imageUrl
-        );
     }
 }
