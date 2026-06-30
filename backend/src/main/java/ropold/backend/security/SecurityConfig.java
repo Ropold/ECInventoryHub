@@ -1,4 +1,3 @@
-/*
 package ropold.backend.security;
 
 import lombok.RequiredArgsConstructor;
@@ -12,15 +11,22 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import ropold.backend.model.Role;
+import ropold.backend.model.UserModel;
 import ropold.backend.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +38,10 @@ public class SecurityConfig {
     private String appUrl;
 
     private final UserRepository userRepository;
-    private static final String COUNTRY = "/api/countries/**";
+    private static final String ASSIGNMENT = "/api/assignments/**";
+    private static final String DEVICE = "/api/devices/**";
+    private static final String EMPLOYEE = "/api/employees/**";
+    private static final String LOCATION = "/api/locations/**";
     private static final String USER = "/api/users/**";
 
     @Bean
@@ -40,10 +49,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers(HttpMethod.GET, COUNTRY, USER).permitAll()
-                        .requestMatchers(HttpMethod.POST, COUNTRY, USER).authenticated()
-                        .requestMatchers(HttpMethod.PUT, COUNTRY, USER).authenticated()
-                        .requestMatchers(HttpMethod.DELETE, COUNTRY, USER).authenticated()
+                        .requestMatchers(HttpMethod.GET, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).permitAll()
+                        .requestMatchers(HttpMethod.POST, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).hasAnyAuthority("USER", "ADMIN")
                         .anyRequest().permitAll()
                 )
                 .logout(l -> l.logoutUrl("/api/users/logout")
@@ -82,18 +91,23 @@ public class SecurityConfig {
                         UserModel newUser = new UserModel();
                         newUser.setGithubId(githubId);
                         newUser.setUsername(username);
-                        newUser.setName(name != null ? name : username); // Fallback auf username
-                        newUser.setRole("USER");
+                        newUser.setName(name != null ? name : username);
+                        newUser.setRole(Role.VIEWER);
                         newUser.setPreferredLanguage("de");
                         newUser.setCreatedAt(LocalDateTime.now());
-                        newUser.setLastLoginAt(LocalDateTime.now());
                         newUser.setAvatarUrl(avatarUrl);
                         newUser.setGithubUrl(githubUrl);
 
                         return userRepository.save(newUser);
                     });
 
-            return githubUser;
+            user.setLastLoginAt(LocalDateTime.now());
+            userRepository.save(user);
+
+            Set<GrantedAuthority> authorities = new HashSet<>(githubUser.getAuthorities());
+            authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
+
+            return new DefaultOAuth2User(authorities, githubUser.getAttributes(), "login");
         };
     }
-*/
+}
