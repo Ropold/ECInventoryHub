@@ -2,81 +2,95 @@ package ropold.backend.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import ropold.backend.model.Role;
 import ropold.backend.model.UserModel;
 import ropold.backend.repository.UserRepository;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.never;
 
 class SecurityConfigTest {
+
     @Mock
     private UserRepository userRepository;
+
+    private SecurityConfig securityConfig;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        securityConfig = new SecurityConfig(userRepository);
     }
 
-
-    @Test
-    void testOauth2UserService_existingUser() {
-        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("github")
-                .clientId("test-client-id")
-                .clientSecret("test-client-secret")
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("http://localhost/login/oauth2/code/github")
-                .tokenUri("https://github.com/login/oauth/access_token")
-                .authorizationUri("https://github.com/login/oauth/authorize")
-                .userInfoUri("https://api.github.com/user")
-                .userNameAttributeName("login")
-                .clientName("GitHub")
-                .build();
-
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER, "mock-token", Instant.now(), Instant.now().plusSeconds(3600)
-        );
-        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-
+    private OAuth2User githubUser(String id, String login, String name) {
         OAuth2User mockOAuth2User = mock(OAuth2User.class);
         when(mockOAuth2User.getAttributes()).thenReturn(Map.of(
-                "id", "12345",
-                "login", "existinguser",
-                "name", "Existing User",
-                "avatar_url", "https://avatars.githubusercontent.com/u/12345",
-                "html_url", "https://github.com/existinguser"
+                "id", id,
+                "login", login,
+                "name", name,
+                "avatar_url", "https://avatars.githubusercontent.com/u/" + id,
+                "html_url", "https://github.com/" + login
         ));
-        when(mockOAuth2User.getName()).thenReturn("existinguser");
+        when(mockOAuth2User.getAttribute("id")).thenReturn(id);
+        when(mockOAuth2User.getAttribute("login")).thenReturn(login);
+        when(mockOAuth2User.getAttribute("name")).thenReturn(name);
+        when(mockOAuth2User.getAttribute("avatar_url")).thenReturn("https://avatars.githubusercontent.com/u/" + id);
+        when(mockOAuth2User.getAttribute("html_url")).thenReturn("https://github.com/" + login);
+        when(mockOAuth2User.getAuthorities()).thenReturn(Set.of());
+        return mockOAuth2User;
+    }
 
-        DefaultOAuth2UserService mockUserService = mock(DefaultOAuth2UserService.class);
-        when(mockUserService.loadUser(userRequest)).thenReturn(mockOAuth2User);
+    @Test
+    void processOAuth2User_existingUser_updatesLastLoginAndDoesNotCreate() {
+        UserModel existingUser = new UserModel();
+        existingUser.setGithubId("12345");
+        existingUser.setUsername("existinguser");
+        existingUser.setRole(Role.USER);
 
-        when(userRepository.findByGithubId("12345")).thenReturn(Optional.of(new UserModel()));
+        when(userRepository.findByGithubId("12345")).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(UserModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService = new SecurityConfig(userRepository) {
-            @Override
-            public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
-                return mockUserService;
-            }
-        }.oauth2UserService();
+        OAuth2User githubUser = githubUser("12345", "existinguser", "Existing User");
 
-        OAuth2User result = oauth2UserService.loadUser(userRequest);
+        OAuth2User result = securityConfig.processOAuth2User(githubUser);
 
-        verify(userRepository, never()).save(any());
-        assertEquals(mockOAuth2User, result);
+        ArgumentCaptor<UserModel> savedUser = ArgumentCaptor.forClass(UserModel.class);
+        verify(userRepository, times(1)).save(savedUser.capture());
+        assertEquals(existingUser, savedUser.getValue());
+        assertNotNull(savedUser.getValue().getLastLoginAt());
+        assertTrue(result.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("USER")));
+    }
+
+    @Test
+    void processOAuth2User_newUser_createsAndUpdatesLastLogin() {
+        when(userRepository.findByGithubId("99999")).thenReturn(Optional.empty());
+        when(userRepository.save(any(UserModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OAuth2User githubUser = githubUser("99999", "newuser", "New User");
+
+        OAuth2User result = securityConfig.processOAuth2User(githubUser);
+
+        ArgumentCaptor<UserModel> savedUser = ArgumentCaptor.forClass(UserModel.class);
+        verify(userRepository, times(2)).save(savedUser.capture());
+
+        UserModel created = savedUser.getAllValues().get(0);
+        assertEquals("99999", created.getGithubId());
+        assertEquals("newuser", created.getUsername());
+        assertEquals(Role.VIEWER, created.getRole());
+        assertNotNull(savedUser.getValue().getLastLoginAt());
+        assertTrue(result.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("VIEWER")));
     }
 }
