@@ -33,12 +33,35 @@
   ## 📊 Code Quality
 
   ### Backend
-  [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
-  [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=ropold_ECInventoryHub-backend)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
 
   ### Frontend
-  [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
-  [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=ropold_ECInventoryHub-frontend)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
 
   ---
 

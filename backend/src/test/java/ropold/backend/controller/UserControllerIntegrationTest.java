@@ -179,6 +179,59 @@ class UserControllerIntegrationTest {
     }
 
     @Test
+    void testGetUserDetails_newUser_currentlyThrowsClassCastExceptionInCreateUser() throws Exception {
+        // KNOWN BUG (reported separately, not fixed here): createUserFromAuthentication() does
+        // `String.valueOf(authentication.getAttribute("id"))` with the generic getAttribute(...) call
+        // inlined as the argument. javac resolves this to the String.valueOf(char[]) overload instead
+        // of String.valueOf(Object), so this always throws a ClassCastException at runtime, regardless
+        // of the actual attribute type. The outer catch(Exception) swallows it and returns the generic
+        // "temporarily unavailable" error, so new-user auto-creation via this endpoint is broken today.
+        // This test documents the current (buggy) behavior and covers the userOpt.isEmpty()==true branch;
+        // the deeper branches inside createUserFromAuthentication cannot be covered until the bug is fixed.
+        OAuth2User mockUser = mock(OAuth2User.class);
+        when(mockUser.getAttribute("id")).thenReturn("githubIdNew");
+        when(mockUser.getAttribute("login")).thenReturn("newUserName");
+        when(mockUser.getAttribute("name")).thenReturn("Brand New User");
+        when(mockUser.getAttribute("avatar_url")).thenReturn("https://avatars.githubusercontent.com/u/999");
+        when(mockUser.getAttribute("html_url")).thenReturn("https://github.com/newUserName");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockUser,
+                List.of(new SimpleGrantedAuthority("OIDC_USER")),
+                "github"
+        );
+
+        mockMvc.perform(get("/api/users/me/details")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.error").value("User data temporarily unavailable, please refresh"));
+
+        assertThat(userRepository.findByGithubId("githubIdNew")).isEmpty();
+    }
+
+    @Test
+    void testGetUserDetails_withNullAvatarAndGithubUrl_shouldReturnEmptyStrings() throws Exception {
+        testUser.setAvatarUrl(null);
+        testUser.setGithubUrl(null);
+        userRepository.save(testUser);
+
+        OAuth2User mockUser = mock(OAuth2User.class);
+        when(mockUser.getAttribute("id")).thenReturn("githubId1");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockUser,
+                List.of(new SimpleGrantedAuthority("OIDC_USER")),
+                "github"
+        );
+
+        mockMvc.perform(get("/api/users/me/details")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.avatarUrl").value(""))
+                .andExpect(jsonPath("$.githubUrl").value(""));
+    }
+
+    @Test
     void testGetUserDetails_withException() throws Exception {
         OAuth2User mockUser = mock(OAuth2User.class);
         when(mockUser.getAttribute("id")).thenThrow(new RuntimeException("Test exception"));

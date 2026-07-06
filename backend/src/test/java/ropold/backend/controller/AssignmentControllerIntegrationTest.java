@@ -12,29 +12,39 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import jakarta.persistence.EntityManager;
+import ropold.backend.model.AssignmentFileModel;
 import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.Department;
 import ropold.backend.model.DeviceModel;
 import ropold.backend.model.DeviceStatus;
 import ropold.backend.model.DeviceType;
 import ropold.backend.model.EmployeeModel;
+import ropold.backend.repository.AssignmentFileRepository;
 import ropold.backend.repository.AssignmentRepository;
 import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.EmployeeRepository;
+import ropold.backend.service.CloudinaryService;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -61,6 +71,15 @@ class AssignmentControllerIntegrationTest {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private AssignmentFileRepository assignmentFileRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @MockitoBean
+    private CloudinaryService cloudinaryService;
 
     private DeviceModel deviceModel1;
     private EmployeeModel employeeModel1;
@@ -267,6 +286,146 @@ class AssignmentControllerIntegrationTest {
     }
 
     @Test
+    void testAddAssignment_withImageFile_shouldUploadImageAndSaveFile() throws Exception {
+        when(cloudinaryService.uploadImage(any())).thenReturn("https://cloudinary.test/new-image.png");
+
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        assignmentRepository.deleteAll();
+
+        String newAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-05-01",
+                    "conditionOut": "New condition",
+                    "notes": "Notes for new assignment",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", newAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile imageFilePart = new MockMultipartFile(
+                "files", "photo.png", "image/png", "image-bytes".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/assignments")
+                        .file(assignmentDtoPart)
+                        .file(imageFilePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isCreated());
+
+        verify(cloudinaryService).uploadImage(any());
+        verify(cloudinaryService, never()).uploadFile(any());
+
+        List<AssignmentFileModel> savedFiles = assignmentFileRepository.findAll();
+        assertEquals(1, savedFiles.size());
+        assertEquals("https://cloudinary.test/new-image.png", savedFiles.getFirst().getFileUrl());
+        assertEquals("image/png", savedFiles.getFirst().getFileType());
+    }
+
+    @Test
+    void testAddAssignment_withNonImageFile_shouldUploadFileAndSaveFile() throws Exception {
+        when(cloudinaryService.uploadFile(any())).thenReturn("https://cloudinary.test/new-doc.pdf");
+
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        assignmentRepository.deleteAll();
+
+        String newAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-05-01",
+                    "conditionOut": "New condition",
+                    "notes": "Notes for new assignment",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", newAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile docFilePart = new MockMultipartFile(
+                "files", "protocol.pdf", "application/pdf", "pdf-bytes".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/assignments")
+                        .file(assignmentDtoPart)
+                        .file(docFilePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isCreated());
+
+        verify(cloudinaryService).uploadFile(any());
+        verify(cloudinaryService, never()).uploadImage(any());
+
+        List<AssignmentFileModel> savedFiles = assignmentFileRepository.findAll();
+        assertEquals(1, savedFiles.size());
+        assertEquals("https://cloudinary.test/new-doc.pdf", savedFiles.getFirst().getFileUrl());
+    }
+
+    @Test
+    void testAddAssignment_withEmptyFilePart_shouldNotUploadAnything() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        assignmentRepository.deleteAll();
+
+        String newAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-05-01",
+                    "conditionOut": "New condition",
+                    "notes": "Notes for new assignment",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", newAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile emptyFilePart = new MockMultipartFile(
+                "files", "empty.txt", "text/plain", new byte[0]
+        );
+
+        mockMvc.perform(multipart("/api/assignments")
+                        .file(assignmentDtoPart)
+                        .file(emptyFilePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isCreated());
+
+        verify(cloudinaryService, never()).uploadImage(any());
+        verify(cloudinaryService, never()).uploadFile(any());
+        assertTrue(assignmentFileRepository.findAll().isEmpty());
+    }
+
+    @Test
     void testUpdateAssignment_shouldReturnUpdated() throws Exception {
         OAuth2User mockOAuth2User = mock(OAuth2User.class);
         when(mockOAuth2User.getName()).thenReturn("test-user");
@@ -363,6 +522,262 @@ class AssignmentControllerIntegrationTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value("User not authenticated"));
+    }
+
+    @Test
+    void testUpdateAssignment_withImageFileNotInKeepIds_shouldDeleteImageFromCloudinary() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+        assignmentFileRepository.save(new AssignmentFileModel(
+                null, existingAssignment, "https://cloudinary.test/old-image.png", "image/png", LocalDateTime.now()
+        ));
+        // Force a real reload so the controller sees a Hibernate-managed files collection
+        // instead of the stale, already-loaded (empty) one cached on this persistence context.
+        entityManager.flush();
+        entityManager.clear();
+
+        // assignmentDTO.files() omitted -> keepIds empty -> the existing image file must be removed
+        String updatedAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-01-01",
+                    "conditionOut": "Like new",
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk());
+
+        verify(cloudinaryService).deleteImage("https://cloudinary.test/old-image.png");
+        verify(cloudinaryService, never()).deleteFile(anyString());
+        assertTrue(assignmentFileRepository.findAll().isEmpty());
+    }
+
+    @Test
+    void testUpdateAssignment_withNonImageFileNotInKeepIds_shouldDeleteFileFromCloudinary() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+        assignmentFileRepository.save(new AssignmentFileModel(
+                null, existingAssignment, "https://cloudinary.test/old-doc.pdf", "application/pdf", LocalDateTime.now()
+        ));
+        entityManager.flush();
+        entityManager.clear();
+
+        // assignmentDTO.files() omitted -> keepIds empty -> the existing document file must be removed
+        String updatedAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-01-01",
+                    "conditionOut": "Like new",
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk());
+
+        verify(cloudinaryService).deleteFile("https://cloudinary.test/old-doc.pdf");
+        verify(cloudinaryService, never()).deleteImage(anyString());
+        assertTrue(assignmentFileRepository.findAll().isEmpty());
+    }
+
+    @Test
+    void testUpdateAssignment_withFileKeptInKeepIds_shouldNotDeleteFromCloudinary() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+        AssignmentFileModel keptFile = assignmentFileRepository.save(new AssignmentFileModel(
+                null, existingAssignment, "https://cloudinary.test/kept-image.png", "image/png", LocalDateTime.now()
+        ));
+        entityManager.flush();
+        entityManager.clear();
+
+        // assignmentDTO.files() references the existing file's id -> keepIds contains it -> must NOT be deleted
+        String updatedAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-01-01",
+                    "conditionOut": "Like new",
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false,
+                    "files": [
+                        { "id": "%s", "fileUrl": "https://cloudinary.test/kept-image.png", "fileType": "image/png", "uploadedAt": "2024-01-01T10:00:00" }
+                    ]
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId(), keptFile.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk());
+
+        verify(cloudinaryService, never()).deleteImage(anyString());
+        verify(cloudinaryService, never()).deleteFile(anyString());
+        assertTrue(assignmentFileRepository.findById(keptFile.getId()).isPresent());
+    }
+
+    @Test
+    void testUpdateAssignment_withNewImageFile_shouldUploadImageAndSaveFile() throws Exception {
+        when(cloudinaryService.uploadImage(any())).thenReturn("https://cloudinary.test/updated-image.png");
+
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+
+        String updatedAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-01-01",
+                    "conditionOut": "Like new",
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile imageFilePart = new MockMultipartFile(
+                "files", "new-photo.png", "image/png", "image-bytes".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .file(imageFilePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk());
+
+        verify(cloudinaryService).uploadImage(any());
+        verify(cloudinaryService, never()).uploadFile(any());
+
+        List<AssignmentFileModel> savedFiles = assignmentFileRepository.findAll();
+        assertEquals(1, savedFiles.size());
+        assertEquals("https://cloudinary.test/updated-image.png", savedFiles.getFirst().getFileUrl());
+    }
+
+    @Test
+    void testUpdateAssignment_withNewNonImageFile_shouldUploadFileAndSaveFile() throws Exception {
+        when(cloudinaryService.uploadFile(any())).thenReturn("https://cloudinary.test/updated-doc.pdf");
+
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+
+        String updatedAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-01-01",
+                    "conditionOut": "Like new",
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile docFilePart = new MockMultipartFile(
+                "files", "new-protocol.pdf", "application/pdf", "pdf-bytes".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .file(docFilePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk());
+
+        verify(cloudinaryService).uploadFile(any());
+        verify(cloudinaryService, never()).uploadImage(any());
+    }
+
+    @Test
+    void testUpdateAssignment_withEmptyFilePart_shouldNotUploadAnything() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+
+        String updatedAssignmentJson = """
+                {
+                    "device": { "id": "%s", "defective": false },
+                    "employee": { "id": "%s", "active": true },
+                    "assignedDate": "2024-01-01",
+                    "conditionOut": "Like new",
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false
+                }
+                """.formatted(deviceModel1.getId(), employeeModel1.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile emptyFilePart = new MockMultipartFile(
+                "files", "empty.txt", "text/plain", new byte[0]
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .file(emptyFilePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk());
+
+        verify(cloudinaryService, never()).uploadImage(any());
+        verify(cloudinaryService, never()).uploadFile(any());
     }
 
     @Test
