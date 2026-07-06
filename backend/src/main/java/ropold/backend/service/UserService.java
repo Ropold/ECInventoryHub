@@ -30,7 +30,8 @@ public class UserService {
     }
 
     public UserModel createOrUpdateFromGitHub(OAuth2User oAuth2User) {
-        String githubId = String.valueOf(oAuth2User.getAttribute("id"));
+        Object githubIdAttribute = oAuth2User.getAttribute("id");
+        String githubId = String.valueOf(githubIdAttribute);
 
         return userRepository.findByGithubId(githubId)
                 .map(existingUser -> {
