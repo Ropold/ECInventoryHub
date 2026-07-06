@@ -35,7 +35,8 @@ class LocationServiceTest {
                 "Musterstrasse 1, 12345 Musterstadt",
                 "+49 170 1234567",
                 "location.one@example.com",
-                "Notes for location one"
+                "Notes for location one",
+                "https://example.com/location1.jpg"
         );
 
         LocationModel locationModel2 = new LocationModel(
@@ -44,7 +45,8 @@ class LocationServiceTest {
                 "Beispielweg 2, 54321 Beispielstadt",
                 "+49 170 7654321",
                 "location.two@example.com",
-                "Notes for location two"
+                "Notes for location two",
+                null
         );
 
         allLocations = List.of(locationModel1, locationModel2);
@@ -73,7 +75,8 @@ class LocationServiceTest {
                 "Neue Strasse 3, 11111 Neustadt",
                 "+49 170 1112223",
                 "new.location@example.com",
-                "None"
+                "None",
+                null
         );
 
         LocationModel savedLocation = new LocationModel(
@@ -82,7 +85,8 @@ class LocationServiceTest {
                 newLocation.getAddress(),
                 newLocation.getPhone(),
                 newLocation.getEmail(),
-                newLocation.getNotes()
+                newLocation.getNotes(),
+                newLocation.getImageUrl()
         );
 
         when(locationRepository.save(newLocation)).thenReturn(savedLocation);
@@ -99,7 +103,8 @@ class LocationServiceTest {
                 existingLocation.getAddress(),
                 existingLocation.getPhone(),
                 existingLocation.getEmail(),
-                existingLocation.getNotes()
+                existingLocation.getNotes(),
+                existingLocation.getImageUrl()
         );
 
         when(locationRepository.existsById(updatedLocation.getId())).thenReturn(true);
