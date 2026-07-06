@@ -7,7 +7,7 @@
   <a href="https://immocalchub.onrender.com/">
     <img src="https://github.com/Ropold/ImmoCalcHub/blob/master/frontend/src/assets/gso-logo.png?raw=true" alt="Immo Calc Logo" width="30"/>&nbsp;
     EC Inventory Hub
-  </a> (https://immocalchub.onrender.com/)
+  </a> (https://ecinventoryhub.onrender.com)
 </p>
 
 
