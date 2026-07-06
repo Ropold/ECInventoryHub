@@ -45,6 +45,38 @@ class AssignmentServiceTest {
     EmployeeModel employeeModel1;
     EmployeeModel employeeModel2;
 
+    private DeviceDTO toDeviceDTO(DeviceModel device) {
+        return new DeviceDTO(
+                device.getId(),
+                device.getType(),
+                device.getManufacturer(),
+                device.getModelName(),
+                device.getSerialNumber(),
+                device.getInventoryNumber(),
+                device.getPurchaseDate(),
+                device.getStatus(),
+                device.isDefective(),
+                null,
+                device.getNotes(),
+                null
+        );
+    }
+
+    private EmployeeDTO toEmployeeDTO(EmployeeModel employee) {
+        return new EmployeeDTO(
+                employee.getId(),
+                employee.getPersonnelNumber(),
+                employee.getName(),
+                employee.getEmail(),
+                employee.getPhone(),
+                employee.getAddress(),
+                employee.getDepartment(),
+                employee.isActive(),
+                employee.getNotes(),
+                employee.getImageUrl()
+        );
+    }
+
     @BeforeEach
     void setUp() {
 
@@ -374,37 +406,5 @@ class AssignmentServiceTest {
         );
 
         verify(assignmentRepository, never()).deleteById(any());
-    }
-
-    private DeviceDTO toDeviceDTO(DeviceModel device) {
-        return new DeviceDTO(
-                device.getId(),
-                device.getType(),
-                device.getManufacturer(),
-                device.getModelName(),
-                device.getSerialNumber(),
-                device.getInventoryNumber(),
-                device.getPurchaseDate(),
-                device.getStatus(),
-                device.isDefective(),
-                null,
-                device.getNotes(),
-                null
-        );
-    }
-
-    private EmployeeDTO toEmployeeDTO(EmployeeModel employee) {
-        return new EmployeeDTO(
-                employee.getId(),
-                employee.getPersonnelNumber(),
-                employee.getName(),
-                employee.getEmail(),
-                employee.getPhone(),
-                employee.getAddress(),
-                employee.getDepartment(),
-                employee.isActive(),
-                employee.getNotes(),
-                employee.getImageUrl()
-        );
     }
 }

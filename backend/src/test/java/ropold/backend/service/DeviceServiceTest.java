@@ -38,6 +38,18 @@ class DeviceServiceTest {
     List<DeviceModel> allDevices;
     LocationModel locationModel1;
 
+    private LocationDTO toLocationDTO(LocationModel location) {
+        return new LocationDTO(
+                location.getId(),
+                location.getName(),
+                location.getAddress(),
+                location.getPhone(),
+                location.getEmail(),
+                location.getNotes(),
+                location.getImageUrl()
+        );
+    }
+
     @BeforeEach
     void setUp() {
 
@@ -287,17 +299,5 @@ class DeviceServiceTest {
         );
 
         verify(deviceRepository, never()).deleteById(any());
-    }
-
-    private LocationDTO toLocationDTO(LocationModel location) {
-        return new LocationDTO(
-                location.getId(),
-                location.getName(),
-                location.getAddress(),
-                location.getPhone(),
-                location.getEmail(),
-                location.getNotes(),
-                location.getImageUrl()
-        );
     }
 }

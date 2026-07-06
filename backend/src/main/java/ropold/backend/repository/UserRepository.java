@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<UserModel, UUID> {
     Optional<UserModel> findByGithubId(String githubId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE UserModel u SET u.preferredLanguage = :language WHERE u.githubId = :githubId")
     void updatePreferredLanguage(@Param("githubId") String githubId, @Param("language") String language);
