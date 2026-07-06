@@ -32,7 +32,7 @@
 
   ## 📊 Code Quality
 
-  ### Backend
+  ### 🛠️Backend
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=ropold_ECInventoryHub-backend)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
@@ -47,7 +47,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ropold_ECInventoryHub-backend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-backend)
 
-  ### Frontend
+  ### 🛠️Frontend
 
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=ropold_ECInventoryHub-frontend)](https://sonarcloud.io/summary/new_code?id=ropold_ECInventoryHub-frontend)
 
