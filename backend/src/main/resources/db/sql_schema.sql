@@ -39,7 +39,8 @@ CREATE TABLE locations (
     address text,
     phone   varchar,
     email   varchar,
-    notes   text
+    notes   text,
+    image_url varchar
 );
 
 -- 4. devices (verweist auf locations)

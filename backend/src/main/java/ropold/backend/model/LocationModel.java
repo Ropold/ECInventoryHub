@@ -33,4 +33,7 @@ public class LocationModel {
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

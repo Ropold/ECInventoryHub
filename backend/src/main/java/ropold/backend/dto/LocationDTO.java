@@ -8,5 +8,6 @@ public record LocationDTO(
         String address,
         String phone,
         String email,
-        String notes
+        String notes,
+        String imageUrl
 ) {}

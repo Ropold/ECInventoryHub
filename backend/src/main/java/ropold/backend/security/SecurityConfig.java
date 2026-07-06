@@ -70,44 +70,44 @@ public class SecurityConfig {
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
         DefaultOAuth2UserService userService = new DefaultOAuth2UserService();
 
-        return (userRequest) -> {
-            OAuth2User githubUser = userService.loadUser(userRequest);
+        return (userRequest) -> processOAuth2User(userService.loadUser(userRequest));
+    }
 
-            // GitHub Attribute extrahieren
-            Object githubIdObj = githubUser.getAttribute("id");
-            if (githubIdObj == null) {
-                throw new IllegalStateException("GitHub ID not found in authentication");
-            }
-            String githubId = String.valueOf(githubIdObj);
+    OAuth2User processOAuth2User(OAuth2User githubUser) {
+        // GitHub Attribute extrahieren
+        Object githubIdObj = githubUser.getAttribute("id");
+        if (githubIdObj == null) {
+            throw new IllegalStateException("GitHub ID not found in authentication");
+        }
+        String githubId = String.valueOf(githubIdObj);
 
-            String username = githubUser.getAttribute("login"); // GitHub Username
-            String name = githubUser.getAttribute("name"); // Display Name
-            String avatarUrl = githubUser.getAttribute("avatar_url");
-            String githubUrl = githubUser.getAttribute("html_url");
+        String username = githubUser.getAttribute("login"); // GitHub Username
+        String name = githubUser.getAttribute("name"); // Display Name
+        String avatarUrl = githubUser.getAttribute("avatar_url");
+        String githubUrl = githubUser.getAttribute("html_url");
 
-            // Lade oder erstelle User ohne gleichzeitiges Update
-            UserModel user = userRepository.findByGithubId(githubId)
-                    .orElseGet(() -> {
-                        UserModel newUser = new UserModel();
-                        newUser.setGithubId(githubId);
-                        newUser.setUsername(username);
-                        newUser.setName(name != null ? name : username);
-                        newUser.setRole(Role.VIEWER);
-                        newUser.setPreferredLanguage("de");
-                        newUser.setCreatedAt(LocalDateTime.now());
-                        newUser.setAvatarUrl(avatarUrl);
-                        newUser.setGithubUrl(githubUrl);
+        // Lade oder erstelle User ohne gleichzeitiges Update
+        UserModel user = userRepository.findByGithubId(githubId)
+                .orElseGet(() -> {
+                    UserModel newUser = new UserModel();
+                    newUser.setGithubId(githubId);
+                    newUser.setUsername(username);
+                    newUser.setName(name != null ? name : username);
+                    newUser.setRole(Role.VIEWER);
+                    newUser.setPreferredLanguage("de");
+                    newUser.setCreatedAt(LocalDateTime.now());
+                    newUser.setAvatarUrl(avatarUrl);
+                    newUser.setGithubUrl(githubUrl);
 
-                        return userRepository.save(newUser);
-                    });
+                    return userRepository.save(newUser);
+                });
 
-            user.setLastLoginAt(LocalDateTime.now());
-            userRepository.save(user);
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
 
-            Set<GrantedAuthority> authorities = new HashSet<>(githubUser.getAuthorities());
-            authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
+        Set<GrantedAuthority> authorities = new HashSet<>(githubUser.getAuthorities());
+        authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
 
-            return new DefaultOAuth2User(authorities, githubUser.getAttributes(), "login");
-        };
+        return new DefaultOAuth2User(authorities, githubUser.getAttributes(), "login");
     }
 }
