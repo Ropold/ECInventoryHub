@@ -12,20 +12,26 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import ropold.backend.model.LocationModel;
 import ropold.backend.repository.LocationRepository;
+import ropold.backend.service.CloudinaryService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -46,6 +52,9 @@ class LocationControllerIntegrationTest {
 
     @Autowired
     private LocationRepository locationRepository;
+
+    @MockitoBean
+    private CloudinaryService cloudinaryService;
 
     @BeforeEach
     void setUp() {
@@ -184,6 +193,82 @@ class LocationControllerIntegrationTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value("User not authenticated"));
+    }
+
+    @Test
+    void testAddLocation_withImage_shouldUploadImage() throws Exception {
+        when(cloudinaryService.uploadImage(any())).thenReturn("https://cloudinary.test/new-location.png");
+
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        locationRepository.deleteAll();
+
+        String newLocationJson = """
+                {
+                    "name": "New Location",
+                    "address": "Neue Strasse 3, 11111 Neustadt",
+                    "phone": "+49 170 1112223",
+                    "email": "new.location@example.com",
+                    "notes": "None"
+                }
+                """;
+
+        MockMultipartFile locationDtoPart = new MockMultipartFile(
+                "locationDTO", "", "application/json", newLocationJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile imagePart = new MockMultipartFile(
+                "image", "photo.png", "image/png", "image-bytes".getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/locations")
+                        .file(locationDtoPart)
+                        .file(imagePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.imageUrl").value("https://cloudinary.test/new-location.png"));
+
+        verify(cloudinaryService).uploadImage(any());
+    }
+
+    @Test
+    void testAddLocation_withEmptyImagePart_shouldNotUploadImage() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        locationRepository.deleteAll();
+
+        String newLocationJson = """
+                {
+                    "name": "New Location",
+                    "address": "Neue Strasse 3, 11111 Neustadt",
+                    "phone": "+49 170 1112223",
+                    "email": "new.location@example.com",
+                    "notes": "None"
+                }
+                """;
+
+        MockMultipartFile locationDtoPart = new MockMultipartFile(
+                "locationDTO", "", "application/json", newLocationJson.getBytes(StandardCharsets.UTF_8)
+        );
+        MockMultipartFile emptyImagePart = new MockMultipartFile(
+                "image", "empty.png", "image/png", new byte[0]
+        );
+
+        mockMvc.perform(multipart("/api/locations")
+                        .file(locationDtoPart)
+                        .file(emptyImagePart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isCreated());
+
+        verify(cloudinaryService, never()).uploadImage(any());
+        assertNull(locationRepository.findAll().getFirst().getImageUrl());
     }
 
     @Test
