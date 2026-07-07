@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-//import {DefaultUser, type UserModel} from "./components/models/UserModel.ts";
 import axios from "axios";
 import Navbar from "./components/Navbar.tsx";
 import {Route, Routes} from "react-router-dom";
 import NotFound from "./components/NotFound.tsx";
 import Welcome from "./components/Welcome.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import {DefaultUser, type UserModel} from "./components/models/UserModel.ts";
+import Footer from "./components/Footer.tsx";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
-  // const [userDetails, setUserDetails] = useState<UserModel | null>(DefaultUser);
-  // const [language, setLanguage] = useState<string>("de");
+  const [userDetails, setUserDetails] = useState<UserModel | null>(DefaultUser);
+  const [language, setLanguage] = useState<string>("de");
 
   function getUser() {
     axios.get("/api/users/me")
@@ -23,6 +24,16 @@ export default function App() {
           setUser("anonymousUser");
         });
   }
+    function getUserDetails() {
+        axios.get("/api/users/me/details")
+            .then((response) => {
+                setUserDetails(response.data as UserModel);
+            })
+            .catch((error) => {
+                console.error(error);
+                setUserDetails(null);
+            });
+    }
 
   useEffect(() => {
     getUser();
@@ -30,7 +41,7 @@ export default function App() {
 
     useEffect(() => {
         if(user !== "anonymousUser"){
-            //getUserDetails();
+            getUserDetails();
         }
     }, [user]);
 
@@ -44,6 +55,7 @@ export default function App() {
 
               </Route>
       </Routes>
+      <Footer language={language}/>
     </>
   )
 }
