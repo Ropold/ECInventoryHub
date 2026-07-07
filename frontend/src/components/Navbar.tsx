@@ -2,6 +2,10 @@ import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import "./styles/Navbar.css";
 import companyLogo from "../assets/ec-logo.png";
+import assignmentLogo from "../assets/assignment-logo.svg";
+import laptopLogo from "../assets/laptop-logo.png";
+import employeeLogo from "../assets/employee-logo.png";
+import githubLogo from "../assets/github-logo.webp"
 import "./styles/Buttons.css";
 
 type NavbarProps = {
@@ -33,7 +37,15 @@ export default function Navbar(props: Readonly<NavbarProps>)
 
     return (
         <nav className="navbar">
-            <button className="button-group-button" onClick={() => navigate("/")}>Home</button>
+            <div
+                className="clickable-header padding-left-5"
+                onClick={() => {
+                    navigate("/");
+                }}
+            >
+                <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                <h2 className="header-title">Home</h2>
+            </div>
             {props.user !== "anonymousUser" ? (
                 <>
                     <div
@@ -42,7 +54,7 @@ export default function Navbar(props: Readonly<NavbarProps>)
                             navigate("/employees");
                         }}
                     >
-                        <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                        <img src={employeeLogo} alt="Employee Logo" className="logo-image" />
                         <h2 className="header-title">Employees</h2>
                     </div>
                     <div
@@ -51,7 +63,7 @@ export default function Navbar(props: Readonly<NavbarProps>)
                             navigate("/assignments");
                         }}
                     >
-                        <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                        <img src={assignmentLogo} alt="Assignment Logo" className="logo-image" />
                         <h2 className="header-title">Assignments</h2>
                     </div>
                     <div
@@ -60,11 +72,17 @@ export default function Navbar(props: Readonly<NavbarProps>)
                             navigate("/devices");
                         }}
                     >
-                        <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                        <img src={laptopLogo} alt="Laptop Logo" className="logo-image" />
                         <h2 className="header-title">Devices</h2>
                     </div>
                     <button className="button-group-button" onClick={() => navigate("/profile")}>Profile</button>
-                    <button className="button-group-button" onClick={logoutFromGithub}>logout</button>
+                    <button
+                        className="clickable-header padding-left-5"
+                        onClick={logoutFromGithub}
+                    >
+                        <img src={githubLogo} alt="GitHub Logo" className="logo-image" />
+                        <h2 className="header-title">Logout</h2>
+                    </button>
                 </>
             ) : (
                 <>
@@ -74,7 +92,7 @@ export default function Navbar(props: Readonly<NavbarProps>)
                             navigate("/employees");
                         }}
                     >
-                        <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                        <img src={employeeLogo} alt="Employee Logo" className="logo-image" />
                         <h2 className="header-title">Employees</h2>
                     </div>
                     <div
@@ -83,7 +101,7 @@ export default function Navbar(props: Readonly<NavbarProps>)
                             navigate("/assignments");
                         }}
                     >
-                        <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                        <img src={assignmentLogo} alt="Assignment Logo" className="logo-image" />
                         <h2 className="header-title">Assignments</h2>
                     </div>
                     <div
@@ -92,10 +110,16 @@ export default function Navbar(props: Readonly<NavbarProps>)
                             navigate("/devices");
                         }}
                     >
-                        <img src={companyLogo} alt="Company Logo" className="logo-image" />
+                        <img src={laptopLogo} alt="Laptop Logo" className="logo-image" />
                         <h2 className="header-title">Devices</h2>
                     </div>
-                    <button className="button-group-button" onClick={loginWithGithub}>Login GitHub</button>
+                    <button
+                        className="clickable-header padding-left-5"
+                        onClick={loginWithGithub}
+                    >
+                        <img src={githubLogo} alt="GitHub Logo" className="logo-image" />
+                        <h2 className="header-title">Login GitHub</h2>
+                    </button>
                 </>
 
             )}
