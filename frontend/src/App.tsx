@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 //import {DefaultUser, type UserModel} from "./components/models/UserModel.ts";
 import axios from "axios";
@@ -24,7 +24,15 @@ export default function App() {
         });
   }
 
+  useEffect(() => {
+    getUser();
+  }, []);
 
+    useEffect(() => {
+        if(user !== "anonymousUser"){
+            //getUserDetails();
+        }
+    }, [user]);
 
   return (
     <>
