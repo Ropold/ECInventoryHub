@@ -12,7 +12,7 @@ import type {UserDetails} from "./components/models/UserModel.ts";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
-    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [language, setLanguage] = useState<string>("de");
 
   function getUser() {
