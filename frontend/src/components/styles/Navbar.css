@@ -18,6 +18,16 @@
     text-align: center;
 }
 
+.footer-container{
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+}
+
+.button-footer{
+    margin-top: 7px;
+}
+
 .clickable-header {
     display: flex;
     align-items: center;

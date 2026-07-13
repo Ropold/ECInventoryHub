@@ -7,6 +7,7 @@ import laptopLogo from "../assets/laptop-logo.png";
 import employeeLogo from "../assets/employee-logo.png";
 import githubLogo from "../assets/github-logo.webp"
 import "./styles/Buttons.css";
+import "./styles/Popup.css";
 
 type NavbarProps = {
     user:string;

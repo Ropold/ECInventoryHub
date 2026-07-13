@@ -6,12 +6,13 @@ import {Route, Routes} from "react-router-dom";
 import NotFound from "./components/NotFound.tsx";
 import Welcome from "./components/Welcome.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
-import {DefaultUser, type UserModel} from "./components/models/UserModel.ts";
 import Footer from "./components/Footer.tsx";
+import Profile from "./components/Profile.tsx";
+import type {UserDetails} from "./components/models/UserModel.ts";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
-  const [userDetails, setUserDetails] = useState<UserModel | null>(DefaultUser);
+    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [language, setLanguage] = useState<string>("de");
 
   function getUser() {
@@ -24,10 +25,11 @@ export default function App() {
           setUser("anonymousUser");
         });
   }
+
     function getUserDetails() {
         axios.get("/api/users/me/details")
             .then((response) => {
-                setUserDetails(response.data as UserModel);
+                setUserDetails(response.data as UserDetails);
             })
             .catch((error) => {
                 console.error(error);
@@ -52,10 +54,10 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Welcome />}/>
               <Route element={<ProtectedRoute user={user}/>}>
-
+                  <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
       </Routes>
-      <Footer language={language}/>
+      <Footer language={language} setLanguage={setLanguage}/>
     </>
   )
 }

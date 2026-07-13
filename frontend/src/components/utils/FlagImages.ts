@@ -43,3 +43,18 @@ export const countryNameToIsoCode: Record<string, string> = {
     "Russia": "ru",
     "Turkey": "tr",
 }
+
+export function getLanguageName(code: string): string {
+    switch (code) {
+        case "en": return "English";
+        case "de": return "Deutsch";
+        case "pl": return "Polski";
+        case "es": return "Español";
+        case "fr": return "Français";
+        case "it": return "Italiano";
+        case "pt": return "Português";
+        case "ru": return "Русский";
+        case "tr": return "Türkçe";
+        default: return code;
+    }
+}
