@@ -9,11 +9,17 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import Footer from "./components/Footer.tsx";
 import Profile from "./components/Profile.tsx";
 import type {UserDetails} from "./components/models/UserModel.ts";
+import Employees from "./components/employee/Employees.tsx";
+import EmployeeDetails from "./components/employee/EmployeeDetails.tsx";
+import EditEmployee from "./components/employee/EditEmployee.tsx";
+import type {EmployeeModel} from "./components/models/EmployeeModel.ts";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [language, setLanguage] = useState<string>("de");
+
+  const [employees, setEmployees] = useState<EmployeeModel[]>([]);
 
   function getUser() {
     axios.get("/api/users/me")
@@ -47,8 +53,33 @@ export default function App() {
             });
     }
 
+    function getAllEmployees() {
+        axios.get("/api/employees")
+            .then((response) => {
+                setEmployees(response.data as EmployeeModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching employees:", error);
+            });
+    }
+
+    function handleNewEmployee(newEmployee: EmployeeModel) {
+        setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
+    }
+
+    function handleEmployeeUpdate(updatedEmployee: EmployeeModel) {
+        setEmployees((prevEmployees) => [...prevEmployees, updatedEmployee]);
+    }
+
+    function handleEmployeeDelete(deletedEmployeeId: string) {
+        setEmployees((prevEmployees) =>
+            prevEmployees.filter((employee) => employee.id !== deletedEmployeeId)
+        );
+    }
+
   useEffect(() => {
     getUser();
+    getAllEmployees();
   }, []);
 
     useEffect(() => {
@@ -64,6 +95,9 @@ export default function App() {
       <Routes>
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Welcome />}/>
+          <Route path="/employees" element={<Employees language={language} employees={employees}/>} />
+          <Route path="/employees/:id" element={<EmployeeDetails language={language} handleEmployeeDelete={handleEmployeeDelete}/>} />
+          <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} employees={employees} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
