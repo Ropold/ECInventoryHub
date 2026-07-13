@@ -6,6 +6,8 @@ import assignmentLogo from "../assets/assignment-logo.svg";
 import laptopLogo from "../assets/laptop-logo.png";
 import employeeLogo from "../assets/employee-logo.png";
 import githubLogo from "../assets/github-logo.webp"
+import worldLogo from "../assets/world-quartet-logo.jpg";
+import userIcon from "../assets/user-icon.png";
 import "./styles/Buttons.css";
 import "./styles/Popup.css";
 
@@ -76,7 +78,25 @@ export default function Navbar(props: Readonly<NavbarProps>)
                         <img src={laptopLogo} alt="Laptop Logo" className="logo-image" />
                         <h2 className="header-title">Devices</h2>
                     </div>
-                    <button className="button-group-button" onClick={() => navigate("/profile")}>Profile</button>
+                    <div
+                        className="clickable-header padding-left-5"
+                        onClick={() => {
+                            navigate("/locations");
+                        }}
+                    >
+                        <img src={worldLogo} alt="World Logo" className="logo-image" />
+                        <h2 className="header-title">Locations</h2>
+                    </div>
+                    <div
+                        className="clickable-header padding-left-5"
+                        onClick={() => {
+                            navigate("/profile");
+                        }}
+                    >
+                        <img src={userIcon} alt="Profile Icon" className="logo-image" />
+                        <h2 className="header-title">Profile</h2>
+                    </div>
+
                     <button
                         className="clickable-header padding-left-5"
                         onClick={logoutFromGithub}
@@ -113,6 +133,15 @@ export default function Navbar(props: Readonly<NavbarProps>)
                     >
                         <img src={laptopLogo} alt="Laptop Logo" className="logo-image" />
                         <h2 className="header-title">Devices</h2>
+                    </div>
+                    <div
+                        className="clickable-header padding-left-5"
+                        onClick={() => {
+                            navigate("/locations");
+                        }}
+                    >
+                        <img src={worldLogo} alt="World Logo" className="logo-image" />
+                        <h2 className="header-title">Locations</h2>
                     </div>
                     <button
                         className="clickable-header padding-left-5"
