@@ -1,11 +1,23 @@
 import {translatedInfo} from "./utils/TranslatedInfo.ts";
 import * as React from "react";
 import {LanguagesImages, getLanguageName} from "./utils/FlagImages.ts";
+import axios from "axios";
 
 type FooterProps = {
     language: string;
     setLanguage: React.Dispatch<React.SetStateAction<string>>
+    user: string;
 };
+
+function setPreferredLanguage(languageIso: string) {
+    axios.post(`/api/users/me/language/${languageIso}`)
+        .then(() => {
+            console.log("Language updated successfully");
+        })
+        .catch((error) => {
+            console.error("Error updating language:", error);
+        });
+}
 
 export default function Footer(props: Readonly<FooterProps>) {
     const [showLanguagePopup, setShowLanguagePopup] = React.useState(false);
@@ -37,12 +49,15 @@ export default function Footer(props: Readonly<FooterProps>) {
                     >
                         <h2>Select Language</h2>
                         <div className="popup-language-options">
-                            {["en", "de", "pl", "es", "fr", "it", "ru"].map((lang) => (
+                            {["en", "de", "pl", "es", "fr", "it", "pt", "ru", "tr"].map((lang) => (
                                 <button
                                     key={lang}
                                     className="language-option-button"
                                     onClick={() => {
                                         props.setLanguage(lang);
+                                        if (props.user !== "anonymousUser") {
+                                            setPreferredLanguage(lang);
+                                        }
                                         setShowLanguagePopup(false);
                                     }}
                                 >

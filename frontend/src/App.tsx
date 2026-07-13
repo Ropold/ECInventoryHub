@@ -37,6 +37,16 @@ export default function App() {
             });
     }
 
+    function getPreferredLanguage() {
+        axios.get("/api/users/me/language")
+            .then((response) => {
+                setLanguage(response.data.toString());
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
   useEffect(() => {
     getUser();
   }, []);
@@ -44,6 +54,7 @@ export default function App() {
     useEffect(() => {
         if(user !== "anonymousUser"){
             getUserDetails();
+            getPreferredLanguage();
         }
     }, [user]);
 
@@ -57,7 +68,7 @@ export default function App() {
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
       </Routes>
-      <Footer language={language} setLanguage={setLanguage}/>
+      <Footer language={language} setLanguage={setLanguage} user={user}/>
     </>
   )
 }
