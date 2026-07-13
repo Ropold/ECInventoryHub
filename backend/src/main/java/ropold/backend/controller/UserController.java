@@ -9,7 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -29,7 +30,8 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
     @GetMapping(value = "/me", produces = "text/plain")
     public String getMe(@AuthenticationPrincipal OAuth2User authentication) {
@@ -41,13 +43,13 @@ public class UserController {
     }
 
     @GetMapping("/me/details")
-    public Map<String, Object> getUserDetails(
-            @AuthenticationPrincipal OAuth2User authentication,
-            @RegisteredOAuth2AuthorizedClient("github") OAuth2AuthorizedClient authorizedClient) {
+    public Map<String, Object> getUserDetails(OAuth2AuthenticationToken authenticationToken) {
 
-        if (authentication == null || authorizedClient == null) {
+        if (authenticationToken == null) {
             return Map.of("message", "User not authenticated");
         }
+
+        OAuth2User authentication = authenticationToken.getPrincipal();
 
         try {
             // GitHub ID aus dem "id" Attribut extrahieren, damit unser eigenes UserModel aktuell bleibt
@@ -58,6 +60,14 @@ public class UserController {
             UserModel user = userOpt.orElseGet(() -> createUserFromAuthentication(authentication));
             user.setLastLoginAt(LocalDateTime.now());
             userRepository.save(user);
+
+            OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
+                    authenticationToken.getAuthorizedClientRegistrationId(),
+                    authenticationToken.getName());
+
+            if (authorizedClient == null) {
+                return Map.of("error", "User data temporarily unavailable, please refresh");
+            }
 
             // Vollständiges GitHub-Profil (login, bio, followers, public_repos, ...) live abrufen
             String accessToken = authorizedClient.getAccessToken().getTokenValue();
