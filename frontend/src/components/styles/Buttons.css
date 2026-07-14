@@ -78,3 +78,19 @@
 .margin-left-20{
     margin-left: 20px;
 }
+
+.purple-button {
+    background-color: #9c27b0; /* Violett */
+}
+
+.purple-button:hover {
+    background-color: #7b1fa2; /* Dunkleres Violett beim Hover */
+}
+
+.button-orange {
+    background-color: #ff9e00;
+}
+
+.button-orange:hover {
+    background-color: #e67e00;
+}

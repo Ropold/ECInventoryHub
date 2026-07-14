@@ -9,7 +9,7 @@
 }
 
 .logo-welcome:hover {
-    border: 5px solid #388e3c; /* Schwarze, 5px dicke Border */
+    border: 5px solid #e67e00; /* Schwarze, 5px dicke Border */
     transform: scale(1.03); /* Skaliert das Bild leicht beim Hover */
     border-radius: 10px; /* Abgerundete Ecken */
     box-shadow: 1px 4px 20px rgba(0, 0, 0, 0.8); /* Leichter Schatten bei Hover */
