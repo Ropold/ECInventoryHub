@@ -103,6 +103,19 @@ public class UserController {
         return userService.getUserByGithubId(githubId).getPreferredLanguage();
     }
 
+    @GetMapping(value = "/me/role", produces = "text/plain")
+    public String getMyRole(@AuthenticationPrincipal OAuth2User authentication) {
+        if (authentication == null) {
+            throw new AccessDeniedException("User not authenticated");
+        }
+        Object idAttribute = authentication.getAttribute("id");
+        if (idAttribute == null) {
+            throw new AccessDeniedException("GitHub ID not found");
+        }
+        String githubId = String.valueOf(idAttribute);
+        return userService.getUserByGithubId(githubId).getRole().name();
+    }
+
     @PostMapping("me/language/{languageIso}")
     public void setPreferredLanguage(@PathVariable String languageIso, @AuthenticationPrincipal OAuth2User authentication) {
         if (authentication == null) {

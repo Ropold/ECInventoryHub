@@ -7,6 +7,7 @@ import "../styles/Details.css";
 
 type EmployeeDetailsProps = {
     language: string;
+    role: string;
     handleEmployeeUpdate: (updatedEmployee: EmployeeModel) => void;
     handleEmployeeDelete: (deletedEmployeeId: string) => void;
 }
@@ -51,6 +52,30 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                 } else {
                     setDeleteError("Error deleting employee. Please try again.");
                     setBlockingAssignments([]);
+                }
+            })
+    }
+
+    function handleForceDelete(){
+        if(!employee) return;
+
+        axios
+            .delete(`/api/employees/${id}/force`)
+            .then(() => {
+                console.log("Successfully deleted employee and all assignments");
+                props.handleEmployeeDelete(employee.id);
+                setShowPopup(false);
+                navigate("/employees");
+            })
+            .catch((error) => {
+                console.error("Error force deleting employee", error);
+
+                if (error.response?.status === 401) {
+                    setDeleteError("You must be logged in as Admin to delete an employee with assignments.");
+                } else if (error.response?.status === 403) {
+                    setDeleteError("You must be an Admin to delete an employee with assignments.");
+                } else {
+                    setDeleteError("Error deleting employee. Please try again.");
                 }
             })
     }
@@ -118,6 +143,9 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                                 )}
                                 <div className="popup-actions">
                                     <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
+                                    {blockingAssignments.length > 0 && props.role === "ADMIN" && (
+                                        <button onClick={handleForceDelete} className="popup-confirm">Delete All</button>
+                                    )}
                                     <button onClick={handleCancel} className="popup-cancel">Cancel</button>
                                 </div>
                             </div>

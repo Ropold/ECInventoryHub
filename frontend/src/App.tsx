@@ -18,6 +18,7 @@ export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [language, setLanguage] = useState<string>("de");
+  const [role, setRole] = useState<string>("VIEWER");
 
   const [employees, setEmployees] = useState<EmployeeModel[]>([]);
 
@@ -50,6 +51,17 @@ export default function App() {
             })
             .catch((error) => {
                 console.error(error);
+            });
+    }
+
+    function getRole() {
+        axios.get("/api/users/me/role")
+            .then((response) => {
+                setRole(response.data.toString());
+            })
+            .catch((error) => {
+                console.error(error);
+                setRole("VIEWER");
             });
     }
 
@@ -86,6 +98,9 @@ export default function App() {
         if(user !== "anonymousUser"){
             getUserDetails();
             getPreferredLanguage();
+            getRole();
+        } else {
+            setRole("VIEWER");
         }
     }, [user]);
 
@@ -96,7 +111,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Welcome />}/>
           <Route path="/employees" element={<Employees language={language} employees={employees}/>} />
-          <Route path="/employees/:id" element={<EmployeeDetails language={language} handleEmployeeDelete={handleEmployeeDelete}/>} />
+          <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeDelete={handleEmployeeDelete}/>} />
           <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} employees={employees} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />

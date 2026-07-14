@@ -231,6 +231,87 @@ class UserControllerIntegrationTest {
     }
 
     @Test
+    void testGetMyRole_withLoggedInUser() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getAttribute("id")).thenReturn("githubId1");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("OIDC_USER")),
+                "github"
+        );
+
+        mockMvc.perform(get("/api/users/me/role")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("USER"));
+    }
+
+    @Test
+    void testGetMyRole_reflectsAdminRole() throws Exception {
+        testUser.setRole(Role.ADMIN);
+        userRepository.save(testUser);
+
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getAttribute("id")).thenReturn("githubId1");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("OIDC_USER")),
+                "github"
+        );
+
+        mockMvc.perform(get("/api/users/me/role")
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("ADMIN"));
+    }
+
+    @Test
+    void testGetMyRole_unauthenticated() throws Exception {
+        mockMvc.perform(get("/api/users/me/role"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value("User not authenticated"));
+    }
+
+    @Test
+    void testGetMyRole_withNullGithubId() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getAttribute("id")).thenReturn(null);
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("OIDC_USER")),
+                "github"
+        );
+
+        mockMvc.perform(get("/api/users/me/role")
+                        .with(authentication(authToken)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value("GitHub ID not found"));
+    }
+
+    @Test
+    void testGetMyRole_unknownGithubId_throwsUserNotFound() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getAttribute("id")).thenReturn("unknownGithubId");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("OIDC_USER")),
+                "github"
+        );
+
+        mockMvc.perform(get("/api/users/me/role")
+                        .with(authentication(authToken)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value("User not found"));
+    }
+
+    @Test
     void testGetPreferredLanguage_withLoggedInUser() throws Exception {
         OAuth2User mockOAuth2User = mock(OAuth2User.class);
         when(mockOAuth2User.getAttribute("id")).thenReturn("githubId1");

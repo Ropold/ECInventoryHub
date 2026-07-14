@@ -49,6 +49,16 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    public void forceDeleteEmployee(UUID id) {
+        employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
+
+        List<AssignmentModel> assignmentsToDelete = assignmentRepository.findByEmployeeId(id);
+        assignmentRepository.deleteAll(assignmentsToDelete);
+
+        employeeRepository.deleteById(id);
+    }
+
     private static String describeAssignment(AssignmentModel assignment) {
         return "Assignment ID: " + assignment.getId();
     }

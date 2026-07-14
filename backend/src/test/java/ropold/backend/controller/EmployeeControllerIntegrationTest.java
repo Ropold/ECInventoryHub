@@ -17,12 +17,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.Department;
+import ropold.backend.model.DeviceModel;
+import ropold.backend.model.DeviceType;
 import ropold.backend.model.EmployeeModel;
+import ropold.backend.repository.AssignmentRepository;
+import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.EmployeeRepository;
 import ropold.backend.service.CloudinaryService;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +59,12 @@ class EmployeeControllerIntegrationTest {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
+
+    @Autowired
+    private DeviceRepository deviceRepository;
 
     @MockitoBean
     private CloudinaryService cloudinaryService;
@@ -437,5 +449,96 @@ class EmployeeControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("User not authenticated"));
 
         assertTrue(employeeRepository.existsById(existingEmployee.getId()));
+    }
+
+    @Test
+    void testDeleteEmployee_withBlockingAssignment_shouldReturnConflict() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        EmployeeModel existingEmployee = employeeRepository.findAll().getFirst();
+        AssignmentModel assignment = saveAssignmentFor(existingEmployee);
+
+        mockMvc.perform(delete("/api/employees/" + existingEmployee.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMPLOYEE_HAS_ASSIGNMENTS"))
+                .andExpect(jsonPath("$.details[0]").value("Assignment ID: " + assignment.getId()));
+
+        assertTrue(employeeRepository.existsById(existingEmployee.getId()));
+    }
+
+    @Test
+    void testForceDeleteEmployee_asAdmin_shouldDeleteEmployeeAndAssignments() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-admin");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("ADMIN")),
+                "github"
+        );
+
+        EmployeeModel existingEmployee = employeeRepository.findAll().getFirst();
+        AssignmentModel assignment = saveAssignmentFor(existingEmployee);
+
+        mockMvc.perform(delete("/api/employees/" + existingEmployee.getId() + "/force")
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        assertFalse(employeeRepository.existsById(existingEmployee.getId()));
+        assertFalse(assignmentRepository.existsById(assignment.getId()));
+    }
+
+    @Test
+    void testForceDeleteEmployee_asUser_shouldReturnForbidden() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        EmployeeModel existingEmployee = employeeRepository.findAll().getFirst();
+        AssignmentModel assignment = saveAssignmentFor(existingEmployee);
+
+        mockMvc.perform(delete("/api/employees/" + existingEmployee.getId() + "/force")
+                        .with(authentication(authToken)))
+                .andExpect(status().isForbidden());
+
+        assertTrue(employeeRepository.existsById(existingEmployee.getId()));
+        assertTrue(assignmentRepository.existsById(assignment.getId()));
+    }
+
+    @Test
+    void testForceDeleteEmployee_unauthenticated_shouldReturnUnauthorized() throws Exception {
+        EmployeeModel existingEmployee = employeeRepository.findAll().getFirst();
+
+        mockMvc.perform(delete("/api/employees/" + existingEmployee.getId() + "/force"))
+                .andExpect(status().isUnauthorized());
+
+        assertTrue(employeeRepository.existsById(existingEmployee.getId()));
+    }
+
+    private AssignmentModel saveAssignmentFor(EmployeeModel employee) {
+        DeviceModel device = new DeviceModel();
+        device.setType(DeviceType.LAPTOP);
+        device.setManufacturer("Dell");
+        device.setModelName("XPS 13");
+        device = deviceRepository.save(device);
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setDevice(device);
+        assignment.setEmployee(employee);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+        return assignmentRepository.save(assignment);
     }
 }

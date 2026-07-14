@@ -170,6 +170,50 @@ class EmployeeServiceTest {
     }
 
     @Test
+    void testForceDeleteEmployee_DeletesAssignmentsAndEmployee() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setId(UUID.randomUUID());
+        assignment.setEmployee(employeeToDelete);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        List<AssignmentModel> blockingAssignments = List.of(assignment);
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(blockingAssignments);
+
+        employeeService.forceDeleteEmployee(employeeToDelete.getId());
+
+        verify(assignmentRepository, times(1)).deleteAll(blockingAssignments);
+        verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteEmployee_NoAssignments_StillDeletesEmployee() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(List.of());
+
+        employeeService.forceDeleteEmployee(employeeToDelete.getId());
+
+        verify(assignmentRepository, times(1)).deleteAll(List.of());
+        verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteEmployee_NotFound() {
+        UUID nonExistentId = UUID.randomUUID();
+        when(employeeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        assertThrows(
+                EmployeeNotFoundException.class,
+                () -> employeeService.forceDeleteEmployee(nonExistentId)
+        );
+
+        verify(employeeRepository, never()).deleteById(any());
+    }
+
+    @Test
     void testGetEmployeeById_NotFound() {
         UUID nonExistentId = UUID.randomUUID();
         when(employeeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
