@@ -139,7 +139,7 @@ class EmployeeServiceTest {
     void testDeleteEmployee() {
         EmployeeModel employeeToDelete = allEmployees.getFirst();
         when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
-        when(assignmentRepository.findByEmployeeIdOrHandedOutById(employeeToDelete.getId(), employeeToDelete.getId()))
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId()))
                 .thenReturn(List.of());
 
         employeeService.deleteEmployee(employeeToDelete.getId());
@@ -156,7 +156,7 @@ class EmployeeServiceTest {
         assignment.setEmployee(employeeToDelete);
         assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
 
-        when(assignmentRepository.findByEmployeeIdOrHandedOutById(employeeToDelete.getId(), employeeToDelete.getId()))
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId()))
                 .thenReturn(List.of(assignment));
 
         EmployeeHasAssignmentsException exception = assertThrows(

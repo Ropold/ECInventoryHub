@@ -39,7 +39,7 @@ public class EmployeeService {
         employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
-        List<AssignmentModel> blockingAssignments = assignmentRepository.findByEmployeeIdOrHandedOutById(id, id);
+        List<AssignmentModel> blockingAssignments = assignmentRepository.findByEmployeeId(id);
         if (!blockingAssignments.isEmpty()) {
             throw new EmployeeHasAssignmentsException(
                     "Employee cannot be deleted because there are still assignments referencing them.",

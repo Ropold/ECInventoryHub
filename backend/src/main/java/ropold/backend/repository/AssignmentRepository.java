@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AssignmentRepository extends JpaRepository<AssignmentModel, UUID> {
-    List<AssignmentModel> findByEmployeeIdOrHandedOutById(UUID employeeId, UUID handedOutById);
+    List<AssignmentModel> findByEmployeeId(UUID employeeId);
 }
