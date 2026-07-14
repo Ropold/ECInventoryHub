@@ -46,7 +46,7 @@ export default function Employees(props:Readonly<EmployeeProps>){
                 setSearchQuery={setSearchQuery}
             />
 
-            <div className="country-company-card-container">
+            <div className="employee-card-container">
                 {filteredEmployees.map((employee) => (
                     <EmployeeCard key={employee.id} employee={employee} language={props.language} />
                 ))}
