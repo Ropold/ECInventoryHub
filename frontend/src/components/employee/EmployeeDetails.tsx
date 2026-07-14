@@ -16,6 +16,8 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
     const {id} = useParams<{id: string}>();
     const navigate = useNavigate();
     const [showPopup, setShowPopup] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
 
 
     useEffect(() => {
@@ -34,18 +36,29 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
             .then(() => {
                 console.log("Successfully deleted employee");
                 props.handleEmployeeDelete(employee.id);
+                setShowPopup(false);
+                navigate("/employees");
             })
             .catch((error) => {
                 console.error("Error deleting employee", error);
-            })
-            .finally(() => {
-                setShowPopup(false);
-                navigate("/employees");
+
+                if (error.response?.status === 401) {
+                    setDeleteError("You must be logged in as User/Admin to delete an employee.");
+                    setBlockingAssignments([]);
+                } else if (error.response?.status === 409) {
+                    setDeleteError(error.response?.data?.message);
+                    setBlockingAssignments(error.response?.data?.details ?? []);
+                } else {
+                    setDeleteError("Error deleting employee. Please try again.");
+                    setBlockingAssignments([]);
+                }
             })
     }
 
     function handleCancel(){
         setShowPopup(false);
+        setDeleteError(null);
+        setBlockingAssignments([]);
     }
 
 
@@ -91,6 +104,18 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                             <div className="popup-content">
                                 <h3>Confirm Deletion</h3>
                                 <p>Are you sure you want to delete {employee.name}?</p>
+                                {deleteError && (
+                                    <div className="popup-error">
+                                        <p>{deleteError}</p>
+                                        {blockingAssignments.length > 0 && (
+                                            <ul className="popup-error-list">
+                                                {blockingAssignments.map((assignment) => (
+                                                    <li key={assignment}>{assignment}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="popup-actions">
                                     <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
                                     <button onClick={handleCancel} className="popup-cancel">Cancel</button>
