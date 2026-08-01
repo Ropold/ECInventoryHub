@@ -26,7 +26,9 @@ export function formatDate(dateString: string | undefined): string {
 
 export const useAutoScrollToTop = () => {
     const location = useLocation();
-    useEffect(() => window.scroll(0, 0), [location]);
+    useEffect(() => {
+        window.scroll(0, 0);
+    }, [location]);
 };
 
 
