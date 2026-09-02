@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import {useAutoScrollToTop} from "../utils/ComponentsFunctions.tsx";
 import SearchBar from "../SearchBar.tsx";
 import EmployeeCard from "./EmployeeCard.tsx";
+import {useNavigate} from "react-router-dom";
 
 type EmployeeProps = {
     language: string;
@@ -11,6 +12,7 @@ type EmployeeProps = {
 
 export default function Employees(props:Readonly<EmployeeProps>){
     useAutoScrollToTop();
+    const navigate = useNavigate();
 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filteredEmployees, setFilteredEmployees] = useState<EmployeeModel[]>([]);
@@ -41,6 +43,7 @@ export default function Employees(props:Readonly<EmployeeProps>){
     return(
         <>
             <h2>Employees</h2>
+            <h3><button className="button-blue" onClick={() => navigate(`/employees/add-new-employee`)}>language=New Employee</button></h3>
             <SearchBar
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}

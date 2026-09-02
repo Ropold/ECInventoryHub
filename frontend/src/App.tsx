@@ -13,6 +13,7 @@ import Employees from "./components/employee/Employees.tsx";
 import EmployeeDetails from "./components/employee/EmployeeDetails.tsx";
 import EditEmployee from "./components/employee/EditEmployee.tsx";
 import type {EmployeeModel} from "./components/models/EmployeeModel.ts";
+import AddNewEmployee from "./components/employee/AddNewEmployee.tsx";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
@@ -111,6 +112,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Welcome />}/>
           <Route path="/employees" element={<Employees language={language} employees={employees}/>} />
+          <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role}/>} />
           <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeDelete={handleEmployeeDelete}/>} />
           <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} employees={employees} />} />
               <Route element={<ProtectedRoute user={user}/>}>
