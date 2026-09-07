@@ -6,6 +6,6 @@ RUN mvn package -DskipTests
 
 FROM eclipse-temurin:21-jre
 LABEL authors="ropold"
-EXPOSE 8080
+EXPOSE 9876
 COPY --from=build /app/target/ecinventoryhub.jar ecinventoryhub.jar
 ENTRYPOINT ["java", "-jar", "ecinventoryhub.jar"]
