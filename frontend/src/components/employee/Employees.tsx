@@ -4,6 +4,7 @@ import {useAutoScrollToTop} from "../utils/ComponentsFunctions.tsx";
 import SearchBar from "../SearchBar.tsx";
 import EmployeeCard from "./EmployeeCard.tsx";
 import {useNavigate} from "react-router-dom";
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 
 type EmployeeProps = {
     language: string;
@@ -43,11 +44,15 @@ export default function Employees(props:Readonly<EmployeeProps>){
     return(
         <>
             <h2>Employees</h2>
-            <h3><button className="button-blue" onClick={() => navigate(`/employees/add-new-employee`)}>language=New Employee</button></h3>
-            <SearchBar
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-            />
+
+            <div className={"search-add-new-button"}>
+                <SearchBar
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                />
+                <button className="button-blue" onClick={() => navigate(`/employees/add-new-employee`)}>{translatedInfo["New Employee"][props.language]}</button>
+            </div>
+
 
             <div className="employee-card-container">
                 {filteredEmployees.map((employee) => (

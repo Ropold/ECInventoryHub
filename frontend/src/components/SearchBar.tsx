@@ -12,7 +12,7 @@ export default function SearchBar(props: Readonly<SearchBarProps>) {
     }
 
     return (
-        <div className="search-bar">
+        <div className="search-bar search-bar-row">
             <input
                 type="text"
                 placeholder="Search by Name or other fields..."

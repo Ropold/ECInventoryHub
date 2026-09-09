@@ -19,3 +19,14 @@
     border-radius: 4px;
     transition: border 0.3s ease;
 }
+
+.search-add-new-button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Abstand zwischen Searchbar und Button */
+}
+
+.search-bar-row {
+    margin: 7px 35px 0 0; /* hebt die auto-Margins aus .search-bar auf */
+}
