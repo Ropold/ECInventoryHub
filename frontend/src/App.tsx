@@ -112,7 +112,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Welcome />}/>
           <Route path="/employees" element={<Employees language={language} employees={employees}/>} />
-          <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role}/>} />
+          <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role} handleNewEmployeeSubmit={handleNewEmployee}/>} />
           <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeDelete={handleEmployeeDelete}/>} />
           <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} employees={employees} />} />
               <Route element={<ProtectedRoute user={user}/>}>
