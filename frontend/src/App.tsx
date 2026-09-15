@@ -81,7 +81,9 @@ export default function App() {
     }
 
     function handleEmployeeUpdate(updatedEmployee: EmployeeModel) {
-        setEmployees((prevEmployees) => [...prevEmployees, updatedEmployee]);
+        setEmployees((prevEmployees) =>
+            prevEmployees.map((employee) => employee.id === updatedEmployee.id ? updatedEmployee : employee)
+        );
     }
 
     function handleEmployeeDelete(deletedEmployeeId: string) {
@@ -113,8 +115,8 @@ export default function App() {
           <Route path="/" element={<Welcome />}/>
           <Route path="/employees" element={<Employees language={language} employees={employees}/>} />
           <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role} handleNewEmployeeSubmit={handleNewEmployee}/>} />
-          <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeDelete={handleEmployeeDelete}/>} />
-          <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} employees={employees} />} />
+          <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeUpdate={handleEmployeeUpdate} handleEmployeeDelete={handleEmployeeDelete}/>} />
+          <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
