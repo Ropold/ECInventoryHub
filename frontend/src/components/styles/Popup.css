@@ -40,7 +40,7 @@
 }
 
 .popup-confirm {
-    background-color: #ff9999;
+    background-color: #d32f2f;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -50,12 +50,12 @@
 }
 
 .popup-confirm:hover {
-    background-color: #d32f2f;
+    background-color: #9a0007;
 }
 
 /* Abbrechen-Button */
 .popup-cancel {
-    background-color: #999;
+    background-color: #666;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -65,7 +65,7 @@
 }
 
 .popup-cancel:hover {
-    background-color: #555;
+    background-color: #444;
 }
 
 .popup-language-options {
@@ -77,7 +77,7 @@
 }
 
 .language-option-button {
-    background-color: #66b3ff; /* helles Blau */
+    background-color: #0069d9; /* Blau mit ausreichendem Kontrast zu weisser Schrift */
     color: white;
     padding: 10px 16px;
     border: none;
@@ -91,7 +91,7 @@
 }
 
 .language-option-button:hover {
-    background-color: #007bff; /* dunkleres Blau beim Hover */
+    background-color: #00509e; /* dunkleres Blau beim Hover */
 }
 
 .language-flag {

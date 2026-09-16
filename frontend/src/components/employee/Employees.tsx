@@ -13,6 +13,24 @@ type EmployeeProps = {
     employees: EmployeeModel[];
 }
 
+function filterEmployees(employees: EmployeeModel[], query: string): EmployeeModel[] {
+    if (!employees) return [];
+
+    const searchQuery = query.toLowerCase();
+
+    return employees.filter(employee => {
+        return (
+            employee.name.toLowerCase().includes(searchQuery) ||
+            employee.personnelNumber?.toLowerCase().includes(searchQuery) ||
+            employee.email?.toLowerCase().includes(searchQuery) ||
+            employee.phone?.toLowerCase().includes(searchQuery) ||
+            employee.address?.toLowerCase().includes(searchQuery) ||
+            employee.department.toLowerCase().includes(searchQuery) ||
+            employee.id.toLowerCase().includes(searchQuery)
+        );
+    });
+}
+
 export default function Employees(props:Readonly<EmployeeProps>){
     useAutoScrollToTop();
     const navigate = useNavigate();
@@ -28,24 +46,6 @@ export default function Employees(props:Readonly<EmployeeProps>){
         navigate(`/employees/add-new-employee`);
     }
 
-
-    function filterEmployees(employees: EmployeeModel[], query: string): EmployeeModel[] {
-        if (!employees) return [];
-
-        const searchQuery = query.toLowerCase();
-
-        return employees.filter(employee => {
-            return (
-                employee.name.toLowerCase().includes(searchQuery) ||
-                employee.personnelNumber?.toLowerCase().includes(searchQuery) ||
-                employee.email?.toLowerCase().includes(searchQuery) ||
-                employee.phone?.toLowerCase().includes(searchQuery) ||
-                employee.address?.toLowerCase().includes(searchQuery) ||
-                employee.department.toLowerCase().includes(searchQuery) ||
-                employee.id.toLowerCase().includes(searchQuery)
-            );
-        });
-    }
 
     const filteredEmployees = filterEmployees(props.employees, searchQuery);
 

@@ -61,8 +61,9 @@ export default function Navbar(props: Readonly<NavbarProps>)
     return (
         <nav className="navbar">
             {navItems.map((item) => (
-                <div
+                <button
                     key={item.path}
+                    type="button"
                     className="clickable-header padding-left-5"
                     onClick={() => {
                         navigate(item.path);
@@ -70,10 +71,11 @@ export default function Navbar(props: Readonly<NavbarProps>)
                 >
                     <img src={item.logo} alt={item.alt} className="logo-image" />
                     <h2 className="header-title">{item.title}</h2>
-                </div>
+                </button>
             ))}
 
             <button
+                type="button"
                 className="clickable-header padding-left-5"
                 onClick={isLoggedIn ? logoutFromGithub : loginWithGithub}
             >

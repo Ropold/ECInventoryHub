@@ -22,30 +22,52 @@ function setPreferredLanguage(languageIso: string) {
 export default function Footer(props: Readonly<FooterProps>) {
     const [showLanguagePopup, setShowLanguagePopup] = React.useState(false);
 
+    React.useEffect(() => {
+        if (!showLanguagePopup) return;
+
+        function handleEscape(event: KeyboardEvent) {
+            if (event.key === "Escape") {
+                setShowLanguagePopup(false);
+            }
+        }
+
+        document.addEventListener("keydown", handleEscape);
+        return () => document.removeEventListener("keydown", handleEscape);
+    }, [showLanguagePopup]);
+
     return (
         <footer className="footer">
 
             <div className="footer-container">
                 <p>{translatedInfo["EC Inventory Hub 2026 by R.Stolz"][props.language]}</p>
 
-                <div
+                <button
+                    type="button"
                     className="clickable-header button-footer"
                     onClick={() => setShowLanguagePopup(true)}
                 >
                     <h2 className="header-title">{getLanguageName(props.language)}</h2>
                     <img src={LanguagesImages[props.language]} alt="Language Logo" className="logo-image" />
-                </div>
+                </button>
             </div>
 
 
             {showLanguagePopup && (
                 <div
                     className="popup-overlay"
-                    onClick={() => setShowLanguagePopup(false)}
+                    role="presentation"
+                    onClick={(e) => {
+                        // nur schliessen, wenn wirklich der Hintergrund getroffen wurde
+                        if (e.target === e.currentTarget) {
+                            setShowLanguagePopup(false);
+                        }
+                    }}
                 >
                     <div
                         className="popup-content"
-                        onClick={(e) => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Select Language"
                     >
                         <h2>Select Language</h2>
                         <div className="popup-language-options">

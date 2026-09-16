@@ -15,7 +15,7 @@ export default function EmployeeCard(props: Readonly<EmployeeCardProps>){
     }
 
     return (
-        <div className="employee-card" onClick={handleCardClick}>
+        <button type="button" className="employee-card" onClick={handleCardClick}>
             <h2>{props.employee.name}</h2>
             {props.employee.imageUrl && (
                 <img
@@ -24,6 +24,6 @@ export default function EmployeeCard(props: Readonly<EmployeeCardProps>){
                     alt={props.employee.name}
                 />
             )}
-        </div>
+        </button>
     )
 }

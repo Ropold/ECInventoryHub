@@ -2,7 +2,6 @@ import type {EmployeeModel} from "../models/EmployeeModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import "../styles/employee/EmployeeDetails.css";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -111,7 +110,7 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                 <div className="details-container">
                     {employee.imageUrl && (
                         <div className="details-img-container">
-                            <img src={employee.imageUrl} alt={`${employee.name} photo`} className="details-image"/>
+                            <img src={employee.imageUrl} alt={employee.name} className="details-image"/>
                         </div>
                     )}
 
