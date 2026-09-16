@@ -16,6 +16,23 @@ type NavbarProps = {
     getUser: () => void;
 }
 
+type NavItem = {
+    path: string;
+    logo: string;
+    alt: string;
+    title: string;
+}
+
+const PUBLIC_NAV_ITEMS: NavItem[] = [
+    {path: "/", logo: companyLogo, alt: "Company Logo", title: "Home"},
+    {path: "/employees", logo: employeeLogo, alt: "Employee Logo", title: "Employees"},
+    {path: "/assignments", logo: assignmentLogo, alt: "Assignment Logo", title: "Assignments"},
+    {path: "/devices", logo: laptopLogo, alt: "Laptop Logo", title: "Devices"},
+    {path: "/locations", logo: worldLogo, alt: "World Logo", title: "Locations"},
+];
+
+const PROFILE_NAV_ITEM: NavItem = {path: "/profile", logo: userIcon, alt: "Profile Icon", title: "Profile"};
+
 function loginWithGithub() {
     const host = window.location.host === "localhost:5173" ? "http://localhost:9876" : window.location.origin;
     window.open(host + "/oauth2/authorization/github", "_self");
@@ -25,6 +42,9 @@ export default function Navbar(props: Readonly<NavbarProps>)
 {
 
     const navigate = useNavigate();
+
+    const isLoggedIn = props.user !== "anonymousUser";
+    const navItems = isLoggedIn ? [...PUBLIC_NAV_ITEMS, PROFILE_NAV_ITEM] : PUBLIC_NAV_ITEMS;
 
     function logoutFromGithub() {
         axios
@@ -40,119 +60,26 @@ export default function Navbar(props: Readonly<NavbarProps>)
 
     return (
         <nav className="navbar">
-            <div
+            {navItems.map((item) => (
+                <div
+                    key={item.path}
+                    className="clickable-header padding-left-5"
+                    onClick={() => {
+                        navigate(item.path);
+                    }}
+                >
+                    <img src={item.logo} alt={item.alt} className="logo-image" />
+                    <h2 className="header-title">{item.title}</h2>
+                </div>
+            ))}
+
+            <button
                 className="clickable-header padding-left-5"
-                onClick={() => {
-                    navigate("/");
-                }}
+                onClick={isLoggedIn ? logoutFromGithub : loginWithGithub}
             >
-                <img src={companyLogo} alt="Company Logo" className="logo-image" />
-                <h2 className="header-title">Home</h2>
-            </div>
-            {props.user !== "anonymousUser" ? (
-                <>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/employees");
-                        }}
-                    >
-                        <img src={employeeLogo} alt="Employee Logo" className="logo-image" />
-                        <h2 className="header-title">Employees</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/assignments");
-                        }}
-                    >
-                        <img src={assignmentLogo} alt="Assignment Logo" className="logo-image" />
-                        <h2 className="header-title">Assignments</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/devices");
-                        }}
-                    >
-                        <img src={laptopLogo} alt="Laptop Logo" className="logo-image" />
-                        <h2 className="header-title">Devices</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/locations");
-                        }}
-                    >
-                        <img src={worldLogo} alt="World Logo" className="logo-image" />
-                        <h2 className="header-title">Locations</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/profile");
-                        }}
-                    >
-                        <img src={userIcon} alt="Profile Icon" className="logo-image" />
-                        <h2 className="header-title">Profile</h2>
-                    </div>
-
-                    <button
-                        className="clickable-header padding-left-5"
-                        onClick={logoutFromGithub}
-                    >
-                        <img src={githubLogo} alt="GitHub Logo" className="logo-image" />
-                        <h2 className="header-title">Logout</h2>
-                    </button>
-                </>
-            ) : (
-                <>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/employees");
-                        }}
-                    >
-                        <img src={employeeLogo} alt="Employee Logo" className="logo-image" />
-                        <h2 className="header-title">Employees</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/assignments");
-                        }}
-                    >
-                        <img src={assignmentLogo} alt="Assignment Logo" className="logo-image" />
-                        <h2 className="header-title">Assignments</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/devices");
-                        }}
-                    >
-                        <img src={laptopLogo} alt="Laptop Logo" className="logo-image" />
-                        <h2 className="header-title">Devices</h2>
-                    </div>
-                    <div
-                        className="clickable-header padding-left-5"
-                        onClick={() => {
-                            navigate("/locations");
-                        }}
-                    >
-                        <img src={worldLogo} alt="World Logo" className="logo-image" />
-                        <h2 className="header-title">Locations</h2>
-                    </div>
-                    <button
-                        className="clickable-header padding-left-5"
-                        onClick={loginWithGithub}
-                    >
-                        <img src={githubLogo} alt="GitHub Logo" className="logo-image" />
-                        <h2 className="header-title">Login GitHub</h2>
-                    </button>
-                </>
-
-            )}
+                <img src={githubLogo} alt="GitHub Logo" className="logo-image" />
+                <h2 className="header-title">{isLoggedIn ? "Logout" : "Login GitHub"}</h2>
+            </button>
         </nav>
     )
 }
