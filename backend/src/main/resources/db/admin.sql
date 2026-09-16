@@ -1,0 +1,1 @@
+UPDATE users SET role = 'ADMIN' WHERE github_id = '154427648';

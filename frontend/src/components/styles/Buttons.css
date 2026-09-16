@@ -1,0 +1,96 @@
+.button-group-button {
+    background-color: #66b3ff;
+}
+
+.button-group-button:hover {
+    background-color: #007bff;
+}
+
+.margin-top-20 {
+    margin-top: 20px;
+}
+.margin-right-20 {
+    margin-right: 20px;
+}
+
+.padding-left-5 {
+    padding-left: 5px;
+}
+.margin-right-5{
+    margin-right: 5px;
+}
+
+.button-grey-search {
+    background-color: #999;
+    cursor: default;
+}
+
+.button-grey{
+    background-color: #999;
+}
+
+.button-grey:hover {
+    background-color: #555;
+}
+
+.add-new-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.button-blue {
+    background-color: #66b3ff;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.button-blue:hover {
+    background-color: #007bff;
+    border: 1px solid transparent;
+}
+
+.margin-top-50{
+    margin-top: 50px;
+}
+
+.button-delete {
+    background-color: #ff9999;
+}
+
+.button-delete:hover {
+    background-color: #d32f2f;
+}
+
+.details-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 5px;
+}
+
+.button-remove-image {
+    margin-top:35px
+}
+
+.margin-left-20{
+    margin-left: 20px;
+}
+
+.purple-button {
+    background-color: #9c27b0; /* Violett */
+}
+
+.purple-button:hover {
+    background-color: #7b1fa2; /* Dunkleres Violett beim Hover */
+}
+
+.button-orange {
+    background-color: #ff9e00;
+}
+
+.button-orange:hover {
+    background-color: #e67e00;
+}

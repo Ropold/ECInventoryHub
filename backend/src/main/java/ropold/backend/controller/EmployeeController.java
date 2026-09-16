@@ -105,4 +105,16 @@ public class EmployeeController {
         }
         employeeService.deleteEmployee(id);
     }
+
+    @DeleteMapping("/{id}/force")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void forceDeleteEmployee(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal OAuth2User authentication) {
+
+        if (authentication == null) {
+            throw new AccessDeniedException("User not authenticated");
+        }
+        employeeService.forceDeleteEmployee(id);
+    }
 }

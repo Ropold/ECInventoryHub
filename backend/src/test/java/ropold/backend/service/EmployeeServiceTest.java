@@ -2,11 +2,15 @@ package ropold.backend.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
 import ropold.backend.exception.notfoundexceptions.EmployeeNotFoundException;
+import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.Department;
 import ropold.backend.model.EmployeeModel;
+import ropold.backend.repository.AssignmentRepository;
 import ropold.backend.repository.EmployeeRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +27,8 @@ import static org.mockito.Mockito.when;
 class EmployeeServiceTest {
 
     EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
-    EmployeeService employeeService = new EmployeeService(employeeRepository);
+    AssignmentRepository assignmentRepository = mock(AssignmentRepository.class);
+    EmployeeService employeeService = new EmployeeService(employeeRepository, assignmentRepository);
 
     List<EmployeeModel> allEmployees;
 
@@ -134,8 +139,78 @@ class EmployeeServiceTest {
     void testDeleteEmployee() {
         EmployeeModel employeeToDelete = allEmployees.getFirst();
         when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId()))
+                .thenReturn(List.of());
+
         employeeService.deleteEmployee(employeeToDelete.getId());
         verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
+    }
+
+    @Test
+    void testDeleteEmployee_WithBlockingAssignments_ThrowsException() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setId(UUID.randomUUID());
+        assignment.setEmployee(employeeToDelete);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId()))
+                .thenReturn(List.of(assignment));
+
+        EmployeeHasAssignmentsException exception = assertThrows(
+                EmployeeHasAssignmentsException.class,
+                () -> employeeService.deleteEmployee(employeeToDelete.getId())
+        );
+
+        assertEquals(1, exception.getAssignmentDetails().size());
+        assertEquals("Assignment ID: " + assignment.getId(), exception.getAssignmentDetails().getFirst());
+        verify(employeeRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void testForceDeleteEmployee_DeletesAssignmentsAndEmployee() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setId(UUID.randomUUID());
+        assignment.setEmployee(employeeToDelete);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        List<AssignmentModel> blockingAssignments = List.of(assignment);
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(blockingAssignments);
+
+        employeeService.forceDeleteEmployee(employeeToDelete.getId());
+
+        verify(assignmentRepository, times(1)).deleteAll(blockingAssignments);
+        verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteEmployee_NoAssignments_StillDeletesEmployee() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(List.of());
+
+        employeeService.forceDeleteEmployee(employeeToDelete.getId());
+
+        verify(assignmentRepository, times(1)).deleteAll(List.of());
+        verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteEmployee_NotFound() {
+        UUID nonExistentId = UUID.randomUUID();
+        when(employeeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        assertThrows(
+                EmployeeNotFoundException.class,
+                () -> employeeService.forceDeleteEmployee(nonExistentId)
+        );
+
+        verify(employeeRepository, never()).deleteById(any());
     }
 
     @Test

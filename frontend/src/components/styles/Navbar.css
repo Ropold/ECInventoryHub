@@ -1,0 +1,84 @@
+.navbar {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 20px;
+    width: 100%;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+}
+
+.footer {
+    margin-top: auto;
+    margin-bottom: 20px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.footer-container{
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+}
+
+.button-footer{
+    margin-top: 7px;
+}
+
+.clickable-header {
+    font: inherit;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    background-color: #66b3ff;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    height: 40px; /* Gleiche Höhe wie Buttons */
+    padding: 0 10px; /* Gleicher Padding wie Buttons */
+    box-sizing: border-box;
+}
+
+.clickable-header:hover {
+    background-color: #007bff;
+    border: 1px solid transparent;
+}
+
+#clickable-header-home {
+    background-color: #66b3ff;
+    border: 1px solid transparent;
+}
+
+#clickable-header-home:hover {
+    background-color: #007bff;
+    border: 1px solid transparent;
+}
+
+.header-title {
+    margin: 2px;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: 550; /* Changed from 650 to 550 for better readability */
+    text-align: center;
+    background: none;
+    border: none;
+    padding: 7px 5px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.logo-image {
+    height: 30px;
+    width: auto;
+    margin-right: 5px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}

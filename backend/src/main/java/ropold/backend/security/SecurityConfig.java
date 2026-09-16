@@ -50,6 +50,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.GET, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/me/language/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/employees/*/force").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, ASSIGNMENT, DEVICE, EMPLOYEE, LOCATION, USER).hasAnyAuthority("USER", "ADMIN")
