@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import "../styles/employee/EmployeeDetails.css";
 import "../styles/Details.css";
+import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
 type EmployeeDetailsProps = {
     language: string;
@@ -19,7 +20,23 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
     const [showPopup, setShowPopup] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
+    const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
 
+    function handleEditClick() {
+        if (props.role === "VIEWER") {
+            setShowNoPermission(true);
+            return;
+        }
+        navigate(`/employees/${id}/edit`);
+    }
+
+    function handleDeleteClick() {
+        if (props.role === "VIEWER") {
+            setShowNoPermission(true);
+            return;
+        }
+        setShowPopup(true);
+    }
 
     useEffect(() => {
         if(!id) return;
@@ -120,9 +137,16 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                     <p><strong>ID:</strong> {employee.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={() => navigate(`/employees/${employee.id}/edit`)}>Edit</button>
-                        <button className="button-delete" onClick={() => setShowPopup(true)}>Delete</button>
+                        <button className="button-blue" onClick={handleEditClick}>Edit</button>
+                        <button className="button-delete" onClick={handleDeleteClick}>Delete</button>
                     </div>
+
+                    {showNoPermission && (
+                        <NoPermissionPopup
+                            language={props.language}
+                            onClose={() => setShowNoPermission(false)}
+                        />
+                    )}
 
                     {showPopup && (
                         <div className="popup-overlay">
