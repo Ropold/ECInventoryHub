@@ -1,11 +1,8 @@
-FROM maven:3.9-eclipse-temurin-21 AS build
-WORKDIR /app
-COPY backend/pom.xml .
-COPY backend/src ./src
-RUN mvn package -DskipTests
-
+# Das Jar wird in der Pipeline gebaut (Job "build-backend", inkl. Frontend unter
+# src/main/resources/static) und vom Job "push-to-docker-hub" nach backend/target geladen.
+# Deshalb hier kein eigener Maven-Build: der wuerde das Frontend verlieren.
 FROM eclipse-temurin:21-jre
 LABEL authors="ropold"
 EXPOSE 9876
-COPY --from=build /app/target/ecinventoryhub.jar ecinventoryhub.jar
+COPY backend/target/ecinventoryhub.jar ecinventoryhub.jar
 ENTRYPOINT ["java", "-jar", "ecinventoryhub.jar"]
