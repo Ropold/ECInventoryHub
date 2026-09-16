@@ -19,6 +19,11 @@ import Assignments from "./components/assignment/Assignments.tsx";
 import AddNewAssignment from "./components/assignment/AddNewAssignment.tsx";
 import AssignmentDetails from "./components/assignment/AssignmentDetails.tsx";
 import EditAssignment from "./components/assignment/EditAssignment.tsx";
+import type {DeviceModel} from "./components/models/DeviceModel.ts";
+import Devices from "./components/device/Devices.tsx";
+import AddNewDevice from "./components/device/AddNewDevice.tsx";
+import DeviceDetails from "./components/device/DeviceDetails.tsx";
+import EditDevice from "./components/device/EditDevice.tsx";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
@@ -28,6 +33,7 @@ export default function App() {
 
   const [employees, setEmployees] = useState<EmployeeModel[]>([]);
   const [assignments, setAssignments] = useState<AssignmentModel[]>([]);
+  const [devices, setDevices] = useState<DeviceModel[]>([]);
 
   function getUser() {
     axios.get("/api/users/me")
@@ -93,6 +99,16 @@ export default function App() {
             });
     }
 
+    function getAllDevices() {
+        axios.get("/api/devices")
+            .then((response) => {
+                setDevices(response.data as DeviceModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching devices:", error);
+            });
+    }
+
     function handleNewEmployee(newEmployee: EmployeeModel) {
         setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
     }
@@ -125,10 +141,27 @@ export default function App() {
         );
     }
 
+    function handleNewDevice(newDevice: DeviceModel) {
+        setDevices((prevDevices) => [...prevDevices, newDevice]);
+    }
+
+    function handleDeviceUpdate(updatedDevice: DeviceModel) {
+        setDevices((prevDevices) =>
+            prevDevices.map((device) => device.id === updatedDevice.id ? updatedDevice : device)
+        );
+    }
+
+    function handleDeviceDelete(deletedDeviceId: string) {
+        setDevices((prevDevices) =>
+            prevDevices.filter((device) => device.id !== deletedDeviceId)
+        );
+    }
+
   useEffect(() => {
     getUser();
     getAllEmployees();
     getAllAssignments();
+    getAllDevices();
   }, []);
 
     useEffect(() => {
@@ -153,6 +186,10 @@ export default function App() {
           <Route path="/assignments/add-new-assignment" element={<AddNewAssignment language={language} role={role} handleNewAssignmentSubmit={handleNewAssignment}/>} />
           <Route path="/assignments/:id" element={<AssignmentDetails language={language} role={role} handleAssignmentUpdate={handleAssignmentUpdate} handleAssignmentDelete={handleAssignmentDelete}/>} />
           <Route path="/assignments/:id/edit" element={<EditAssignment language={language} handleAssignmentUpdate={handleAssignmentUpdate} />} />
+          <Route path="/devices" element={<Devices language={language} role={role} devices={devices}/>} />
+          <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
+          <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
+          <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
