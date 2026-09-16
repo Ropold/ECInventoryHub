@@ -14,6 +14,11 @@ import EmployeeDetails from "./components/employee/EmployeeDetails.tsx";
 import EditEmployee from "./components/employee/EditEmployee.tsx";
 import type {EmployeeModel} from "./components/models/EmployeeModel.ts";
 import AddNewEmployee from "./components/employee/AddNewEmployee.tsx";
+import type {AssignmentModel} from "./components/models/AssignmentModel.ts";
+import Assignments from "./components/assignment/Assignments.tsx";
+import AddNewAssignment from "./components/assignment/AddNewAssignment.tsx";
+import AssignmentDetails from "./components/assignment/AssignmentDetails.tsx";
+import EditAssignment from "./components/assignment/EditAssignment.tsx";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
@@ -22,6 +27,7 @@ export default function App() {
   const [role, setRole] = useState<string>("VIEWER");
 
   const [employees, setEmployees] = useState<EmployeeModel[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentModel[]>([]);
 
   function getUser() {
     axios.get("/api/users/me")
@@ -77,6 +83,16 @@ export default function App() {
             });
     }
 
+    function getAllAssignments() {
+        axios.get("/api/assignments")
+            .then((response) => {
+                setAssignments(response.data as AssignmentModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching assignments:", error);
+            });
+    }
+
     function handleNewEmployee(newEmployee: EmployeeModel) {
         setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
     }
@@ -93,9 +109,26 @@ export default function App() {
         );
     }
 
+    function handleNewAssignment(newAssignment: AssignmentModel) {
+        setAssignments((prevAssignments) => [...prevAssignments, newAssignment]);
+    }
+
+    function handleAssignmentUpdate(updatedAssignment: AssignmentModel) {
+        setAssignments((prevAssignments) =>
+            prevAssignments.map((assignment) => assignment.id === updatedAssignment.id ? updatedAssignment : assignment)
+        );
+    }
+
+    function handleAssignmentDelete(deletedAssignmentId: string) {
+        setAssignments((prevAssignments) =>
+            prevAssignments.filter((assignment) => assignment.id !== deletedAssignmentId)
+        );
+    }
+
   useEffect(() => {
     getUser();
     getAllEmployees();
+    getAllAssignments();
   }, []);
 
     useEffect(() => {
@@ -116,6 +149,10 @@ export default function App() {
           <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role} handleNewEmployeeSubmit={handleNewEmployee}/>} />
           <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeUpdate={handleEmployeeUpdate} handleEmployeeDelete={handleEmployeeDelete}/>} />
           <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} />} />
+          <Route path="/assignments" element={<Assignments language={language} role={role} assignments={assignments}/>} />
+          <Route path="/assignments/add-new-assignment" element={<AddNewAssignment language={language} role={role} handleNewAssignmentSubmit={handleNewAssignment}/>} />
+          <Route path="/assignments/:id" element={<AssignmentDetails language={language} role={role} handleAssignmentUpdate={handleAssignmentUpdate} handleAssignmentDelete={handleAssignmentDelete}/>} />
+          <Route path="/assignments/:id/edit" element={<EditAssignment language={language} handleAssignmentUpdate={handleAssignmentUpdate} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
