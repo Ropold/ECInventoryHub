@@ -142,6 +142,17 @@ export const translatedInfo: Record<string, Record<string, string>> = {
         "ru": "Новый сотрудник",
         "tr": "Yeni Çalışan",
     },
+    "New Device": {
+        "de": "Neues Gerät",
+        "en": "New Device",
+        "pl": "Nowe urządzenie",
+        "es": "Nuevo dispositivo",
+        "fr": "Nouvel appareil",
+        "it": "Nuovo dispositivo",
+        "pt": "Novo dispositivo",
+        "ru": "Новое устройство",
+        "tr": "Yeni Cihaz",
+    },
     "New Assignment": {
         "de": "Neue Zuweisung",
         "en": "New Assignment",

@@ -1,0 +1,72 @@
+.mapbox-details-container {
+    width: 100%;
+    height: 600px;
+    min-height: 600px;
+}
+
+/* Container für das Suchfeld */
+.mapbox-all-search-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Das Suchfeld selbst */
+.mapbox-all-search-field input {
+    padding: 8px 16px;
+    font-size: 1rem;
+    width: 80%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Fokussierter Zustand des Input-Feldes */
+.mapbox-all-search-field input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button im Suchfeld */
+.mapbox-all-search-field button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #66b3ff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hover-Zustand des Buttons */
+.mapbox-all-search-field button:hover {
+    background-color: #007bff;
+}
+
+@media (prefers-color-scheme: dark) {
+    .mapbox-all-search-field {
+        background-color: #444444;
+        border: 1px solid #555555;
+    }
+
+    .mapbox-all-search-field input {
+        color: #fff;
+        background-color: #555555;
+        border: 1px solid #666666;
+    }
+
+    .mapbox-all-search-field input:focus {
+        border-color: #66b3ff;
+        box-shadow: 0 0 5px rgba(102, 179, 255, 0.5);
+    }
+
+    .mapbox-all-search-field button:hover {
+        background-color: #5599e5;
+    }
+}
