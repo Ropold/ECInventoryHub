@@ -70,3 +70,20 @@
         background-color: #5599e5;
     }
 }
+/* Popup eines Standort-Markers */
+.mapbox-popup {
+    text-align: center;
+    max-width: 200px;
+    color: #333;
+}
+
+.mapbox-popup img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.mapbox-popup-warning {
+    color: #dc2626;
+    font-weight: bold;
+}

@@ -24,7 +24,8 @@ import Devices from "./components/device/Devices.tsx";
 import AddNewDevice from "./components/device/AddNewDevice.tsx";
 import DeviceDetails from "./components/device/DeviceDetails.tsx";
 import EditDevice from "./components/device/EditDevice.tsx";
-//import MapBoxButton from "./components/location/MapBoxButton.tsx";
+import MapBoxCard from "./components/location/MapBoxCard.tsx";
+import type {LocationModel} from "./components/models/LocationModel.ts";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
@@ -35,6 +36,7 @@ export default function App() {
   const [employees, setEmployees] = useState<EmployeeModel[]>([]);
   const [assignments, setAssignments] = useState<AssignmentModel[]>([]);
   const [devices, setDevices] = useState<DeviceModel[]>([]);
+  const [locations, setLocations] = useState<LocationModel[]>([]);
 
   function getUser() {
     axios.get("/api/users/me")
@@ -110,6 +112,16 @@ export default function App() {
             });
     }
 
+    function getAllLocations() {
+        axios.get("/api/locations")
+            .then((response) => {
+                setLocations(response.data as LocationModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching locations:", error);
+            });
+    }
+
     function handleNewEmployee(newEmployee: EmployeeModel) {
         setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
     }
@@ -163,6 +175,7 @@ export default function App() {
     getAllEmployees();
     getAllAssignments();
     getAllDevices();
+    getAllLocations();
   }, []);
 
     useEffect(() => {
@@ -191,7 +204,7 @@ export default function App() {
           <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
           <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
           <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
-          {/*<Route path="/location" element={<MapBoxButton language={language} role={role} employees={employees} assignments={assignments} devices={devices} />} />*/}
+          <Route path="/locations" element={<MapBoxCard language={language} locations={locations} devices={devices} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
