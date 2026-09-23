@@ -17,7 +17,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import ropold.backend.model.DeviceModel;
+import ropold.backend.model.DeviceType;
 import ropold.backend.model.LocationModel;
+import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.LocationRepository;
 import ropold.backend.service.CloudinaryService;
 
@@ -52,6 +55,9 @@ class LocationControllerIntegrationTest {
 
     @Autowired
     private LocationRepository locationRepository;
+
+    @Autowired
+    private DeviceRepository deviceRepository;
 
     @MockitoBean
     private CloudinaryService cloudinaryService;
@@ -404,5 +410,105 @@ class LocationControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("User not authenticated"));
 
         assertTrue(locationRepository.existsById(existingLocation.getId()));
+    }
+
+    @Test
+    void testDeleteLocation_withBlockingDevice_shouldReturnConflict() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        LocationModel existingLocation = locationRepository.findAll().getFirst();
+        DeviceModel device = saveDeviceAt(existingLocation);
+
+        mockMvc.perform(delete("/api/locations/" + existingLocation.getId())
+                        .with(authentication(authToken)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("LOCATION_HAS_DEVICES"))
+                .andExpect(jsonPath("$.details[0]").value("Device ID: " + device.getId()));
+
+        assertTrue(locationRepository.existsById(existingLocation.getId()));
+    }
+
+    @Test
+    void testForceDeleteLocation_asAdmin_shouldDeleteLocationAndDetachDevices() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-admin");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("ADMIN")),
+                "github"
+        );
+
+        LocationModel existingLocation = locationRepository.findAll().getFirst();
+        DeviceModel device = saveDeviceAt(existingLocation);
+
+        mockMvc.perform(delete("/api/locations/" + existingLocation.getId() + "/force")
+                        .with(authentication(authToken)))
+                .andExpect(status().isNoContent());
+
+        assertFalse(locationRepository.existsById(existingLocation.getId()));
+        assertTrue(deviceRepository.existsById(device.getId()));
+        assertNull(deviceRepository.findById(device.getId()).orElseThrow().getLocation());
+    }
+
+    @Test
+    void testForceDeleteLocation_asUser_shouldReturnForbidden() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        LocationModel existingLocation = locationRepository.findAll().getFirst();
+        DeviceModel device = saveDeviceAt(existingLocation);
+
+        mockMvc.perform(delete("/api/locations/" + existingLocation.getId() + "/force")
+                        .with(authentication(authToken)))
+                .andExpect(status().isForbidden());
+
+        assertTrue(locationRepository.existsById(existingLocation.getId()));
+        assertTrue(deviceRepository.existsById(device.getId()));
+    }
+
+    @Test
+    void testForceDeleteLocation_unauthenticated_shouldReturnUnauthorized() throws Exception {
+        LocationModel existingLocation = locationRepository.findAll().getFirst();
+
+        mockMvc.perform(delete("/api/locations/" + existingLocation.getId() + "/force"))
+                .andExpect(status().isUnauthorized());
+
+        assertTrue(locationRepository.existsById(existingLocation.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "test-admin", authorities = {"ADMIN"})
+    void testForceDeleteLocation_withoutOAuth2Principal_shouldReturnInternalServerError() throws Exception {
+        LocationModel existingLocation = locationRepository.findAll().getFirst();
+
+        mockMvc.perform(delete("/api/locations/" + existingLocation.getId() + "/force"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value("User not authenticated"));
+
+        assertTrue(locationRepository.existsById(existingLocation.getId()));
+    }
+
+    private DeviceModel saveDeviceAt(LocationModel location) {
+        DeviceModel device = new DeviceModel();
+        device.setType(DeviceType.LAPTOP);
+        device.setManufacturer("Dell");
+        device.setModelName("XPS 13");
+        device.setLocation(location);
+        return deviceRepository.save(device);
     }
 }

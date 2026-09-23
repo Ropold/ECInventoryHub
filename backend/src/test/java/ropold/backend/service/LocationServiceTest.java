@@ -2,8 +2,12 @@ package ropold.backend.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ropold.backend.exception.conflictexceptions.LocationHasDevicesException;
 import ropold.backend.exception.notfoundexceptions.LocationNotFoundException;
+import ropold.backend.model.DeviceModel;
+import ropold.backend.model.DeviceType;
 import ropold.backend.model.LocationModel;
+import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.LocationRepository;
 
 import java.util.List;
@@ -11,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -22,7 +27,8 @@ import static org.mockito.Mockito.when;
 class LocationServiceTest {
 
     LocationRepository locationRepository = mock(LocationRepository.class);
-    LocationService locationService = new LocationService(locationRepository);
+    DeviceRepository deviceRepository = mock(DeviceRepository.class);
+    LocationService locationService = new LocationService(locationRepository, deviceRepository);
 
     List<LocationModel> allLocations;
 
@@ -119,8 +125,77 @@ class LocationServiceTest {
     void testDeleteLocation() {
         LocationModel locationToDelete = allLocations.getFirst();
         when(locationRepository.findById(locationToDelete.getId())).thenReturn(Optional.of(locationToDelete));
+        when(deviceRepository.findByLocationId(locationToDelete.getId())).thenReturn(List.of());
+
         locationService.deleteLocation(locationToDelete.getId());
         verify(locationRepository, times(1)).deleteById(locationToDelete.getId());
+    }
+
+    @Test
+    void testDeleteLocation_WithBlockingDevices_ThrowsException() {
+        LocationModel locationToDelete = allLocations.getFirst();
+        when(locationRepository.findById(locationToDelete.getId())).thenReturn(Optional.of(locationToDelete));
+
+        DeviceModel device = new DeviceModel();
+        device.setId(UUID.randomUUID());
+        device.setType(DeviceType.LAPTOP);
+        device.setLocation(locationToDelete);
+
+        when(deviceRepository.findByLocationId(locationToDelete.getId())).thenReturn(List.of(device));
+
+        LocationHasDevicesException exception = assertThrows(
+                LocationHasDevicesException.class,
+                () -> locationService.deleteLocation(locationToDelete.getId())
+        );
+
+        assertEquals(1, exception.getDeviceDetails().size());
+        assertEquals("Device ID: " + device.getId(), exception.getDeviceDetails().getFirst());
+        verify(locationRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void testForceDeleteLocation_DetachesDevicesAndDeletesLocation() {
+        LocationModel locationToDelete = allLocations.getFirst();
+        when(locationRepository.findById(locationToDelete.getId())).thenReturn(Optional.of(locationToDelete));
+
+        DeviceModel device = new DeviceModel();
+        device.setId(UUID.randomUUID());
+        device.setType(DeviceType.LAPTOP);
+        device.setLocation(locationToDelete);
+
+        List<DeviceModel> blockingDevices = List.of(device);
+        when(deviceRepository.findByLocationId(locationToDelete.getId())).thenReturn(blockingDevices);
+
+        locationService.forceDeleteLocation(locationToDelete.getId());
+
+        assertNull(device.getLocation());
+        verify(deviceRepository, times(1)).saveAll(blockingDevices);
+        verify(locationRepository, times(1)).deleteById(locationToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteLocation_NoDevices_StillDeletesLocation() {
+        LocationModel locationToDelete = allLocations.getFirst();
+        when(locationRepository.findById(locationToDelete.getId())).thenReturn(Optional.of(locationToDelete));
+        when(deviceRepository.findByLocationId(locationToDelete.getId())).thenReturn(List.of());
+
+        locationService.forceDeleteLocation(locationToDelete.getId());
+
+        verify(deviceRepository, times(1)).saveAll(List.of());
+        verify(locationRepository, times(1)).deleteById(locationToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteLocation_NotFound() {
+        UUID nonExistentId = UUID.randomUUID();
+        when(locationRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        assertThrows(
+                LocationNotFoundException.class,
+                () -> locationService.forceDeleteLocation(nonExistentId)
+        );
+
+        verify(locationRepository, never()).deleteById(any());
     }
 
     @Test

@@ -99,4 +99,16 @@ public class LocationController {
         }
         locationService.deleteLocation(id);
     }
+
+    @DeleteMapping("/{id}/force")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void forceDeleteLocation(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal OAuth2User authentication) {
+
+        if (authentication == null) {
+            throw new AccessDeniedException("User not authenticated");
+        }
+        locationService.forceDeleteLocation(id);
+    }
 }

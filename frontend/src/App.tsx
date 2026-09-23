@@ -14,6 +14,21 @@ import EmployeeDetails from "./components/employee/EmployeeDetails.tsx";
 import EditEmployee from "./components/employee/EditEmployee.tsx";
 import type {EmployeeModel} from "./components/models/EmployeeModel.ts";
 import AddNewEmployee from "./components/employee/AddNewEmployee.tsx";
+import type {AssignmentModel} from "./components/models/AssignmentModel.ts";
+import Assignments from "./components/assignment/Assignments.tsx";
+import AddNewAssignment from "./components/assignment/AddNewAssignment.tsx";
+import AssignmentDetails from "./components/assignment/AssignmentDetails.tsx";
+import EditAssignment from "./components/assignment/EditAssignment.tsx";
+import type {DeviceModel} from "./components/models/DeviceModel.ts";
+import Devices from "./components/device/Devices.tsx";
+import AddNewDevice from "./components/device/AddNewDevice.tsx";
+import DeviceDetails from "./components/device/DeviceDetails.tsx";
+import EditDevice from "./components/device/EditDevice.tsx";
+import Locations from "./components/location/Locations.tsx";
+import AddNewLocation from "./components/location/AddNewLocation.tsx";
+import LocationDetails from "./components/location/LocationDetails.tsx";
+import EditLocation from "./components/location/EditLocation.tsx";
+import type {LocationModel} from "./components/models/LocationModel.ts";
 
 export default function App() {
   const [user, setUser] = useState<string>("anonymousUser");
@@ -22,6 +37,9 @@ export default function App() {
   const [role, setRole] = useState<string>("VIEWER");
 
   const [employees, setEmployees] = useState<EmployeeModel[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentModel[]>([]);
+  const [devices, setDevices] = useState<DeviceModel[]>([]);
+  const [locations, setLocations] = useState<LocationModel[]>([]);
 
   function getUser() {
     axios.get("/api/users/me")
@@ -77,6 +95,36 @@ export default function App() {
             });
     }
 
+    function getAllAssignments() {
+        axios.get("/api/assignments")
+            .then((response) => {
+                setAssignments(response.data as AssignmentModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching assignments:", error);
+            });
+    }
+
+    function getAllDevices() {
+        axios.get("/api/devices")
+            .then((response) => {
+                setDevices(response.data as DeviceModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching devices:", error);
+            });
+    }
+
+    function getAllLocations() {
+        axios.get("/api/locations")
+            .then((response) => {
+                setLocations(response.data as LocationModel[]);
+            })
+            .catch((error) => {
+                console.error("Error fetching locations:", error);
+            });
+    }
+
     function handleNewEmployee(newEmployee: EmployeeModel) {
         setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
     }
@@ -93,9 +141,60 @@ export default function App() {
         );
     }
 
+    function handleNewAssignment(newAssignment: AssignmentModel) {
+        setAssignments((prevAssignments) => [...prevAssignments, newAssignment]);
+    }
+
+    function handleAssignmentUpdate(updatedAssignment: AssignmentModel) {
+        setAssignments((prevAssignments) =>
+            prevAssignments.map((assignment) => assignment.id === updatedAssignment.id ? updatedAssignment : assignment)
+        );
+    }
+
+    function handleAssignmentDelete(deletedAssignmentId: string) {
+        setAssignments((prevAssignments) =>
+            prevAssignments.filter((assignment) => assignment.id !== deletedAssignmentId)
+        );
+    }
+
+    function handleNewDevice(newDevice: DeviceModel) {
+        setDevices((prevDevices) => [...prevDevices, newDevice]);
+    }
+
+    function handleDeviceUpdate(updatedDevice: DeviceModel) {
+        setDevices((prevDevices) =>
+            prevDevices.map((device) => device.id === updatedDevice.id ? updatedDevice : device)
+        );
+    }
+
+    function handleDeviceDelete(deletedDeviceId: string) {
+        setDevices((prevDevices) =>
+            prevDevices.filter((device) => device.id !== deletedDeviceId)
+        );
+    }
+
+    function handleNewLocation(newLocation: LocationModel) {
+        setLocations((prevLocations) => [...prevLocations, newLocation]);
+    }
+
+    function handleLocationUpdate(updatedLocation: LocationModel) {
+        setLocations((prevLocations) =>
+            prevLocations.map((location) => location.id === updatedLocation.id ? updatedLocation : location)
+        );
+    }
+
+    function handleLocationDelete(deletedLocationId: string) {
+        setLocations((prevLocations) =>
+            prevLocations.filter((location) => location.id !== deletedLocationId)
+        );
+    }
+
   useEffect(() => {
     getUser();
     getAllEmployees();
+    getAllAssignments();
+    getAllDevices();
+    getAllLocations();
   }, []);
 
     useEffect(() => {
@@ -116,6 +215,18 @@ export default function App() {
           <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role} handleNewEmployeeSubmit={handleNewEmployee}/>} />
           <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeUpdate={handleEmployeeUpdate} handleEmployeeDelete={handleEmployeeDelete}/>} />
           <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} />} />
+          <Route path="/assignments" element={<Assignments language={language} role={role} assignments={assignments}/>} />
+          <Route path="/assignments/add-new-assignment" element={<AddNewAssignment language={language} role={role} handleNewAssignmentSubmit={handleNewAssignment}/>} />
+          <Route path="/assignments/:id" element={<AssignmentDetails language={language} role={role} handleAssignmentUpdate={handleAssignmentUpdate} handleAssignmentDelete={handleAssignmentDelete}/>} />
+          <Route path="/assignments/:id/edit" element={<EditAssignment language={language} handleAssignmentUpdate={handleAssignmentUpdate} />} />
+          <Route path="/devices" element={<Devices language={language} role={role} devices={devices}/>} />
+          <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
+          <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
+          <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
+          <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} />} />
+          <Route path="/locations/add-new-location" element={<AddNewLocation language={language} role={role} handleNewLocationSubmit={handleNewLocation}/>} />
+          <Route path="/locations/:id" element={<LocationDetails language={language} role={role} handleLocationUpdate={handleLocationUpdate} handleLocationDelete={handleLocationDelete}/>} />
+          <Route path="/locations/:id/edit" element={<EditLocation language={language} handleLocationUpdate={handleLocationUpdate} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>

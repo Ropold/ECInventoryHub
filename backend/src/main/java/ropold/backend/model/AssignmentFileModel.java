@@ -1,5 +1,6 @@
 package ropold.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class AssignmentFileModel {
     @Column(columnDefinition = "UUID")
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "assignment_id", nullable = false)
     private AssignmentModel assignment;
