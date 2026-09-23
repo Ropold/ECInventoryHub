@@ -204,7 +204,7 @@ export default function App() {
           <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
           <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
           <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
-          <Route path="/locations" element={<Locations language={language} locations={locations} devices={devices} />} />
+          <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
