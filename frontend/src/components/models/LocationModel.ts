@@ -6,6 +6,8 @@ export type LocationModel = {
     phone: string | null;
     email: string | null;
     notes: string | null;
+    latitude: number | null;
+    longitude: number | null;
     imageUrl: string | null;
 };
 
@@ -16,5 +18,7 @@ export const DefaultLocation: LocationModel = {
     phone: null,
     email: null,
     notes: null,
+    latitude: null,
+    longitude: null,
     imageUrl: null,
 };

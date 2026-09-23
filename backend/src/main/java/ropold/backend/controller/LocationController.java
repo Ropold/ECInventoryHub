@@ -58,6 +58,8 @@ public class LocationController {
                 locationDTO.phone(),
                 locationDTO.email(),
                 locationDTO.notes(),
+                null,
+                null,
                 imageUrl
         ));
     }
@@ -84,6 +86,8 @@ public class LocationController {
                 locationDTO.phone(),
                 locationDTO.email(),
                 locationDTO.notes(),
+                null,
+                null,
                 newImageUrl
         ));
     }

@@ -40,6 +40,8 @@ CREATE TABLE locations (
     phone   varchar,
     email   varchar,
     notes   text,
+    latitude  double precision,
+    longitude double precision,
     image_url varchar
 );
 

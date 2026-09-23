@@ -97,6 +97,8 @@ class DeviceControllerIntegrationTest {
                 "+49 170 1234567",
                 "location.one@example.com",
                 "Notes for location one",
+                null,
+                null,
                 "https://example.com/location1.jpg"
         );
 

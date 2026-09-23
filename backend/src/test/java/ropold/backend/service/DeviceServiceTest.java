@@ -60,6 +60,8 @@ class DeviceServiceTest {
                 "+49 170 1234567",
                 "location.one@example.com",
                 "Notes for location one",
+                null,
+                null,
                 "http://example.com/location1.jpg"
         );
 
