@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
@@ -121,8 +122,8 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                     <p><strong>ID:</strong> {assignment.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={() => withPermission(() => navigate(`/assignments/${id}/edit`))}>Edit</button>
-                        <button className="button-delete" onClick={() => withPermission(() => setShowPopup(true))}>Delete</button>
+                        <button className="button-blue" onClick={() => withPermission(() => navigate(`/assignments/${id}/edit`))}>{translatedInfo["Edit"][props.language]}</button>
+                        <button className="button-delete" onClick={() => withPermission(() => setShowPopup(true))}>{translatedInfo["Delete"][props.language]}</button>
                     </div>
 
                     {showNoPermission && (
@@ -144,8 +145,8 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                                     </div>
                                 )}
                                 <div className="popup-actions">
-                                    <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
-                                    <button onClick={handleCancel} className="popup-cancel">Cancel</button>
+                                    <button onClick={handleConfirmDelete} className="popup-confirm">{translatedInfo["Yes, Delete"][props.language]}</button>
+                                    <button onClick={handleCancel} className="popup-cancel">{translatedInfo["Cancel"][props.language]}</button>
                                 </div>
                             </div>
                         </div>

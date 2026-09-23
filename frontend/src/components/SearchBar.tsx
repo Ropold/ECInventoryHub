@@ -1,8 +1,10 @@
+import {translatedInfo} from "./utils/TranslatedInfo.ts";
 import "./styles/SearchBar.css"
 
 type SearchBarProps = {
     searchQuery: string;
     setSearchQuery: (value: string) => void;
+    language: string;
 }
 
 export default function SearchBar(props: Readonly<SearchBarProps>) {
@@ -25,7 +27,7 @@ export default function SearchBar(props: Readonly<SearchBarProps>) {
                 onClick={handleReset}
                 className={`${props.searchQuery ? "button-group-button" : "button-grey-search"}`}
             >
-                Reset Filters
+                {translatedInfo["Reset Filters"][props.language]}
             </button>
         </div>
     );

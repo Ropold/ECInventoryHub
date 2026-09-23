@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import {useNavigate} from "react-router-dom";
 import {onFileChange, onImageCancel, renderImagePreview} from "../utils/ComponentsFunctions.tsx";
 import "../styles/FormStyles.css";
@@ -120,15 +121,15 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
                         onImageCancel(setImage);
                         if (existingImageUrl) setImageDeleted(true);
                     }}>
-                        remove image
+                        {translatedInfo["remove image"][props.language]}
                     </button>
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">
-                    {isEditMode ? "Update Location" : "Add Location"}
+                    {isEditMode ? translatedInfo["Update Location"][props.language] : translatedInfo["Add Location"][props.language]}
                 </button>
                 <button type="button" className="button-blue margin-left-20" onClick={() => navigate(backNavigationPath)}>
-                    back
+                    {translatedInfo["back"][props.language]}
                 </button>
             </form>
         </div>

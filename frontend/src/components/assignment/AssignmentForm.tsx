@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
@@ -253,7 +254,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                             <li key={item.key}>
                                 {item.label}
                                 <button type="button" className="button-blue margin-left-20" onClick={item.onRemove}>
-                                    remove file
+                                    {translatedInfo["remove file"][props.language]}
                                 </button>
                             </li>
                         ))}
@@ -261,10 +262,10 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">
-                    {isEditMode ? "Update Assignment" : "Add Assignment"}
+                    {isEditMode ? translatedInfo["Update Assignment"][props.language] : translatedInfo["Add Assignment"][props.language]}
                 </button>
                 <button type="button" className="button-blue margin-left-20" onClick={() => navigate(backNavigationPath)}>
-                    back
+                    {translatedInfo["back"][props.language]}
                 </button>
             </form>
         </div>

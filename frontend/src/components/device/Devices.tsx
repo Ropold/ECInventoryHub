@@ -59,6 +59,7 @@ export default function Devices(props: Readonly<DeviceProps>){
                 <SearchBar
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
+                    language={props.language}
                 />
                 <button className="button-blue" onClick={handleAddNewClick}>{translatedInfo["New Device"][props.language]}</button>
             </div>

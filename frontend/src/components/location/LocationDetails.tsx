@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import type {LocationModel} from "../models/LocationModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
@@ -134,8 +135,8 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                     <p><strong>ID:</strong> {location.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={handleEditClick}>Edit</button>
-                        <button className="button-delete" onClick={handleDeleteClick}>Delete</button>
+                        <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
+                        <button className="button-delete" onClick={handleDeleteClick}>{translatedInfo["Delete"][props.language]}</button>
                     </div>
 
                     {showNoPermission && (
@@ -163,11 +164,11 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                                     </div>
                                 )}
                                 <div className="popup-actions">
-                                    <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
+                                    <button onClick={handleConfirmDelete} className="popup-confirm">{translatedInfo["Yes, Delete"][props.language]}</button>
                                     {blockingDevices.length > 0 && props.role === "ADMIN" && (
-                                        <button onClick={handleForceDelete} className="popup-confirm">Delete Anyway</button>
+                                        <button onClick={handleForceDelete} className="popup-confirm">{translatedInfo["Delete Anyway"][props.language]}</button>
                                     )}
-                                    <button onClick={handleCancel} className="popup-cancel">Cancel</button>
+                                    <button onClick={handleCancel} className="popup-cancel">{translatedInfo["Cancel"][props.language]}</button>
                                 </div>
                             </div>
                         </div>

@@ -96,7 +96,7 @@ export default function Footer(props: Readonly<FooterProps>) {
                             className="popup-cancel margin-top-20"
                             onClick={() => setShowLanguagePopup(false)}
                         >
-                            Cancel
+                            {translatedInfo["Cancel"][props.language]}
                         </button>
                     </div>
                 </div>

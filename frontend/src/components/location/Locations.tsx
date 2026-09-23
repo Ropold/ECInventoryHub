@@ -60,6 +60,7 @@ export default function Locations(props: Readonly<LocationsProps>) {
                 <SearchBar
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
+                    language={props.language}
                 />
                 <button className="button-blue" onClick={handleAddNewClick}>{translatedInfo["New Location"][props.language]}</button>
             </div>

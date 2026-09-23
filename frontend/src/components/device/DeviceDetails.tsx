@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
@@ -130,8 +131,8 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                     <p><strong>ID:</strong> {device.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={handleEditClick}>Edit</button>
-                        <button className="button-delete" onClick={handleDeleteClick}>Delete</button>
+                        <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
+                        <button className="button-delete" onClick={handleDeleteClick}>{translatedInfo["Delete"][props.language]}</button>
                     </div>
 
                     {showNoPermission && (
@@ -152,8 +153,8 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                                     </div>
                                 )}
                                 <div className="popup-actions">
-                                    <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
-                                    <button onClick={handleCancel} className="popup-cancel">Cancel</button>
+                                    <button onClick={handleConfirmDelete} className="popup-confirm">{translatedInfo["Yes, Delete"][props.language]}</button>
+                                    <button onClick={handleCancel} className="popup-cancel">{translatedInfo["Cancel"][props.language]}</button>
                                 </div>
                             </div>
                         </div>

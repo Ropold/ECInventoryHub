@@ -207,7 +207,7 @@ export default function App() {
 
   return (
     <>
-      <Navbar user={user} getUser={getUser}/>
+      <Navbar user={user} getUser={getUser} language={language}/>
       <Routes>
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Welcome />}/>
