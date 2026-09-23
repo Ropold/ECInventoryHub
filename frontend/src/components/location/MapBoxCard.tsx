@@ -14,7 +14,14 @@ type MapBoxCardProps = {
     language: string;
 };
 
-const DEFAULT_CENTER: [number, number] = [6.6667, 51.2667]; // Meerbusch
+// Ein Standort mit fertig geocodierten Koordinaten
+type MapPoint = {
+    location: LocationModel;
+    coordinates: [number, number];
+};
+
+const DEFAULT_CENTER: [number, number] = [6.6667, 51.2667]; // Meerbusch, nur wenn es keinen Standort auf der Karte gibt
+const DEFAULT_ZOOM = 12;
 const MARKER_COLOR = "#2563eb"; // Blau: alles in Ordnung
 const MARKER_WARNING_COLOR = "#dc2626"; // Rot: Geräte defekt oder in Reparatur
 
@@ -75,6 +82,7 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
     const [geocodeError, setGeocodeError] = useState<string | null>(null);
     const [mapboxConfig, setMapboxConfig] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [mapPoints, setMapPoints] = useState<MapPoint[] | null>(null); // null = noch nicht geocodiert
 
     const deviceStats = useMemo(() => getDeviceStatsByLocation(props.devices), [props.devices]);
 
@@ -92,24 +100,15 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
             });
     }, []);
 
-    // Karte einmalig initialisieren, sobald das Token da ist
+    // Karte beim Verlassen der Seite aufräumen
     useEffect(() => {
-        if (!mapboxConfig || !mapContainerRef.current) return;
-
-        mapRef.current = new mapboxgl.Map({
-            container: mapContainerRef.current,
-            style: "mapbox://styles/mapbox/streets-v11",
-            center: DEFAULT_CENTER,
-            zoom: 12,
-        });
-
         return () => {
             mapRef.current?.remove();
             mapRef.current = null;
         };
-    }, [mapboxConfig]);
+    }, []);
 
-    // Marker setzen, wenn sich Standorte oder Geräte ändern (Karte bleibt bestehen)
+    // Adressen geocodieren, sobald Token und Standorte da sind
     useEffect(() => {
         if (!mapboxConfig) return;
         let cancelled = false;
@@ -127,46 +126,70 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
                 });
             })
         ).then((allCoordinates) => {
-            const map = mapRef.current;
-            if (cancelled || !map) return;
+            if (cancelled) return;
 
-            const bounds = new mapboxgl.LngLatBounds();
+            const points: MapPoint[] = [];
             const notFound: string[] = [];
 
             locationsWithAddress.forEach((location, index) => {
                 const coordinates = allCoordinates[index];
-                if (!coordinates) {
+                if (coordinates) {
+                    points.push({ location: location, coordinates: coordinates });
+                } else {
                     notFound.push(location.name);
-                    return;
                 }
-
-                const stats = deviceStats[location.id];
-                const hasWarning = !!stats && (stats.inRepair > 0 || stats.defective > 0);
-
-                const popup = new mapboxgl.Popup({ offset: 25 })
-                    .setDOMContent(createPopupContent(location, stats, props.language));
-
-                const marker = new mapboxgl.Marker({ color: hasWarning ? MARKER_WARNING_COLOR : MARKER_COLOR })
-                    .setLngLat(coordinates)
-                    .setPopup(popup)
-                    .addTo(map);
-
-                markersRef.current.push(marker);
-                bounds.extend(coordinates);
             });
 
-            if (!bounds.isEmpty()) {
-                map.fitBounds(bounds, { padding: 80, maxZoom: 14 });
-            }
+            setMapPoints(points);
             setGeocodeError(notFound.length > 0 ? `Address not found: ${notFound.join(", ")}` : null);
         });
 
         return () => {
             cancelled = true;
+        };
+    }, [props.locations, mapboxConfig]);
+
+    // Karte einmalig erzeugen, dann schon passend zu den Standorten (kein Nachspringen)
+    useEffect(() => {
+        if (!mapboxConfig || !mapContainerRef.current || mapRef.current || !mapPoints) return;
+
+        const bounds = new mapboxgl.LngLatBounds();
+        mapPoints.forEach((point) => bounds.extend(point.coordinates));
+
+        mapRef.current = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            style: "mapbox://styles/mapbox/streets-v11",
+            ...(bounds.isEmpty()
+                ? { center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM }
+                : { bounds: bounds, fitBoundsOptions: { padding: 80, maxZoom: DEFAULT_ZOOM } }),
+        });
+    }, [mapboxConfig, mapPoints]);
+
+    // Marker setzen, wenn sich Standorte oder Geräte ändern (Kartenausschnitt bleibt, wie er ist)
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !mapPoints) return;
+
+        mapPoints.forEach((point) => {
+            const stats = deviceStats[point.location.id];
+            const hasWarning = !!stats && (stats.inRepair > 0 || stats.defective > 0);
+
+            const popup = new mapboxgl.Popup({ offset: 25 })
+                .setDOMContent(createPopupContent(point.location, stats, props.language));
+
+            const marker = new mapboxgl.Marker({ color: hasWarning ? MARKER_WARNING_COLOR : MARKER_COLOR })
+                .setLngLat(point.coordinates)
+                .setPopup(popup)
+                .addTo(map);
+
+            markersRef.current.push(marker);
+        });
+
+        return () => {
             markersRef.current.forEach((marker) => marker.remove());
             markersRef.current = [];
         };
-    }, [props.locations, deviceStats, props.language, mapboxConfig]);
+    }, [mapPoints, deviceStats, props.language]);
 
     // Ort suchen und Karte darauf zentrieren
     const handleSearch = () => {

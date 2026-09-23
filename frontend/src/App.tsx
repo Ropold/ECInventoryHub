@@ -25,6 +25,9 @@ import AddNewDevice from "./components/device/AddNewDevice.tsx";
 import DeviceDetails from "./components/device/DeviceDetails.tsx";
 import EditDevice from "./components/device/EditDevice.tsx";
 import Locations from "./components/location/Locations.tsx";
+import AddNewLocation from "./components/location/AddNewLocation.tsx";
+import LocationDetails from "./components/location/LocationDetails.tsx";
+import EditLocation from "./components/location/EditLocation.tsx";
 import type {LocationModel} from "./components/models/LocationModel.ts";
 
 export default function App() {
@@ -170,6 +173,22 @@ export default function App() {
         );
     }
 
+    function handleNewLocation(newLocation: LocationModel) {
+        setLocations((prevLocations) => [...prevLocations, newLocation]);
+    }
+
+    function handleLocationUpdate(updatedLocation: LocationModel) {
+        setLocations((prevLocations) =>
+            prevLocations.map((location) => location.id === updatedLocation.id ? updatedLocation : location)
+        );
+    }
+
+    function handleLocationDelete(deletedLocationId: string) {
+        setLocations((prevLocations) =>
+            prevLocations.filter((location) => location.id !== deletedLocationId)
+        );
+    }
+
   useEffect(() => {
     getUser();
     getAllEmployees();
@@ -205,6 +224,9 @@ export default function App() {
           <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
           <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
           <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} />} />
+          <Route path="/locations/add-new-location" element={<AddNewLocation language={language} role={role} handleNewLocationSubmit={handleNewLocation}/>} />
+          <Route path="/locations/:id" element={<LocationDetails language={language} role={role} handleLocationUpdate={handleLocationUpdate} handleLocationDelete={handleLocationDelete}/>} />
+          <Route path="/locations/:id/edit" element={<EditLocation language={language} handleLocationUpdate={handleLocationUpdate} />} />
               <Route element={<ProtectedRoute user={user}/>}>
                   <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
               </Route>
