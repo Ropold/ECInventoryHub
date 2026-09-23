@@ -228,7 +228,7 @@ export default function App() {
           <Route path="/locations/:id" element={<LocationDetails language={language} role={role} handleLocationUpdate={handleLocationUpdate} handleLocationDelete={handleLocationDelete}/>} />
           <Route path="/locations/:id/edit" element={<EditLocation language={language} handleLocationUpdate={handleLocationUpdate} />} />
               <Route element={<ProtectedRoute user={user}/>}>
-                  <Route path="/profile" element={<Profile user={user} userDetails={userDetails} language={language}/>} />
+                  <Route path="/profile" element={<Profile user={user} userDetails={userDetails} role={role} language={language}/>} />
               </Route>
       </Routes>
       <Footer language={language} setLanguage={setLanguage} user={user}/>

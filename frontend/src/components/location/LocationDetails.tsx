@@ -120,6 +120,8 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                     {location.address && <p><strong>Address:</strong> {location.address}</p>}
                     {location.phone && <p><strong>Phone:</strong> {location.phone}</p>}
                     {location.email && <p><strong>Email:</strong> {location.email}</p>}
+                    {location.latitude != null && <p><strong>Latitude:</strong> {location.latitude}</p>}
+                    {location.longitude != null && <p><strong>Longitude:</strong> {location.longitude}</p>}
 
                     {location.notes && (
                         <>

@@ -3,6 +3,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import type {LocationModel} from "../models/LocationModel.ts";
 import LocationsForm from "./LocationsForm.tsx";
+import {resolveCoordinates} from "../utils/MapboxGeocoding.ts";
 
 type AddNewLocationProps = {
     language: string;
@@ -27,26 +28,29 @@ export default function AddNewLocation(props: Readonly<AddNewLocationProps>) {
     function handleNewAddSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        const newLocation = {
-            id: null,
-            name: name,
-            address: address ?? null,
-            phone: phone ?? null,
-            email: email ?? null,
-            notes: notes ?? null,
-            latitude: latitude ?? null,
-            longitude: longitude ?? null,
-            imageUrl: null
-        };
+        // Fehlende Koordinaten einmalig aus der Adresse holen
+        resolveCoordinates(address, {latitude: latitude ?? null, longitude: longitude ?? null}, false)
+            .then((coordinates) => {
+                const newLocation = {
+                    id: null,
+                    name: name,
+                    address: address ?? null,
+                    phone: phone ?? null,
+                    email: email ?? null,
+                    notes: notes ?? null,
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                    imageUrl: null
+                };
 
-        const data = new FormData();
-        data.append("locationDTO", new Blob([JSON.stringify(newLocation)], {type: "application/json"}));
-        if (image) {
-            data.append("image", image);
-        }
+                const data = new FormData();
+                data.append("locationDTO", new Blob([JSON.stringify(newLocation)], {type: "application/json"}));
+                if (image) {
+                    data.append("image", image);
+                }
 
-        axios
-            .post('/api/locations', data, {headers: {"Content-Type": "multipart/form-data"}})
+                return axios.post('/api/locations', data, {headers: {"Content-Type": "multipart/form-data"}});
+            })
             .then((response) => {
                 props.handleNewLocationSubmit(response.data);
                 navigate(`/locations/${response.data.id}`);

@@ -273,5 +273,16 @@ export const translatedInfo: Record<string, Record<string, string>> = {
         "pt": "Defeituoso",
         "ru": "Неисправно",
         "tr": "Arızalı",
+    },
+    "Role": {
+        "de": "Rolle",
+        "en": "Role",
+        "pl": "Rola",
+        "es": "Rol",
+        "fr": "Rôle",
+        "it": "Ruolo",
+        "pt": "Função",
+        "ru": "Роль",
+        "tr": "Rol",
     }
 }

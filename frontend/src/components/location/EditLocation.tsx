@@ -3,6 +3,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import type {LocationModel} from "../models/LocationModel.ts";
 import LocationsForm from "./LocationsForm.tsx";
+import {resolveCoordinates} from "../utils/MapboxGeocoding.ts";
 
 type EditLocationProps = {
     language: string;
@@ -46,26 +47,36 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
         e.preventDefault();
         if (!location) return;
 
-        const updatedLocation = {
-            id: location.id,
-            name: name,
-            address: address ?? null,
-            phone: phone ?? null,
-            email: email ?? null,
-            notes: notes ?? null,
-            latitude: latitude ?? null,
-            longitude: longitude ?? null,
-            imageUrl: imageDeleted ? null : location.imageUrl
-        };
+        // Adresse geändert, Koordinaten aber nicht von Hand angepasst -> neu geocodieren
+        const addressChanged = (address ?? null) !== location.address;
+        const coordinatesChanged = (latitude ?? null) !== location.latitude || (longitude ?? null) !== location.longitude;
 
-        const data = new FormData();
-        data.append("locationDTO", new Blob([JSON.stringify(updatedLocation)], {type: "application/json"}));
-        if (image) {
-            data.append("image", image);
-        }
+        resolveCoordinates(
+            address,
+            {latitude: latitude ?? null, longitude: longitude ?? null},
+            addressChanged && !coordinatesChanged
+        )
+            .then((coordinates) => {
+                const updatedLocation = {
+                    id: location.id,
+                    name: name,
+                    address: address ?? null,
+                    phone: phone ?? null,
+                    email: email ?? null,
+                    notes: notes ?? null,
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                    imageUrl: imageDeleted ? null : location.imageUrl
+                };
 
-        axios
-            .put(`/api/locations/${location.id}`, data, {headers: {"Content-Type": "multipart/form-data"}})
+                const data = new FormData();
+                data.append("locationDTO", new Blob([JSON.stringify(updatedLocation)], {type: "application/json"}));
+                if (image) {
+                    data.append("image", image);
+                }
+
+                return axios.put(`/api/locations/${location.id}`, data, {headers: {"Content-Type": "multipart/form-data"}});
+            })
             .then((response) => {
                 props.handleLocationUpdate(response.data);
                 navigate(`/locations/${location.id}`);

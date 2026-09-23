@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState, useMemo } from "react";
-import axios from "axios";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "../styles/MapBox.css";
@@ -7,6 +6,7 @@ import type { LocationModel } from "../models/LocationModel.ts";
 import type { DeviceModel } from "../models/DeviceModel.ts";
 import { getDeviceStatsByLocation, type LocationDeviceStats } from "../utils/LocationDeviceStats.ts";
 import { translatedInfo } from "../utils/TranslatedInfo.ts";
+import { DEFAULT_CENTER, fetchMapboxToken, geocodeAddress } from "../utils/MapboxGeocoding.ts";
 
 type MapBoxCardProps = {
     locations: LocationModel[];
@@ -20,25 +20,9 @@ type MapPoint = {
     coordinates: [number, number];
 };
 
-const DEFAULT_CENTER: [number, number] = [6.6667, 51.2667]; // Meerbusch, nur wenn es keinen Standort auf der Karte gibt
 const DEFAULT_ZOOM = 12;
 const MARKER_COLOR = "#2563eb"; // Blau: alles in Ordnung
 const MARKER_WARNING_COLOR = "#dc2626"; // Rot: Geräte defekt oder in Reparatur
-
-// Geocodiert eine Adresse, gibt [longitude, latitude] oder null zurück
-function geocodeAddress(address: string, token: string): Promise<[number, number] | null> {
-    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        address
-    )}.json?country=de&proximity=${DEFAULT_CENTER.join(",")}&access_token=${token}`;
-
-    return fetch(geocodeUrl)
-        .then((response) => response.json())
-        .then((data) => (data.features && data.features.length > 0 ? data.features[0].geometry.coordinates : null))
-        .catch((error) => {
-            console.error("Error geocoding address:", error);
-            return null;
-        });
-}
 
 // Popup-Inhalt per DOM statt HTML-String, damit Namen/Adressen nicht als HTML interpretiert werden
 function createPopupContent(location: LocationModel, stats: LocationDeviceStats | undefined, language: string): HTMLElement {
@@ -102,11 +86,10 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
 
     // Mapbox-Token einmalig vom Backend holen
     useEffect(() => {
-        axios
-            .get("/api/mbox/72c81498-f6b2-4a8a-911c-cd217a65e0da")
-            .then((response) => {
-                mapboxgl.accessToken = response.data;
-                setMapboxConfig(response.data);
+        fetchMapboxToken()
+            .then((token) => {
+                mapboxgl.accessToken = token;
+                setMapboxConfig(token);
             })
             .catch((error) => {
                 console.error("Error fetching MapBox configuration:", error);
@@ -162,7 +145,7 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
             markersRef.current.forEach((marker) => marker.remove());
             markersRef.current = [];
         };
-    }, [mapPoints, deviceStats, props.language]);
+    }, [mapboxConfig, mapPoints, deviceStats, props.language]); // mapboxConfig: Karte wird erst nach dem Token erzeugt
 
     // Ort suchen und Karte darauf zentrieren
     const handleSearch = () => {
