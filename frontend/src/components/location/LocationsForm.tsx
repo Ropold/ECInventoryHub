@@ -47,13 +47,13 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
 
     const navigate = useNavigate();
     const isEditMode = backNavigationPath.includes('/locations/') && backNavigationPath !== '/locations';
+    const hasImage = image || (existingImageUrl && !imageDeleted);
 
-    function handleImageCancel() {
-        onImageCancel(setImage);
-        if (existingImageUrl) {
-            setImageDeleted(true);
-        }
-    }
+    const optionalFields = [
+        {label: "Address", type: "text", value: address, setter: setAddress},
+        {label: "Phone", type: "text", value: phone, setter: setPhone},
+        {label: "Email", type: "email", value: email, setter: setEmail},
+    ];
 
     return (
         <div>
@@ -61,78 +61,42 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
 
             <form onSubmit={handleSubmit}>
                 <div className="edit-form">
-                    {/* Name */}
                     <label>
                         <span>Name:</span>
-                        <input
-                            className="input-small"
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
+                        <input className="input-small" type="text" value={name}
+                               onChange={(e) => setName(e.target.value)} required/>
                     </label>
 
-                    {/* Address */}
-                    <label>
-                        <span>Address:</span>
-                        <input
-                            className="input-small"
-                            type="text"
-                            value={address ?? ""}
-                            onChange={(e) => setAddress(e.target.value || undefined)}
-                        />
-                    </label>
+                    {optionalFields.map(({label, type, value, setter}) => (
+                        <label key={label}>
+                            <span>{label}:</span>
+                            <input className="input-small" type={type} value={value ?? ""}
+                                   onChange={(e) => setter(e.target.value || undefined)}/>
+                        </label>
+                    ))}
 
-                    {/* Phone */}
-                    <label>
-                        <span>Phone:</span>
-                        <input
-                            className="input-small"
-                            type="text"
-                            value={phone ?? ""}
-                            onChange={(e) => setPhone(e.target.value || undefined)}
-                        />
-                    </label>
-
-                    {/* Email */}
-                    <label>
-                        <span>Email:</span>
-                        <input
-                            className="input-small"
-                            type="email"
-                            value={email ?? ""}
-                            onChange={(e) => setEmail(e.target.value || undefined)}
-                        />
-                    </label>
-
-                    {/* Notes */}
                     <label>
                         <span>Notes:</span>
-                        <textarea
-                            className="input-small"
-                            value={notes ?? ""}
-                            onChange={(e) => setNotes(e.target.value || undefined)}
-                        />
+                        <textarea className="input-small" value={notes ?? ""}
+                                  onChange={(e) => setNotes(e.target.value || undefined)}/>
                     </label>
 
-                    {/* Image */}
                     <label>
                         <span>Image:</span>
-                        <input
-                            type="file"
-                            onChange={(e) => {
-                                onFileChange(e, setImage);
-                                setImageDeleted(false);
-                            }}
-                        />
+                        <input type="file" onChange={(e) => {
+                            onFileChange(e, setImage);
+                            setImageDeleted(false);
+                        }}/>
                     </label>
                 </div>
 
                 {renderImagePreview(image, existingImageUrl, imageDeleted)}
 
-                {(image || (existingImageUrl && !imageDeleted)) && (
-                    <button type="button" className="button-blue margin-top-20" onClick={handleImageCancel}>
+                {hasImage && (
+                    <button type="button" className="button-blue margin-top-20" onClick={() => {
+                        onImageCancel(setImage);
+                        if (existingImageUrl) setImageDeleted(true);
+                    }}>
                         remove image
                     </button>
                 )}
