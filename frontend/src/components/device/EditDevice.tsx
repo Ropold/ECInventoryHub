@@ -16,15 +16,15 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
     const navigate = useNavigate();
 
     const [type, setType] = useState<DeviceType>("LAPTOP");
-    const [manufacturer, setManufacturer] = useState<string | undefined>(undefined);
-    const [modelName, setModelName] = useState<string | undefined>(undefined);
-    const [serialNumber, setSerialNumber] = useState<string | undefined>(undefined);
-    const [inventoryNumber, setInventoryNumber] = useState<string | undefined>(undefined);
-    const [purchaseDate, setPurchaseDate] = useState<string | undefined>(undefined);
+    const [manufacturer, setManufacturer] = useState<string>();
+    const [modelName, setModelName] = useState<string>();
+    const [serialNumber, setSerialNumber] = useState<string>();
+    const [inventoryNumber, setInventoryNumber] = useState<string>();
+    const [purchaseDate, setPurchaseDate] = useState<string>();
     const [status, setStatus] = useState<DeviceStatus>("AVAILABLE");
     const [defective, setDefective] = useState<boolean>(false);
-    const [locationId, setLocationId] = useState<string | undefined>(undefined);
-    const [notes, setNotes] = useState<string | undefined>(undefined);
+    const [locationId, setLocationId] = useState<string>();
+    const [notes, setNotes] = useState<string>();
     const [newFiles, setNewFiles] = useState<File[]>([]);
     const [existingFiles, setExistingFiles] = useState<DeviceFileModel[]>([]);
 
@@ -90,30 +90,14 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
                 language={props.language}
                 backNavigationPath={backNavigationPath}
                 handleSubmit={handleSaveEdit}
-                type={type}
-                setType={setType}
-                manufacturer={manufacturer}
-                setManufacturer={setManufacturer}
-                modelName={modelName}
-                setModelName={setModelName}
-                serialNumber={serialNumber}
-                setSerialNumber={setSerialNumber}
-                inventoryNumber={inventoryNumber}
-                setInventoryNumber={setInventoryNumber}
-                purchaseDate={purchaseDate}
-                setPurchaseDate={setPurchaseDate}
-                status={status}
-                setStatus={setStatus}
-                defective={defective}
-                setDefective={setDefective}
-                locationId={locationId}
-                setLocationId={setLocationId}
-                notes={notes}
-                setNotes={setNotes}
-                newFiles={newFiles}
-                setNewFiles={setNewFiles}
-                existingFiles={existingFiles}
-                setExistingFiles={setExistingFiles}
+                {...{
+                    type, setType, manufacturer, setManufacturer,
+                    modelName, setModelName, serialNumber, setSerialNumber,
+                    inventoryNumber, setInventoryNumber, purchaseDate, setPurchaseDate,
+                    status, setStatus, defective, setDefective,
+                    locationId, setLocationId, notes, setNotes,
+                    newFiles, setNewFiles, existingFiles, setExistingFiles
+                }}
             />
         </div>
     )

@@ -65,28 +65,14 @@ export default function AddNewAssignment(props: Readonly<AddNewAssignmentProps>)
                 language={props.language}
                 backNavigationPath={backNavigationPath}
                 handleSubmit={handleNewAddSubmit}
-                deviceId={deviceId}
-                setDeviceId={setDeviceId}
-                employeeId={employeeId}
-                setEmployeeId={setEmployeeId}
-                handedOutById={handedOutById}
-                setHandedOutById={setHandedOutById}
-                assignedDate={assignedDate}
-                setAssignedDate={setAssignedDate}
-                returnedDate={returnedDate}
-                setReturnedDate={setReturnedDate}
-                conditionOut={conditionOut}
-                setConditionOut={setConditionOut}
-                conditionIn={conditionIn}
-                setConditionIn={setConditionIn}
-                notes={notes}
-                setNotes={setNotes}
-                copyHandedToEmployee={copyHandedToEmployee}
-                setCopyHandedToEmployee={setCopyHandedToEmployee}
-                copyFiledInPersonnelFile={copyFiledInPersonnelFile}
-                setCopyFiledInPersonnelFile={setCopyFiledInPersonnelFile}
-                newFiles={newFiles}
-                setNewFiles={setNewFiles}
+                {...{
+                    deviceId, setDeviceId, employeeId, setEmployeeId,
+                    handedOutById, setHandedOutById, assignedDate, setAssignedDate,
+                    returnedDate, setReturnedDate, conditionOut, setConditionOut,
+                    conditionIn, setConditionIn, notes, setNotes,
+                    copyHandedToEmployee, setCopyHandedToEmployee, copyFiledInPersonnelFile, setCopyFiledInPersonnelFile,
+                    newFiles, setNewFiles
+                }}
             />
         </div>
     )

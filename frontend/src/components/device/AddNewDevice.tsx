@@ -65,28 +65,14 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
                 language={props.language}
                 backNavigationPath={backNavigationPath}
                 handleSubmit={handleNewAddSubmit}
-                type={type}
-                setType={setType}
-                manufacturer={manufacturer}
-                setManufacturer={setManufacturer}
-                modelName={modelName}
-                setModelName={setModelName}
-                serialNumber={serialNumber}
-                setSerialNumber={setSerialNumber}
-                inventoryNumber={inventoryNumber}
-                setInventoryNumber={setInventoryNumber}
-                purchaseDate={purchaseDate}
-                setPurchaseDate={setPurchaseDate}
-                status={status}
-                setStatus={setStatus}
-                defective={defective}
-                setDefective={setDefective}
-                locationId={locationId}
-                setLocationId={setLocationId}
-                notes={notes}
-                setNotes={setNotes}
-                newFiles={newFiles}
-                setNewFiles={setNewFiles}
+                {...{
+                    type, setType, manufacturer, setManufacturer,
+                    modelName, setModelName, serialNumber, setSerialNumber,
+                    inventoryNumber, setInventoryNumber, purchaseDate, setPurchaseDate,
+                    status, setStatus, defective, setDefective,
+                    locationId, setLocationId, notes, setNotes,
+                    newFiles, setNewFiles
+                }}
             />
         </div>
     )

@@ -21,20 +21,10 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
 
-    function handleEditClick() {
-        if (props.role === "VIEWER") {
-            setShowNoPermission(true);
-            return;
-        }
-        navigate(`/assignments/${id}/edit`);
-    }
-
-    function handleDeleteClick() {
-        if (props.role === "VIEWER") {
-            setShowNoPermission(true);
-            return;
-        }
-        setShowPopup(true);
+    // Viewer dürfen weder bearbeiten noch löschen
+    function withPermission(action: () => void) {
+        if (props.role === "VIEWER") setShowNoPermission(true);
+        else action();
     }
 
     useEffect(() => {
@@ -131,8 +121,8 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                     <p><strong>ID:</strong> {assignment.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={handleEditClick}>Edit</button>
-                        <button className="button-delete" onClick={handleDeleteClick}>Delete</button>
+                        <button className="button-blue" onClick={() => withPermission(() => navigate(`/assignments/${id}/edit`))}>Edit</button>
+                        <button className="button-delete" onClick={() => withPermission(() => setShowPopup(true))}>Delete</button>
                     </div>
 
                     {showNoPermission && (

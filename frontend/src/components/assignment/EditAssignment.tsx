@@ -17,12 +17,12 @@ export default function EditAssignment(props: Readonly<EditAssignmentProps>) {
 
     const [deviceId, setDeviceId] = useState<string>("");
     const [employeeId, setEmployeeId] = useState<string>("");
-    const [handedOutById, setHandedOutById] = useState<string | undefined>(undefined);
+    const [handedOutById, setHandedOutById] = useState<string>();
     const [assignedDate, setAssignedDate] = useState<string>("");
-    const [returnedDate, setReturnedDate] = useState<string | undefined>(undefined);
-    const [conditionOut, setConditionOut] = useState<string | undefined>(undefined);
-    const [conditionIn, setConditionIn] = useState<string | undefined>(undefined);
-    const [notes, setNotes] = useState<string | undefined>(undefined);
+    const [returnedDate, setReturnedDate] = useState<string>();
+    const [conditionOut, setConditionOut] = useState<string>();
+    const [conditionIn, setConditionIn] = useState<string>();
+    const [notes, setNotes] = useState<string>();
     const [copyHandedToEmployee, setCopyHandedToEmployee] = useState<boolean>(false);
     const [copyFiledInPersonnelFile, setCopyFiledInPersonnelFile] = useState<boolean>(false);
     const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -90,30 +90,14 @@ export default function EditAssignment(props: Readonly<EditAssignmentProps>) {
                 language={props.language}
                 backNavigationPath={backNavigationPath}
                 handleSubmit={handleSaveEdit}
-                deviceId={deviceId}
-                setDeviceId={setDeviceId}
-                employeeId={employeeId}
-                setEmployeeId={setEmployeeId}
-                handedOutById={handedOutById}
-                setHandedOutById={setHandedOutById}
-                assignedDate={assignedDate}
-                setAssignedDate={setAssignedDate}
-                returnedDate={returnedDate}
-                setReturnedDate={setReturnedDate}
-                conditionOut={conditionOut}
-                setConditionOut={setConditionOut}
-                conditionIn={conditionIn}
-                setConditionIn={setConditionIn}
-                notes={notes}
-                setNotes={setNotes}
-                copyHandedToEmployee={copyHandedToEmployee}
-                setCopyHandedToEmployee={setCopyHandedToEmployee}
-                copyFiledInPersonnelFile={copyFiledInPersonnelFile}
-                setCopyFiledInPersonnelFile={setCopyFiledInPersonnelFile}
-                newFiles={newFiles}
-                setNewFiles={setNewFiles}
-                existingFiles={existingFiles}
-                setExistingFiles={setExistingFiles}
+                {...{
+                    deviceId, setDeviceId, employeeId, setEmployeeId,
+                    handedOutById, setHandedOutById, assignedDate, setAssignedDate,
+                    returnedDate, setReturnedDate, conditionOut, setConditionOut,
+                    conditionIn, setConditionIn, notes, setNotes,
+                    copyHandedToEmployee, setCopyHandedToEmployee, copyFiledInPersonnelFile, setCopyFiledInPersonnelFile,
+                    newFiles, setNewFiles, existingFiles, setExistingFiles
+                }}
             />
         </div>
     )

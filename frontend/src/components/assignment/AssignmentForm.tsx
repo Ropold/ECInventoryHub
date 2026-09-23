@@ -96,14 +96,19 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
         setNewFiles(Array.from(e.target.files));
     }
 
-    function handleRemoveNewFile(fileName: string) {
-        setNewFiles(newFiles.filter((file) => file.name !== fileName));
-    }
-
-    function handleRemoveExistingFile(fileId: string) {
-        if (!setExistingFiles) return;
-        setExistingFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId));
-    }
+    // Vorhandene und neue Dateien in einer Liste, jeweils mit eigenem Entfernen-Handler
+    const fileItems = [
+        ...(existingFiles ?? []).map((file) => ({
+            key: file.id,
+            label: <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">{file.fileUrl}</a>,
+            onRemove: () => setExistingFiles?.((prevFiles) => prevFiles.filter((f) => f.id !== file.id)),
+        })),
+        ...newFiles.map((file) => ({
+            key: file.name,
+            label: <span>{file.name}</span>,
+            onRemove: () => setNewFiles(newFiles.filter((f) => f.name !== file.name)),
+        })),
+    ];
 
     return (
         <div>
@@ -242,33 +247,12 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                     </label>
                 </div>
 
-                {existingFiles && existingFiles.length > 0 && (
+                {fileItems.length > 0 && (
                     <ul className="assignment-file-list">
-                        {existingFiles.map((file) => (
-                            <li key={file.id}>
-                                <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">{file.fileUrl}</a>
-                                <button
-                                    type="button"
-                                    className="button-blue margin-left-20"
-                                    onClick={() => handleRemoveExistingFile(file.id)}
-                                >
-                                    remove file
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
-                {newFiles.length > 0 && (
-                    <ul className="assignment-file-list">
-                        {newFiles.map((file) => (
-                            <li key={file.name}>
-                                <span>{file.name}</span>
-                                <button
-                                    type="button"
-                                    className="button-blue margin-left-20"
-                                    onClick={() => handleRemoveNewFile(file.name)}
-                                >
+                        {fileItems.map((item) => (
+                            <li key={item.key}>
+                                {item.label}
+                                <button type="button" className="button-blue margin-left-20" onClick={item.onRemove}>
                                     remove file
                                 </button>
                             </li>
