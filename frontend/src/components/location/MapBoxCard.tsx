@@ -78,13 +78,27 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
     const mapRef = useRef<mapboxgl.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const markersRef = useRef<mapboxgl.Marker[]>([]);
-    const geocodeCacheRef = useRef<Map<string, [number, number] | null>>(new Map()); // Adresse -> Koordinaten, damit nicht jedes Mal neu geocodiert wird
     const [geocodeError, setGeocodeError] = useState<string | null>(null);
     const [mapboxConfig, setMapboxConfig] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [mapPoints, setMapPoints] = useState<MapPoint[] | null>(null); // null = noch nicht geocodiert
 
     const deviceStats = useMemo(() => getDeviceStatsByLocation(props.devices), [props.devices]);
+
+    // Koordinaten kommen gespeichert aus der DB, kein Geocoding pro Standort mehr nötig
+    const mapPoints = useMemo<MapPoint[]>(
+        () =>
+            props.locations
+                .filter((location) => location.latitude != null && location.longitude != null)
+                .map((location) => ({
+                    location: location,
+                    coordinates: [location.longitude as number, location.latitude as number],
+                })),
+        [props.locations]
+    );
+
+    const locationsWithoutCoordinates = props.locations
+        .filter((location) => location.latitude == null || location.longitude == null)
+        .map((location) => location.name);
 
     // Mapbox-Token einmalig vom Backend holen
     useEffect(() => {
@@ -108,50 +122,9 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
         };
     }, []);
 
-    // Adressen geocodieren, sobald Token und Standorte da sind
-    useEffect(() => {
-        if (!mapboxConfig) return;
-        let cancelled = false;
-
-        const locationsWithAddress = props.locations.filter((location) => location.address);
-
-        Promise.all(
-            locationsWithAddress.map((location) => {
-                const address = location.address as string;
-                const cache = geocodeCacheRef.current;
-                if (cache.has(address)) return Promise.resolve(cache.get(address) ?? null);
-                return geocodeAddress(address, mapboxConfig).then((coordinates) => {
-                    cache.set(address, coordinates);
-                    return coordinates;
-                });
-            })
-        ).then((allCoordinates) => {
-            if (cancelled) return;
-
-            const points: MapPoint[] = [];
-            const notFound: string[] = [];
-
-            locationsWithAddress.forEach((location, index) => {
-                const coordinates = allCoordinates[index];
-                if (coordinates) {
-                    points.push({ location: location, coordinates: coordinates });
-                } else {
-                    notFound.push(location.name);
-                }
-            });
-
-            setMapPoints(points);
-            setGeocodeError(notFound.length > 0 ? `Address not found: ${notFound.join(", ")}` : null);
-        });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [props.locations, mapboxConfig]);
-
     // Karte einmalig erzeugen, dann schon passend zu den Standorten (kein Nachspringen)
     useEffect(() => {
-        if (!mapboxConfig || !mapContainerRef.current || mapRef.current || !mapPoints) return;
+        if (!mapboxConfig || !mapContainerRef.current || mapRef.current) return;
 
         const bounds = new mapboxgl.LngLatBounds();
         mapPoints.forEach((point) => bounds.extend(point.coordinates));
@@ -168,7 +141,7 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
     // Marker setzen, wenn sich Standorte oder Geräte ändern (Kartenausschnitt bleibt, wie er ist)
     useEffect(() => {
         const map = mapRef.current;
-        if (!map || !mapPoints) return;
+        if (!map) return;
 
         mapPoints.forEach((point) => {
             const stats = deviceStats[point.location.id];
@@ -226,6 +199,9 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
             </div>
             <div>
                 {geocodeError && <div>{geocodeError}</div>}
+                {locationsWithoutCoordinates.length > 0 && (
+                    <div>No coordinates: {locationsWithoutCoordinates.join(", ")}</div>
+                )}
                 <div ref={mapContainerRef} className="mapbox-details-container" />
             </div>
         </>

@@ -9,5 +9,7 @@ public record LocationDTO(
         String phone,
         String email,
         String notes,
+        Double latitude,
+        Double longitude,
         String imageUrl
 ) {}

@@ -46,6 +46,8 @@ class DeviceServiceTest {
                 location.getPhone(),
                 location.getEmail(),
                 location.getNotes(),
+                location.getLatitude(),
+                location.getLongitude(),
                 location.getImageUrl()
         );
     }

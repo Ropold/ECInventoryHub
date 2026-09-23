@@ -17,6 +17,8 @@ export default function AddNewLocation(props: Readonly<AddNewLocationProps>) {
     const [phone, setPhone] = useState<string | undefined>(undefined);
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [notes, setNotes] = useState<string | undefined>(undefined);
+    const [latitude, setLatitude] = useState<number | undefined>(undefined);
+    const [longitude, setLongitude] = useState<number | undefined>(undefined);
     const [image, setImage] = useState<File | null>(null);
     const [imageDeleted, setImageDeleted] = useState<boolean>(false);
 
@@ -32,6 +34,8 @@ export default function AddNewLocation(props: Readonly<AddNewLocationProps>) {
             phone: phone ?? null,
             email: email ?? null,
             notes: notes ?? null,
+            latitude: latitude ?? null,
+            longitude: longitude ?? null,
             imageUrl: null
         };
 
@@ -68,6 +72,10 @@ export default function AddNewLocation(props: Readonly<AddNewLocationProps>) {
                 setEmail={setEmail}
                 notes={notes}
                 setNotes={setNotes}
+                latitude={latitude}
+                setLatitude={setLatitude}
+                longitude={longitude}
+                setLongitude={setLongitude}
                 image={image}
                 setImage={setImage}
                 imageDeleted={imageDeleted}

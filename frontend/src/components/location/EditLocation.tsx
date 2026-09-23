@@ -19,6 +19,8 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
     const [phone, setPhone] = useState<string | undefined>(undefined);
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [notes, setNotes] = useState<string | undefined>(undefined);
+    const [latitude, setLatitude] = useState<number | undefined>(undefined);
+    const [longitude, setLongitude] = useState<number | undefined>(undefined);
     const [image, setImage] = useState<File | null>(null);
     const [imageDeleted, setImageDeleted] = useState<boolean>(false);
 
@@ -34,6 +36,8 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
                 setPhone(data.phone ?? undefined);
                 setEmail(data.email ?? undefined);
                 setNotes(data.notes ?? undefined);
+                setLatitude(data.latitude ?? undefined);
+                setLongitude(data.longitude ?? undefined);
             })
             .catch((error) => console.error("Error fetching location details", error));
     }, [id]);
@@ -49,6 +53,8 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
             phone: phone ?? null,
             email: email ?? null,
             notes: notes ?? null,
+            latitude: latitude ?? null,
+            longitude: longitude ?? null,
             imageUrl: imageDeleted ? null : location.imageUrl
         };
 
@@ -85,6 +91,10 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
                 setEmail={setEmail}
                 notes={notes}
                 setNotes={setNotes}
+                latitude={latitude}
+                setLatitude={setLatitude}
+                longitude={longitude}
+                setLongitude={setLongitude}
                 image={image}
                 setImage={setImage}
                 existingImageUrl={location?.imageUrl ?? undefined}
