@@ -7,17 +7,25 @@
     display: flex; /* Setzt alle Kinder in eine Zeile */
     align-items: center; /* Zentriert sie vertikal */
     gap: 10px; /* Abstand zwischen den Elementen */
+    box-sizing: border-box; /* Padding zählt zu den 600px */
     width: 600px;
+    max-width: 100%; /* auf kleinen Bildschirmen nicht überstehen */
     height: auto; /* Höhe dynamisch halten */
 }
 
 .search-input {
-    width: 72%;
+    flex: 1; /* nimmt den Platz, den der Button übrig lässt */
+    min-width: 0; /* darf schrumpfen, statt den Kasten zu sprengen */
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
     transition: border 0.3s ease;
+}
+
+.search-bar button {
+    flex-shrink: 0; /* Button behält seine Breite */
+    white-space: nowrap; /* Text bricht nicht um */
 }
 
 .search-add-new-button{
