@@ -20,6 +20,7 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
     const navigate = useNavigate();
     const [showPopup, setShowPopup] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
 
     function handleEditClick() {
@@ -62,10 +63,13 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
 
                 if (error.response?.status === 401 || error.response?.status === 403) {
                     setDeleteError("You must be logged in as User/Admin to delete a device.");
-                } else if (error.response?.status === 500) {
-                    setDeleteError("This device cannot be deleted while assignments still reference it.");
+                    setBlockingAssignments([]);
+                } else if (error.response?.status === 409) {
+                    setDeleteError(error.response?.data?.message);
+                    setBlockingAssignments(error.response?.data?.details ?? []);
                 } else {
                     setDeleteError("Error deleting device. Please try again.");
+                    setBlockingAssignments([]);
                 }
             })
     }
@@ -73,6 +77,7 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
     function handleCancel() {
         setShowPopup(false);
         setDeleteError(null);
+        setBlockingAssignments([]);
     }
 
     const deviceName = device
@@ -150,6 +155,13 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
+                                        {blockingAssignments.length > 0 && (
+                                            <ul className="popup-error-list">
+                                                {blockingAssignments.map((assignment) => (
+                                                    <li key={assignment}>{assignment}</li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </div>
                                 )}
                                 <div className="popup-actions">

@@ -11,6 +11,7 @@ import ropold.backend.repository.EmployeeRepository;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,11 @@ public class EmployeeService {
         employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: " + id));
 
-        List<AssignmentModel> blockingAssignments = assignmentRepository.findByEmployeeId(id);
+        List<AssignmentModel> blockingAssignments = Stream.concat(
+                        assignmentRepository.findByEmployeeId(id).stream(),
+                        assignmentRepository.findByHandedOutById(id).stream())
+                .distinct()
+                .toList();
         if (!blockingAssignments.isEmpty()) {
             throw new EmployeeHasAssignmentsException(
                     "Employee cannot be deleted because there are still assignments referencing them.",
@@ -55,6 +60,13 @@ public class EmployeeService {
 
         List<AssignmentModel> assignmentsToDelete = assignmentRepository.findByEmployeeId(id);
         assignmentRepository.deleteAll(assignmentsToDelete);
+
+        // Assignments this employee only handed out are kept, just without the "handed out by" reference
+        List<AssignmentModel> assignmentsToDetach = assignmentRepository.findByHandedOutById(id).stream()
+                .filter(assignment -> !assignmentsToDelete.contains(assignment))
+                .toList();
+        assignmentsToDetach.forEach(assignment -> assignment.setHandedOutBy(null));
+        assignmentRepository.saveAll(assignmentsToDetach);
 
         employeeRepository.deleteById(id);
     }

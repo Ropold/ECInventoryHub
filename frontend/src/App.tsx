@@ -133,11 +133,25 @@ export default function App() {
         setEmployees((prevEmployees) =>
             prevEmployees.map((employee) => employee.id === updatedEmployee.id ? updatedEmployee : employee)
         );
+        setAssignments((prevAssignments) =>
+            prevAssignments.map((assignment) => ({
+                ...assignment,
+                employee: assignment.employee.id === updatedEmployee.id ? updatedEmployee : assignment.employee,
+                handedOutBy: assignment.handedOutBy?.id === updatedEmployee.id ? updatedEmployee : assignment.handedOutBy,
+            }))
+        );
     }
 
     function handleEmployeeDelete(deletedEmployeeId: string) {
         setEmployees((prevEmployees) =>
             prevEmployees.filter((employee) => employee.id !== deletedEmployeeId)
+        );
+        setAssignments((prevAssignments) =>
+            prevAssignments
+                .filter((assignment) => assignment.employee.id !== deletedEmployeeId)
+                .map((assignment) =>
+                    assignment.handedOutBy?.id === deletedEmployeeId ? {...assignment, handedOutBy: null} : assignment
+                )
         );
     }
 
@@ -165,6 +179,11 @@ export default function App() {
         setDevices((prevDevices) =>
             prevDevices.map((device) => device.id === updatedDevice.id ? updatedDevice : device)
         );
+        setAssignments((prevAssignments) =>
+            prevAssignments.map((assignment) =>
+                assignment.device.id === updatedDevice.id ? {...assignment, device: updatedDevice} : assignment
+            )
+        );
     }
 
     function handleDeviceDelete(deletedDeviceId: string) {
@@ -181,11 +200,23 @@ export default function App() {
         setLocations((prevLocations) =>
             prevLocations.map((location) => location.id === updatedLocation.id ? updatedLocation : location)
         );
+        replaceDeviceLocation(updatedLocation.id, updatedLocation);
     }
 
     function handleLocationDelete(deletedLocationId: string) {
         setLocations((prevLocations) =>
             prevLocations.filter((location) => location.id !== deletedLocationId)
+        );
+        replaceDeviceLocation(deletedLocationId, null);
+    }
+
+    function replaceDeviceLocation(locationId: string, newLocation: LocationModel | null) {
+        const withNewLocation = (device: DeviceModel): DeviceModel =>
+            device.location?.id === locationId ? {...device, location: newLocation} : device;
+
+        setDevices((prevDevices) => prevDevices.map(withNewLocation));
+        setAssignments((prevAssignments) =>
+            prevAssignments.map((assignment) => ({...assignment, device: withNewLocation(assignment.device)}))
         );
     }
 

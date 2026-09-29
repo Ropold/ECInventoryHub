@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.LocationHasDevicesException;
 import ropold.backend.exception.notfoundexceptions.*;
@@ -25,6 +26,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleEmployeeHasAssignmentsException(EmployeeHasAssignmentsException e) {
         log.warn("Conflict: {}", e.getMessage());
         return new ErrorResponse("EMPLOYEE_HAS_ASSIGNMENTS", e.getMessage(), e.getAssignmentDetails());
+    }
+
+    @ExceptionHandler(DeviceHasAssignmentsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDeviceHasAssignmentsException(DeviceHasAssignmentsException e) {
+        log.warn("Conflict: {}", e.getMessage());
+        return new ErrorResponse("DEVICE_HAS_ASSIGNMENTS", e.getMessage(), e.getAssignmentDetails());
     }
 
     @ExceptionHandler(LocationHasDevicesException.class)

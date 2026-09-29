@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.LocationHasDevicesException;
 import ropold.backend.exception.notfoundexceptions.*;
@@ -48,6 +49,19 @@ class GlobalExceptionHandlerTest {
 
         assertThat(response.code()).isEqualTo("EMPLOYEE_HAS_ASSIGNMENTS");
         assertThat(response.message()).isEqualTo("Employee cannot be deleted because there are still assignments referencing them.");
+        assertThat(response.details()).containsExactly("Assignment ID: 123");
+    }
+
+    @Test
+    void testHandleDeviceHasAssignmentsException() {
+        DeviceHasAssignmentsException exception = new DeviceHasAssignmentsException(
+                "Device cannot be deleted because there are still assignments referencing it.",
+                List.of("Assignment ID: 123"));
+
+        ErrorResponse response = globalExceptionHandler.handleDeviceHasAssignmentsException(exception);
+
+        assertThat(response.code()).isEqualTo("DEVICE_HAS_ASSIGNMENTS");
+        assertThat(response.message()).isEqualTo("Device cannot be deleted because there are still assignments referencing it.");
         assertThat(response.details()).containsExactly("Assignment ID: 123");
     }
 
