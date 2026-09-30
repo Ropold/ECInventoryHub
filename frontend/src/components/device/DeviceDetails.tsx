@@ -6,12 +6,15 @@ import axios from "axios";
 import {formatDate, handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
+import type {AssignmentModel} from "../models/AssignmentModel.ts";
+import EmployeeCard from "../employee/EmployeeCard.tsx";
 
 type DeviceDetailsProps = {
     language: string;
     role: string;
     handleDeviceUpdate: (updatedDevice: DeviceModel) => void;
     handleDeviceDelete: (deletedDeviceId: string) => void;
+    assignments: AssignmentModel[];
 }
 
 export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
@@ -22,6 +25,9 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
+
+    // Aktuelle Zuweisung: noch nicht zurückgegeben
+    const currentAssignment = props.assignments.find((assignment) => assignment.device.id === id && !assignment.returnedDate);
 
     function handleEditClick() {
         if (props.role === "VIEWER") {
@@ -87,12 +93,26 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                     <p><strong>{translatedInfo["Type"][props.language]}:</strong> {device.type}</p>
                     <p><strong>{translatedInfo["Status"][props.language]}:</strong> {device.status}</p>
                     <p><strong>{translatedInfo["Defective"][props.language]}:</strong> {device.defective ? translatedInfo["Yes"][props.language] : translatedInfo["No"][props.language]}</p>
-
                     <h3>{translatedInfo["Identification"][props.language]}</h3>
                     {device.inventoryNumber && <p><strong>{translatedInfo["Inventory Number"][props.language]}:</strong> {device.inventoryNumber}</p>}
                     {device.hostname && <p><strong>{translatedInfo["Hostname"][props.language]}:</strong> {device.hostname}</p>}
                     {device.serialNumber && <p><strong>{translatedInfo["Serial Number"][props.language]}:</strong> {device.serialNumber}</p>}
                     <p><strong>{translatedInfo["Purchase Date"][props.language]}:</strong> {formatDate(device.purchaseDate ?? undefined)}</p>
+
+                    {currentAssignment && (
+                        <div className="details-card-container">
+                            <div className="details-card-labeled">
+                                <h3>{translatedInfo["Employee"][props.language]}</h3>
+                                <EmployeeCard employee={currentAssignment.employee} language={props.language} />
+                            </div>
+                            {currentAssignment.handedOutBy && (
+                                <div className="details-card-labeled">
+                                    <h3>{translatedInfo["Handed Out By"][props.language]}</h3>
+                                    <EmployeeCard employee={currentAssignment.handedOutBy} language={props.language} />
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {device.location && (
                         <>

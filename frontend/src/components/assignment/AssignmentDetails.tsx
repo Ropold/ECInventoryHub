@@ -6,6 +6,8 @@ import axios from "axios";
 import {formatDate, handleRequestError} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
+import DeviceCard from "../device/DeviceCard.tsx";
+import EmployeeCard from "../employee/EmployeeCard.tsx";
 
 type AssignmentDetailsProps = {
     language: string;
@@ -70,6 +72,7 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
             <h2>{translatedInfo["Assignment Details"][props.language]}</h2>
             {assignment ? (
                 <div className="details-container">
+
                     <h3>{translatedInfo["Device"][props.language]}</h3>
                     <p><strong>{translatedInfo["Device"][props.language]}:</strong> {deviceName}</p>
                     <p><strong>{translatedInfo["Type"][props.language]}:</strong> {assignment.device.type}</p>
@@ -79,6 +82,23 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                         <p><strong>{translatedInfo["Hostname"][props.language]}:</strong> {assignment.device.hostname}</p>}
                     {assignment.device.serialNumber &&
                         <p><strong>{translatedInfo["Serial Number"][props.language]}:</strong> {assignment.device.serialNumber}</p>}
+
+                    <div className="details-card-container">
+                        <div className="details-card-labeled">
+                            <h3>{translatedInfo["Device"][props.language]}</h3>
+                            <DeviceCard device={assignment.device} language={props.language} />
+                        </div>
+                        <div className="details-card-labeled">
+                            <h3>{translatedInfo["Employee"][props.language]}</h3>
+                            <EmployeeCard employee={assignment.employee} language={props.language} />
+                        </div>
+                        {assignment.handedOutBy && (
+                            <div className="details-card-labeled">
+                                <h3>{translatedInfo["Handed Out By"][props.language]}</h3>
+                                <EmployeeCard employee={assignment.handedOutBy} language={props.language} />
+                            </div>
+                        )}
+                    </div>
 
                     <h3>{translatedInfo["Employee"][props.language]}</h3>
                     <p><strong>{translatedInfo["Employee"][props.language]}:</strong> {assignment.employee.name}</p>

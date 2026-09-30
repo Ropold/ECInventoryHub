@@ -252,7 +252,7 @@ export default function App() {
           <Route path="/assignments/:id/edit" element={<EditAssignment language={language} handleAssignmentUpdate={handleAssignmentUpdate} />} />
           <Route path="/devices" element={<Devices language={language} role={role} devices={devices}/>} />
           <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
-          <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
+          <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete} assignments={assignments}/>} />
           <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
           <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} />} />
           <Route path="/locations/add-new-location" element={<AddNewLocation language={language} role={role} handleNewLocationSubmit={handleNewLocation}/>} />

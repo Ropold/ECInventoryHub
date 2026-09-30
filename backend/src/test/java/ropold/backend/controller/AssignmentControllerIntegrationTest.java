@@ -473,6 +473,47 @@ class AssignmentControllerIntegrationTest {
     }
 
     @Test
+    void testUpdateAssignment_withIdOnlyReferences_shouldReturnUpdated() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
+
+        // Same shape the frontend sends: device/employee only carry their id,
+        // the primitive fields "defective" and "active" are missing.
+        String updatedAssignmentJson = """
+                {
+                    "id": "%s",
+                    "device": { "id": "%s" },
+                    "employee": { "id": "%s" },
+                    "handedOutBy": null,
+                    "assignedDate": "2024-01-01",
+                    "returnedDate": null,
+                    "conditionOut": null,
+                    "conditionIn": null,
+                    "notes": "Updated notes",
+                    "copyHandedToEmployee": true,
+                    "copyFiledInPersonnelFile": false,
+                    "files": []
+                }
+                """.formatted(existingAssignment.getId(), deviceModel1.getId(), employeeModel2.getId());
+
+        MockMultipartFile assignmentDtoPart = new MockMultipartFile(
+                "assignmentDTO", "", "application/json", updatedAssignmentJson.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/assignments/" + existingAssignment.getId())
+                        .file(assignmentDtoPart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.notes").value("Updated notes"))
+                .andExpect(jsonPath("$.employee.id").value(employeeModel2.getId().toString()));
+    }
+
+    @Test
     void testUpdateAssignment_unauthenticated_shouldReturnUnauthorized() throws Exception {
         AssignmentModel existingAssignment = assignmentRepository.findAll().getFirst();
 
