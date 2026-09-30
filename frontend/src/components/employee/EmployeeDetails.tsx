@@ -3,6 +3,7 @@ import type {EmployeeModel} from "../models/EmployeeModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -59,17 +60,10 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting employee", error);
-
-                if (error.response?.status === 401) {
-                    setDeleteError("You must be logged in as User/Admin to delete an employee.");
-                    setBlockingAssignments([]);
-                } else if (error.response?.status === 409) {
-                    setDeleteError(error.response?.data?.message);
-                    setBlockingAssignments(error.response?.data?.details ?? []);
-                } else {
-                    setDeleteError("Error deleting employee. Please try again.");
-                    setBlockingAssignments([]);
-                }
+                handleDeleteError(error,
+                    "You must be logged in as User/Admin to delete an employee.",
+                    "Error deleting employee. Please try again.",
+                    setDeleteError, setBlockingAssignments);
             })
     }
 
@@ -156,13 +150,7 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
-                                        {blockingAssignments.length > 0 && (
-                                            <ul className="popup-error-list">
-                                                {blockingAssignments.map((assignment) => (
-                                                    <li key={assignment}>{assignment}</li>
-                                                ))}
-                                            </ul>
-                                        )}
+                                        {renderBlockingList(blockingAssignments)}
                                     </div>
                                 )}
                                 <div className="popup-actions">

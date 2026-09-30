@@ -3,7 +3,7 @@ import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {formatDate} from "../utils/ComponentsFunctions.tsx";
+import {formatDate, handleDeleteError} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -49,12 +49,10 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
             })
             .catch((error) => {
                 console.error("Error deleting assignment", error);
-
-                if (error.response?.status === 401) {
-                    setDeleteError("You must be logged in as User/Admin to delete an assignment.");
-                } else {
-                    setDeleteError("Error deleting assignment. Please try again.");
-                }
+                handleDeleteError(error,
+                    "You must be logged in as User/Admin to delete an assignment.",
+                    "Error deleting assignment. Please try again.",
+                    setDeleteError);
             })
     }
 

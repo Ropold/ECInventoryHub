@@ -3,6 +3,7 @@ import type {LocationModel} from "../models/LocationModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -59,17 +60,10 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting location", error);
-
-                if (error.response?.status === 401) {
-                    setDeleteError("You must be logged in as User/Admin to delete a location.");
-                    setBlockingDevices([]);
-                } else if (error.response?.status === 409) {
-                    setDeleteError(error.response?.data?.message);
-                    setBlockingDevices(error.response?.data?.details ?? []);
-                } else {
-                    setDeleteError("Error deleting location. Please try again.");
-                    setBlockingDevices([]);
-                }
+                handleDeleteError(error,
+                    "You must be logged in as User/Admin to delete a location.",
+                    "Error deleting location. Please try again.",
+                    setDeleteError, setBlockingDevices);
             })
     }
 
@@ -154,13 +148,7 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
-                                        {blockingDevices.length > 0 && (
-                                            <ul className="popup-error-list">
-                                                {blockingDevices.map((device) => (
-                                                    <li key={device}>{device}</li>
-                                                ))}
-                                            </ul>
-                                        )}
+                                        {renderBlockingList(blockingDevices)}
                                     </div>
                                 )}
                                 <div className="popup-actions">
