@@ -6,12 +6,15 @@ import axios from "axios";
 import {handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
+import type {AssignmentModel} from "../models/AssignmentModel.ts";
+import AssignmentCard from "../assignment/AssignmentCard.tsx";
 
 type EmployeeDetailsProps = {
     language: string;
     role: string;
     handleEmployeeUpdate: (updatedEmployee: EmployeeModel) => void;
     handleEmployeeDelete: (deletedEmployeeId: string) => void;
+    assignments: AssignmentModel[];
 }
 
 export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
@@ -22,6 +25,8 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
+
+    const employeeAssignments = props.assignments.filter((assignment) => assignment.employee.id === id);
 
     function handleEditClick() {
         if (props.role === "VIEWER") {
@@ -107,6 +112,17 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                         <div className="details-img-container">
                             <img src={employee.imageUrl} alt={employee.name} className="details-image"/>
                         </div>
+                    )}
+
+                    {employeeAssignments.length > 0 && (
+                        <>
+                            <h3>{translatedInfo["Assignments"][props.language]}</h3>
+                            <div className="assignment-card-container">
+                                {employeeAssignments.map((assignment) => (
+                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} />
+                                ))}
+                            </div>
+                        </>
                     )}
 
                     <h3>{translatedInfo["Basic Information"][props.language]}</h3>
