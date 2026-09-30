@@ -99,7 +99,7 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
 
     return(
         <div>
-            <h2>Location Details</h2>
+            <h2>{translatedInfo["Location Details"][props.language]}</h2>
             {location ? (
                 <div className="details-container">
                     {location.imageUrl && (
@@ -108,25 +108,25 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                         </div>
                     )}
 
-                    <h3>Basic Information</h3>
-                    <p><strong>Name:</strong> {location.name}</p>
+                    <h3>{translatedInfo["Basic Information"][props.language]}</h3>
+                    <p><strong>{translatedInfo["Name"][props.language]}:</strong> {location.name}</p>
 
-                    <h3>Contact Information</h3>
-                    {location.address && <p><strong>Address:</strong> {location.address}</p>}
-                    {location.phone && <p><strong>Phone:</strong> {location.phone}</p>}
-                    {location.email && <p><strong>Email:</strong> {location.email}</p>}
-                    {location.latitude != null && <p><strong>Latitude:</strong> {location.latitude}</p>}
-                    {location.longitude != null && <p><strong>Longitude:</strong> {location.longitude}</p>}
+                    <h3>{translatedInfo["Contact Information"][props.language]}</h3>
+                    {location.address && <p><strong>{translatedInfo["Address"][props.language]}:</strong> {location.address}</p>}
+                    {location.phone && <p><strong>{translatedInfo["Phone"][props.language]}:</strong> {location.phone}</p>}
+                    {location.email && <p><strong>{translatedInfo["Email"][props.language]}:</strong> {location.email}</p>}
+                    {location.latitude != null && <p><strong>{translatedInfo["Latitude"][props.language]}:</strong> {location.latitude}</p>}
+                    {location.longitude != null && <p><strong>{translatedInfo["Longitude"][props.language]}:</strong> {location.longitude}</p>}
 
                     {location.notes && (
                         <>
-                            <h3>Notes</h3>
+                            <h3>{translatedInfo["Notes"][props.language]}</h3>
                             <p>{location.notes}</p>
                         </>
                     )}
 
-                    <h3>Metadata</h3>
-                    <p><strong>ID:</strong> {location.id}</p>
+                    <h3>{translatedInfo["Metadata"][props.language]}</h3>
+                    <p><strong>{translatedInfo["ID"][props.language]}:</strong> {location.id}</p>
 
                     <div className="details-buttons">
                         <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
@@ -143,8 +143,8 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                     {showPopup && (
                         <div className="popup-overlay">
                             <div className="popup-content">
-                                <h3>Confirm Deletion</h3>
-                                <p>Are you sure you want to delete {location.name}?</p>
+                                <h3>{translatedInfo["Confirm Deletion"][props.language]}</h3>
+                                <p>{translatedInfo["Delete confirmation"][props.language].replace("{name}", location.name)}</p>
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
@@ -163,7 +163,7 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                     )}
                 </div>
             ) : (
-                <p>Loading...</p>
+                <p>{translatedInfo["Loading..."][props.language]}</p>
             )}
         </div>
     )

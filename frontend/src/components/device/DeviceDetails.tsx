@@ -79,41 +79,41 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
 
     return (
         <div>
-            <h2>Device Details</h2>
+            <h2>{translatedInfo["Device Details"][props.language]}</h2>
             {device ? (
                 <div className="details-container">
-                    <h3>Basic Information</h3>
-                    <p><strong>Device:</strong> {deviceName}</p>
-                    <p><strong>Type:</strong> {device.type}</p>
-                    <p><strong>Status:</strong> {device.status}</p>
-                    <p><strong>Defective:</strong> {device.defective ? 'Yes' : 'No'}</p>
+                    <h3>{translatedInfo["Basic Information"][props.language]}</h3>
+                    <p><strong>{translatedInfo["Device"][props.language]}:</strong> {deviceName}</p>
+                    <p><strong>{translatedInfo["Type"][props.language]}:</strong> {device.type}</p>
+                    <p><strong>{translatedInfo["Status"][props.language]}:</strong> {device.status}</p>
+                    <p><strong>{translatedInfo["Defective"][props.language]}:</strong> {device.defective ? translatedInfo["Yes"][props.language] : translatedInfo["No"][props.language]}</p>
 
-                    <h3>Identification</h3>
-                    {device.inventoryNumber && <p><strong>Inventory Number:</strong> {device.inventoryNumber}</p>}
-                    {device.hostname && <p><strong>Hostname:</strong> {device.hostname}</p>}
-                    {device.serialNumber && <p><strong>Serial Number:</strong> {device.serialNumber}</p>}
-                    <p><strong>Purchase Date:</strong> {formatDate(device.purchaseDate ?? undefined)}</p>
+                    <h3>{translatedInfo["Identification"][props.language]}</h3>
+                    {device.inventoryNumber && <p><strong>{translatedInfo["Inventory Number"][props.language]}:</strong> {device.inventoryNumber}</p>}
+                    {device.hostname && <p><strong>{translatedInfo["Hostname"][props.language]}:</strong> {device.hostname}</p>}
+                    {device.serialNumber && <p><strong>{translatedInfo["Serial Number"][props.language]}:</strong> {device.serialNumber}</p>}
+                    <p><strong>{translatedInfo["Purchase Date"][props.language]}:</strong> {formatDate(device.purchaseDate ?? undefined)}</p>
 
                     {device.location && (
                         <>
-                            <h3>Location</h3>
-                            <p><strong>Name:</strong> {device.location.name}</p>
-                            {device.location.address && <p><strong>Address:</strong> {device.location.address}</p>}
-                            {device.location.phone && <p><strong>Phone:</strong> {device.location.phone}</p>}
-                            {device.location.email && <p><strong>Email:</strong> {device.location.email}</p>}
+                            <h3>{translatedInfo["Device Location"][props.language]}</h3>
+                            <p><strong>{translatedInfo["Name"][props.language]}:</strong> {device.location.name}</p>
+                            {device.location.address && <p><strong>{translatedInfo["Address"][props.language]}:</strong> {device.location.address}</p>}
+                            {device.location.phone && <p><strong>{translatedInfo["Phone"][props.language]}:</strong> {device.location.phone}</p>}
+                            {device.location.email && <p><strong>{translatedInfo["Email"][props.language]}:</strong> {device.location.email}</p>}
                         </>
                     )}
 
                     {device.notes && (
                         <>
-                            <h3>Notes</h3>
+                            <h3>{translatedInfo["Notes"][props.language]}</h3>
                             <p>{device.notes}</p>
                         </>
                     )}
 
                     {device.files.length > 0 && (
                         <>
-                            <h3>Files</h3>
+                            <h3>{translatedInfo["Files"][props.language]}</h3>
                             <ul className="device-file-list">
                                 {device.files.map((file) => (
                                     <li key={file.id}>
@@ -126,8 +126,8 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                         </>
                     )}
 
-                    <h3>Metadata</h3>
-                    <p><strong>ID:</strong> {device.id}</p>
+                    <h3>{translatedInfo["Metadata"][props.language]}</h3>
+                    <p><strong>{translatedInfo["ID"][props.language]}:</strong> {device.id}</p>
 
                     <div className="details-buttons">
                         <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
@@ -144,8 +144,8 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                     {showPopup && (
                         <div className="popup-overlay">
                             <div className="popup-content">
-                                <h3>Confirm Deletion</h3>
-                                <p>Are you sure you want to delete {deviceName}?</p>
+                                <h3>{translatedInfo["Confirm Deletion"][props.language]}</h3>
+                                <p>{translatedInfo["Delete confirmation"][props.language].replace("{name}", deviceName)}</p>
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
@@ -161,7 +161,7 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                     )}
                 </div>
             ) : (
-                <p>Loading...</p>
+                <p>{translatedInfo["Loading..."][props.language]}</p>
             )}
         </div>
     )

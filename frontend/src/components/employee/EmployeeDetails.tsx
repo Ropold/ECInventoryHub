@@ -100,7 +100,7 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
 
     return(
         <div>
-            <h2>Employee Details</h2>
+            <h2>{translatedInfo["Employee Details"][props.language]}</h2>
             {employee ? (
                 <div className="details-container">
                     {employee.imageUrl && (
@@ -109,26 +109,26 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                         </div>
                     )}
 
-                    <h3>Basic Information</h3>
-                    <p><strong>Name:</strong> {employee.name}</p>
-                    {employee.personnelNumber && <p><strong>Personnel Number:</strong> {employee.personnelNumber}</p>}
-                    <p><strong>Department:</strong> {employee.department}</p>
-                    <p><strong>Status:</strong> {employee.active ? 'Active' : 'Inactive'}</p>
+                    <h3>{translatedInfo["Basic Information"][props.language]}</h3>
+                    <p><strong>{translatedInfo["Name"][props.language]}:</strong> {employee.name}</p>
+                    {employee.personnelNumber && <p><strong>{translatedInfo["Personnel Number"][props.language]}:</strong> {employee.personnelNumber}</p>}
+                    <p><strong>{translatedInfo["Department"][props.language]}:</strong> {employee.department}</p>
+                    <p><strong>{translatedInfo["Status"][props.language]}:</strong> {employee.active ? translatedInfo["Active"][props.language] : translatedInfo["Inactive"][props.language]}</p>
 
-                    <h3>Contact Information</h3>
-                    {employee.email && <p><strong>Email:</strong> {employee.email}</p>}
-                    {employee.phone && <p><strong>Phone:</strong> {employee.phone}</p>}
-                    {employee.address && <p><strong>Address:</strong> {employee.address}</p>}
+                    <h3>{translatedInfo["Contact Information"][props.language]}</h3>
+                    {employee.email && <p><strong>{translatedInfo["Email"][props.language]}:</strong> {employee.email}</p>}
+                    {employee.phone && <p><strong>{translatedInfo["Phone"][props.language]}:</strong> {employee.phone}</p>}
+                    {employee.address && <p><strong>{translatedInfo["Address"][props.language]}:</strong> {employee.address}</p>}
 
                     {employee.notes && (
                         <>
-                            <h3>Notes</h3>
+                            <h3>{translatedInfo["Notes"][props.language]}</h3>
                             <p>{employee.notes}</p>
                         </>
                     )}
 
-                    <h3>Metadata</h3>
-                    <p><strong>ID:</strong> {employee.id}</p>
+                    <h3>{translatedInfo["Metadata"][props.language]}</h3>
+                    <p><strong>{translatedInfo["ID"][props.language]}:</strong> {employee.id}</p>
 
                     <div className="details-buttons">
                         <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
@@ -145,8 +145,8 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                     {showPopup && (
                         <div className="popup-overlay">
                             <div className="popup-content">
-                                <h3>Confirm Deletion</h3>
-                                <p>Are you sure you want to delete {employee.name}?</p>
+                                <h3>{translatedInfo["Confirm Deletion"][props.language]}</h3>
+                                <p>{translatedInfo["Delete confirmation"][props.language].replace("{name}", employee.name)}</p>
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
@@ -165,7 +165,7 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                     )}
                 </div>
             ) : (
-                <p>Loading...</p>
+                <p>{translatedInfo["Loading..."][props.language]}</p>
             )}
         </div>
     )
