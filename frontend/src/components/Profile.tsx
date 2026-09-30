@@ -5,6 +5,7 @@ import {translatedInfo} from "./utils/TranslatedInfo.ts";
 type ProfileProps = {
     user: string;
     userDetails: UserDetails | null;
+    role: string;
     language: string;
 }
 
@@ -15,6 +16,7 @@ export default function Profile(props:Readonly<ProfileProps>) {
             {props.userDetails ? (
                 <div>
                     <p>{translatedInfo["Username"][props.language]}: {props.userDetails.login}</p>
+                    <p>{translatedInfo["Role"][props.language]}: {props.role}</p>
                     <p>{translatedInfo["Name"][props.language]}: {props.userDetails.name || "No name provided"}</p>
                     <p>{translatedInfo["Location"][props.language]}: {props.userDetails.location ?? "No location provided"}</p>
                     {props.userDetails.bio && <p>Bio: {props.userDetails.bio}</p>}

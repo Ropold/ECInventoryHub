@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
@@ -110,6 +111,11 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
         })),
     ];
 
+    // Wird für "Employee" und "Handed Out By" gebraucht
+    const employeeOptions = employees.map((employee) => (
+        <option key={employee.id} value={employee.id}>{employee.name}</option>
+    ));
+
     return (
         <div>
             <h2>{isEditMode ? "Edit Assignment" : "Add Assignment"}</h2>
@@ -142,9 +148,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                             required
                         >
                             <option value="">-- select employee --</option>
-                            {employees.map((employee) => (
-                                <option key={employee.id} value={employee.id}>{employee.name}</option>
-                            ))}
+                            {employeeOptions}
                         </select>
                     </label>
 
@@ -157,9 +161,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                             onChange={(e) => setHandedOutById(e.target.value || undefined)}
                         >
                             <option value="">-- none --</option>
-                            {employees.map((employee) => (
-                                <option key={employee.id} value={employee.id}>{employee.name}</option>
-                            ))}
+                            {employeeOptions}
                         </select>
                     </label>
 
@@ -253,7 +255,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                             <li key={item.key}>
                                 {item.label}
                                 <button type="button" className="button-blue margin-left-20" onClick={item.onRemove}>
-                                    remove file
+                                    {translatedInfo["remove file"][props.language]}
                                 </button>
                             </li>
                         ))}
@@ -261,10 +263,10 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">
-                    {isEditMode ? "Update Assignment" : "Add Assignment"}
+                    {isEditMode ? translatedInfo["Update Assignment"][props.language] : translatedInfo["Add Assignment"][props.language]}
                 </button>
                 <button type="button" className="button-blue margin-left-20" onClick={() => navigate(backNavigationPath)}>
-                    back
+                    {translatedInfo["back"][props.language]}
                 </button>
             </form>
         </div>

@@ -77,6 +77,8 @@ class LocationControllerIntegrationTest {
                 "+49 170 1234567",
                 "location.one@example.com",
                 "Notes for location one",
+                null,
+                null,
                 "https://example.com/location1.jpg"
         );
 
@@ -87,6 +89,8 @@ class LocationControllerIntegrationTest {
                 "+49 170 7654321",
                 "location.two@example.com",
                 "Notes for location two",
+                null,
+                null,
                 "https://example.com/location2.jpg"
         );
 

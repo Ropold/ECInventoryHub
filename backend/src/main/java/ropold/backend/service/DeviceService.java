@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ropold.backend.dto.DeviceDTO;
 import ropold.backend.dto.DeviceFileDTO;
+import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
 import ropold.backend.exception.notfoundexceptions.DeviceNotFoundException;
 import ropold.backend.exception.notfoundexceptions.LocationNotFoundException;
+import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.DeviceModel;
 import ropold.backend.model.LocationModel;
+import ropold.backend.repository.AssignmentRepository;
 import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.LocationRepository;
 
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final LocationRepository locationRepository;
+    private final AssignmentRepository assignmentRepository;
 
     public List<DeviceModel> findAllDevices() {
         return deviceRepository.findAll();
@@ -78,7 +82,19 @@ public class DeviceService {
     public void deleteDevice(UUID id) {
         deviceRepository.findById(id)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with id: " + id));
+
+        List<AssignmentModel> blockingAssignments = assignmentRepository.findByDeviceId(id);
+        if (!blockingAssignments.isEmpty()) {
+            throw new DeviceHasAssignmentsException(
+                    "Device cannot be deleted because there are still assignments referencing it.",
+                    blockingAssignments.stream().map(DeviceService::describeAssignment).toList());
+        }
+
         deviceRepository.deleteById(id);
+    }
+
+    private static String describeAssignment(AssignmentModel assignment) {
+        return "Assignment ID: " + assignment.getId();
     }
 
     private LocationModel resolveLocation(DeviceDTO dto) {

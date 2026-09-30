@@ -25,7 +25,7 @@ class DeviceDTOTest {
         DeviceStatus status = DeviceStatus.ASSIGNED;
         boolean defective = true;
         LocationDTO location = new LocationDTO(
-                UUID.randomUUID(), "Location One", "Address", "Phone", "Email", "Notes", "ImageUrl"
+                UUID.randomUUID(), "Location One", "Address", "Phone", "Email", "Notes", 51.2667, 6.6667, "ImageUrl"
         );
         String notes = "Notes for device one";
         List<DeviceFileDTO> files = List.of(

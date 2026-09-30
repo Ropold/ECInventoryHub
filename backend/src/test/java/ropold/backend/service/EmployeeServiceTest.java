@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -167,6 +168,81 @@ class EmployeeServiceTest {
         assertEquals(1, exception.getAssignmentDetails().size());
         assertEquals("Assignment ID: " + assignment.getId(), exception.getAssignmentDetails().getFirst());
         verify(employeeRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void testDeleteEmployee_WithHandedOutAssignments_ThrowsException() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setId(UUID.randomUUID());
+        assignment.setEmployee(allEmployees.get(1));
+        assignment.setHandedOutBy(employeeToDelete);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(List.of());
+        when(assignmentRepository.findByHandedOutById(employeeToDelete.getId())).thenReturn(List.of(assignment));
+
+        EmployeeHasAssignmentsException exception = assertThrows(
+                EmployeeHasAssignmentsException.class,
+                () -> employeeService.deleteEmployee(employeeToDelete.getId())
+        );
+
+        assertEquals(List.of("Assignment ID: " + assignment.getId()), exception.getAssignmentDetails());
+        verify(employeeRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void testDeleteEmployee_ReceivedAndHandedOutSameAssignment_ListedOnce() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setId(UUID.randomUUID());
+        assignment.setEmployee(employeeToDelete);
+        assignment.setHandedOutBy(employeeToDelete);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(List.of(assignment));
+        when(assignmentRepository.findByHandedOutById(employeeToDelete.getId())).thenReturn(List.of(assignment));
+
+        EmployeeHasAssignmentsException exception = assertThrows(
+                EmployeeHasAssignmentsException.class,
+                () -> employeeService.deleteEmployee(employeeToDelete.getId())
+        );
+
+        assertEquals(1, exception.getAssignmentDetails().size());
+    }
+
+    @Test
+    void testForceDeleteEmployee_DetachesHandedOutAssignments() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        AssignmentModel ownAssignment = new AssignmentModel();
+        ownAssignment.setId(UUID.randomUUID());
+        ownAssignment.setEmployee(employeeToDelete);
+        ownAssignment.setHandedOutBy(employeeToDelete);
+        ownAssignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        AssignmentModel handedOutAssignment = new AssignmentModel();
+        handedOutAssignment.setId(UUID.randomUUID());
+        handedOutAssignment.setEmployee(allEmployees.get(1));
+        handedOutAssignment.setHandedOutBy(employeeToDelete);
+        handedOutAssignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId())).thenReturn(List.of(ownAssignment));
+        when(assignmentRepository.findByHandedOutById(employeeToDelete.getId()))
+                .thenReturn(List.of(ownAssignment, handedOutAssignment));
+
+        employeeService.forceDeleteEmployee(employeeToDelete.getId());
+
+        verify(assignmentRepository, times(1)).deleteAll(List.of(ownAssignment));
+        verify(assignmentRepository, times(1)).saveAll(List.of(handedOutAssignment));
+        assertNull(handedOutAssignment.getHandedOutBy());
+        assertEquals(allEmployees.get(1), handedOutAssignment.getEmployee());
+        verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
     }
 
     @Test

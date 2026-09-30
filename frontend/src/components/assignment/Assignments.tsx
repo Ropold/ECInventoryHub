@@ -59,6 +59,7 @@ export default function Assignments(props:Readonly<AssignmentProps>){
                 <SearchBar
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
+                    language={props.language}
                 />
                 <button className="button-blue" onClick={handleAddNewClick}>{translatedInfo["New Assignment"][props.language]}</button>
             </div>

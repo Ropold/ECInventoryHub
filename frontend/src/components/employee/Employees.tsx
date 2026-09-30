@@ -57,6 +57,7 @@ export default function Employees(props:Readonly<EmployeeProps>){
                 <SearchBar
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
+                    language={props.language}
                 />
                 <button className="button-blue" onClick={handleAddNewClick}>{translatedInfo["New Employee"][props.language]}</button>
             </div>

@@ -1,7 +1,9 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import type {LocationModel} from "../models/LocationModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -58,17 +60,10 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting location", error);
-
-                if (error.response?.status === 401) {
-                    setDeleteError("You must be logged in as User/Admin to delete a location.");
-                    setBlockingDevices([]);
-                } else if (error.response?.status === 409) {
-                    setDeleteError(error.response?.data?.message);
-                    setBlockingDevices(error.response?.data?.details ?? []);
-                } else {
-                    setDeleteError("Error deleting location. Please try again.");
-                    setBlockingDevices([]);
-                }
+                handleDeleteError(error,
+                    "You must be logged in as User/Admin to delete a location.",
+                    "Error deleting location. Please try again.",
+                    setDeleteError, setBlockingDevices);
             })
     }
 
@@ -120,6 +115,8 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                     {location.address && <p><strong>Address:</strong> {location.address}</p>}
                     {location.phone && <p><strong>Phone:</strong> {location.phone}</p>}
                     {location.email && <p><strong>Email:</strong> {location.email}</p>}
+                    {location.latitude != null && <p><strong>Latitude:</strong> {location.latitude}</p>}
+                    {location.longitude != null && <p><strong>Longitude:</strong> {location.longitude}</p>}
 
                     {location.notes && (
                         <>
@@ -132,8 +129,8 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                     <p><strong>ID:</strong> {location.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={handleEditClick}>Edit</button>
-                        <button className="button-delete" onClick={handleDeleteClick}>Delete</button>
+                        <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
+                        <button className="button-delete" onClick={handleDeleteClick}>{translatedInfo["Delete"][props.language]}</button>
                     </div>
 
                     {showNoPermission && (
@@ -151,21 +148,15 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
-                                        {blockingDevices.length > 0 && (
-                                            <ul className="popup-error-list">
-                                                {blockingDevices.map((device) => (
-                                                    <li key={device}>{device}</li>
-                                                ))}
-                                            </ul>
-                                        )}
+                                        {renderBlockingList(blockingDevices)}
                                     </div>
                                 )}
                                 <div className="popup-actions">
-                                    <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
+                                    <button onClick={handleConfirmDelete} className="popup-confirm">{translatedInfo["Yes, Delete"][props.language]}</button>
                                     {blockingDevices.length > 0 && props.role === "ADMIN" && (
-                                        <button onClick={handleForceDelete} className="popup-confirm">Delete Anyway</button>
+                                        <button onClick={handleForceDelete} className="popup-confirm">{translatedInfo["Delete Anyway"][props.language]}</button>
                                     )}
-                                    <button onClick={handleCancel} className="popup-cancel">Cancel</button>
+                                    <button onClick={handleCancel} className="popup-cancel">{translatedInfo["Cancel"][props.language]}</button>
                                 </div>
                             </div>
                         </div>

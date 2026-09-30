@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import {useNavigate} from "react-router-dom";
 import {onFileChange, onImageCancel, renderImagePreview} from "../utils/ComponentsFunctions.tsx";
 import "../styles/FormStyles.css";
@@ -16,6 +17,10 @@ type LocationsFormProps = {
     setEmail: React.Dispatch<React.SetStateAction<string | undefined>>;
     notes: string | undefined;
     setNotes: React.Dispatch<React.SetStateAction<string | undefined>>;
+    latitude: number | undefined;
+    setLatitude: React.Dispatch<React.SetStateAction<number | undefined>>;
+    longitude: number | undefined;
+    setLongitude: React.Dispatch<React.SetStateAction<number | undefined>>;
     image: File | null;
     setImage: React.Dispatch<React.SetStateAction<File | null>>;
     existingImageUrl?: string;
@@ -38,6 +43,10 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
         setEmail,
         notes,
         setNotes,
+        latitude,
+        setLatitude,
+        longitude,
+        setLongitude,
         image,
         setImage,
         existingImageUrl,
@@ -53,6 +62,12 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
         {label: "Address", type: "text", value: address, setter: setAddress},
         {label: "Phone", type: "text", value: phone, setter: setPhone},
         {label: "Email", type: "email", value: email, setter: setEmail},
+    ];
+
+    // Koordinaten für die Karte, damit Mapbox die Adresse nicht jedes Mal geocodieren muss
+    const coordinateFields = [
+        {label: "Latitude", min: -90, max: 90, value: latitude, setter: setLatitude},
+        {label: "Longitude", min: -180, max: 180, value: longitude, setter: setLongitude},
     ];
 
     return (
@@ -72,6 +87,15 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
                             <span>{label}:</span>
                             <input className="input-small" type={type} value={value ?? ""}
                                    onChange={(e) => setter(e.target.value || undefined)}/>
+                        </label>
+                    ))}
+
+                    {coordinateFields.map(({label, min, max, value, setter}) => (
+                        <label key={label}>
+                            <span>{label}:</span>
+                            <input className="input-small" type="number" step="any" min={min} max={max}
+                                   value={value ?? ""}
+                                   onChange={(e) => setter(e.target.value === "" ? undefined : Number(e.target.value))}/>
                         </label>
                     ))}
 
@@ -97,15 +121,15 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
                         onImageCancel(setImage);
                         if (existingImageUrl) setImageDeleted(true);
                     }}>
-                        remove image
+                        {translatedInfo["remove image"][props.language]}
                     </button>
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">
-                    {isEditMode ? "Update Location" : "Add Location"}
+                    {isEditMode ? translatedInfo["Update Location"][props.language] : translatedInfo["Add Location"][props.language]}
                 </button>
                 <button type="button" className="button-blue margin-left-20" onClick={() => navigate(backNavigationPath)}>
-                    back
+                    {translatedInfo["back"][props.language]}
                 </button>
             </form>
         </div>

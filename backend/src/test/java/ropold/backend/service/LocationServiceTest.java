@@ -42,6 +42,8 @@ class LocationServiceTest {
                 "+49 170 1234567",
                 "location.one@example.com",
                 "Notes for location one",
+                null,
+                null,
                 "https://example.com/location1.jpg"
         );
 
@@ -52,6 +54,8 @@ class LocationServiceTest {
                 "+49 170 7654321",
                 "location.two@example.com",
                 "Notes for location two",
+                null,
+                null,
                 null
         );
 
@@ -82,6 +86,8 @@ class LocationServiceTest {
                 "+49 170 1112223",
                 "new.location@example.com",
                 "None",
+                null,
+                null,
                 null
         );
 
@@ -92,6 +98,8 @@ class LocationServiceTest {
                 newLocation.getPhone(),
                 newLocation.getEmail(),
                 newLocation.getNotes(),
+                null,
+                null,
                 newLocation.getImageUrl()
         );
 
@@ -110,6 +118,8 @@ class LocationServiceTest {
                 existingLocation.getPhone(),
                 existingLocation.getEmail(),
                 existingLocation.getNotes(),
+                null,
+                null,
                 existingLocation.getImageUrl()
         );
 

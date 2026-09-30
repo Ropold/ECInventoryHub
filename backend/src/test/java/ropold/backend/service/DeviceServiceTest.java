@@ -4,12 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ropold.backend.dto.DeviceDTO;
 import ropold.backend.dto.LocationDTO;
+import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
 import ropold.backend.exception.notfoundexceptions.DeviceNotFoundException;
 import ropold.backend.exception.notfoundexceptions.LocationNotFoundException;
+import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.DeviceModel;
 import ropold.backend.model.DeviceStatus;
 import ropold.backend.model.DeviceType;
 import ropold.backend.model.LocationModel;
+import ropold.backend.repository.AssignmentRepository;
 import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.LocationRepository;
 
@@ -33,7 +36,8 @@ class DeviceServiceTest {
 
     DeviceRepository deviceRepository = mock(DeviceRepository.class);
     LocationRepository locationRepository = mock(LocationRepository.class);
-    DeviceService deviceService = new DeviceService(deviceRepository, locationRepository);
+    AssignmentRepository assignmentRepository = mock(AssignmentRepository.class);
+    DeviceService deviceService = new DeviceService(deviceRepository, locationRepository, assignmentRepository);
 
     List<DeviceModel> allDevices;
     LocationModel locationModel1;
@@ -46,6 +50,8 @@ class DeviceServiceTest {
                 location.getPhone(),
                 location.getEmail(),
                 location.getNotes(),
+                location.getLatitude(),
+                location.getLongitude(),
                 location.getImageUrl()
         );
     }
@@ -60,6 +66,8 @@ class DeviceServiceTest {
                 "+49 170 1234567",
                 "location.one@example.com",
                 "Notes for location one",
+                null,
+                null,
                 "http://example.com/location1.jpg"
         );
 
@@ -286,6 +294,27 @@ class DeviceServiceTest {
         when(deviceRepository.findById(deviceToDelete.getId())).thenReturn(Optional.of(deviceToDelete));
         deviceService.deleteDevice(deviceToDelete.getId());
         verify(deviceRepository, times(1)).deleteById(deviceToDelete.getId());
+    }
+
+    @Test
+    void testDeleteDevice_WithBlockingAssignments_ThrowsException() {
+        DeviceModel deviceToDelete = allDevices.getFirst();
+        when(deviceRepository.findById(deviceToDelete.getId())).thenReturn(Optional.of(deviceToDelete));
+
+        AssignmentModel assignment = new AssignmentModel();
+        assignment.setId(UUID.randomUUID());
+        assignment.setDevice(deviceToDelete);
+        assignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        when(assignmentRepository.findByDeviceId(deviceToDelete.getId())).thenReturn(List.of(assignment));
+
+        DeviceHasAssignmentsException exception = assertThrows(
+                DeviceHasAssignmentsException.class,
+                () -> deviceService.deleteDevice(deviceToDelete.getId())
+        );
+
+        assertEquals(List.of("Assignment ID: " + assignment.getId()), exception.getAssignmentDetails());
+        verify(deviceRepository, never()).deleteById(any());
     }
 
     @Test

@@ -3,6 +3,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import type {LocationModel} from "../models/LocationModel.ts";
 import LocationsForm from "./LocationsForm.tsx";
+import {resolveCoordinates} from "../utils/MapboxGeocoding.ts";
 
 type EditLocationProps = {
     language: string;
@@ -19,6 +20,8 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
     const [phone, setPhone] = useState<string | undefined>(undefined);
     const [email, setEmail] = useState<string | undefined>(undefined);
     const [notes, setNotes] = useState<string | undefined>(undefined);
+    const [latitude, setLatitude] = useState<number | undefined>(undefined);
+    const [longitude, setLongitude] = useState<number | undefined>(undefined);
     const [image, setImage] = useState<File | null>(null);
     const [imageDeleted, setImageDeleted] = useState<boolean>(false);
 
@@ -34,6 +37,8 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
                 setPhone(data.phone ?? undefined);
                 setEmail(data.email ?? undefined);
                 setNotes(data.notes ?? undefined);
+                setLatitude(data.latitude ?? undefined);
+                setLongitude(data.longitude ?? undefined);
             })
             .catch((error) => console.error("Error fetching location details", error));
     }, [id]);
@@ -42,24 +47,36 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
         e.preventDefault();
         if (!location) return;
 
-        const updatedLocation = {
-            id: location.id,
-            name: name,
-            address: address ?? null,
-            phone: phone ?? null,
-            email: email ?? null,
-            notes: notes ?? null,
-            imageUrl: imageDeleted ? null : location.imageUrl
-        };
+        // Adresse geändert, Koordinaten aber nicht von Hand angepasst -> neu geocodieren
+        const addressChanged = (address ?? null) !== location.address;
+        const coordinatesChanged = (latitude ?? null) !== location.latitude || (longitude ?? null) !== location.longitude;
 
-        const data = new FormData();
-        data.append("locationDTO", new Blob([JSON.stringify(updatedLocation)], {type: "application/json"}));
-        if (image) {
-            data.append("image", image);
-        }
+        resolveCoordinates(
+            address,
+            {latitude: latitude ?? null, longitude: longitude ?? null},
+            addressChanged && !coordinatesChanged
+        )
+            .then((coordinates) => {
+                const updatedLocation = {
+                    id: location.id,
+                    name: name,
+                    address: address ?? null,
+                    phone: phone ?? null,
+                    email: email ?? null,
+                    notes: notes ?? null,
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                    imageUrl: imageDeleted ? null : location.imageUrl
+                };
 
-        axios
-            .put(`/api/locations/${location.id}`, data, {headers: {"Content-Type": "multipart/form-data"}})
+                const data = new FormData();
+                data.append("locationDTO", new Blob([JSON.stringify(updatedLocation)], {type: "application/json"}));
+                if (image) {
+                    data.append("image", image);
+                }
+
+                return axios.put(`/api/locations/${location.id}`, data, {headers: {"Content-Type": "multipart/form-data"}});
+            })
             .then((response) => {
                 props.handleLocationUpdate(response.data);
                 navigate(`/locations/${location.id}`);
@@ -85,6 +102,10 @@ export default function EditLocation(props: Readonly<EditLocationProps>) {
                 setEmail={setEmail}
                 notes={notes}
                 setNotes={setNotes}
+                latitude={latitude}
+                setLatitude={setLatitude}
+                longitude={longitude}
+                setLongitude={setLongitude}
                 image={image}
                 setImage={setImage}
                 existingImageUrl={location?.imageUrl ?? undefined}

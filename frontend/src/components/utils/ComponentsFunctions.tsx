@@ -1,3 +1,4 @@
+import type {AxiosError} from "axios";
 import {useEffect} from "react";
 import {useLocation} from "react-router-dom";
 
@@ -44,4 +45,35 @@ export function renderImagePreview(
         return (<img src={existingImageUrl} alt="existing-image" className="image-preview" />);
     }
     return null;
+}
+export function handleDeleteError(
+    error: AxiosError<{message?: string; details?: string[]}>,
+    loginMessage: string,
+    genericMessage: string,
+    setDeleteError: (message: string | null) => void,
+    setBlockingItems?: (items: string[]) => void
+) {
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
+        setDeleteError(loginMessage);
+        setBlockingItems?.([]);
+    } else if (status === 409) {
+        setDeleteError(error.response?.data?.message ?? genericMessage);
+        setBlockingItems?.(error.response?.data?.details ?? []);
+    } else {
+        setDeleteError(genericMessage);
+        setBlockingItems?.([]);
+    }
+}
+
+export function renderBlockingList(items: string[]) {
+    if (items.length === 0) return null;
+    return (
+        <ul className="popup-error-list">
+            {items.map((item) => (
+                <li key={item}>{item}</li>
+            ))}
+        </ul>
+    );
 }

@@ -1,3 +1,4 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import {useNavigate} from "react-router-dom";
 import type {Department} from "../models/EmployeeModel.ts";
 import {onFileChange, onImageCancel, renderImagePreview} from "../utils/ComponentsFunctions.tsx";
@@ -184,15 +185,15 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                 {(image || (existingImageUrl && !imageDeleted)) && (
                     <button type="button" className="button-blue margin-top-20" onClick={handleImageCancel}>
-                        remove image
+                        {translatedInfo["remove image"][props.language]}
                     </button>
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">
-                    {isEditMode ? "Update Employee" : "Add Employee"}
+                    {isEditMode ? translatedInfo["Update Employee"][props.language] : translatedInfo["Add Employee"][props.language]}
                 </button>
                 <button type="button" className="button-blue margin-left-20" onClick={() => navigate(backNavigationPath)}>
-                    back
+                    {translatedInfo["back"][props.language]}
                 </button>
             </form>
         </div>

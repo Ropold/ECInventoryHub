@@ -1,8 +1,9 @@
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {formatDate} from "../utils/ComponentsFunctions.tsx";
+import {formatDate, handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -19,6 +20,7 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
     const navigate = useNavigate();
     const [showPopup, setShowPopup] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
 
     function handleEditClick() {
@@ -58,20 +60,17 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting device", error);
-
-                if (error.response?.status === 401 || error.response?.status === 403) {
-                    setDeleteError("You must be logged in as User/Admin to delete a device.");
-                } else if (error.response?.status === 500) {
-                    setDeleteError("This device cannot be deleted while assignments still reference it.");
-                } else {
-                    setDeleteError("Error deleting device. Please try again.");
-                }
+                handleDeleteError(error,
+                    "You must be logged in as User/Admin to delete a device.",
+                    "Error deleting device. Please try again.",
+                    setDeleteError, setBlockingAssignments);
             })
     }
 
     function handleCancel() {
         setShowPopup(false);
         setDeleteError(null);
+        setBlockingAssignments([]);
     }
 
     const deviceName = device
@@ -130,8 +129,8 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                     <p><strong>ID:</strong> {device.id}</p>
 
                     <div className="details-buttons">
-                        <button className="button-blue" onClick={handleEditClick}>Edit</button>
-                        <button className="button-delete" onClick={handleDeleteClick}>Delete</button>
+                        <button className="button-blue" onClick={handleEditClick}>{translatedInfo["Edit"][props.language]}</button>
+                        <button className="button-delete" onClick={handleDeleteClick}>{translatedInfo["Delete"][props.language]}</button>
                     </div>
 
                     {showNoPermission && (
@@ -149,11 +148,12 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
+                                        {renderBlockingList(blockingAssignments)}
                                     </div>
                                 )}
                                 <div className="popup-actions">
-                                    <button onClick={handleConfirmDelete} className="popup-confirm">Yes, Delete</button>
-                                    <button onClick={handleCancel} className="popup-cancel">Cancel</button>
+                                    <button onClick={handleConfirmDelete} className="popup-confirm">{translatedInfo["Yes, Delete"][props.language]}</button>
+                                    <button onClick={handleCancel} className="popup-cancel">{translatedInfo["Cancel"][props.language]}</button>
                                 </div>
                             </div>
                         </div>

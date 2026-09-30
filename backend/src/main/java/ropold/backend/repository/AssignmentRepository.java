@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface AssignmentRepository extends JpaRepository<AssignmentModel, UUID> {
     List<AssignmentModel> findByEmployeeId(UUID employeeId);
+
+    List<AssignmentModel> findByHandedOutById(UUID handedOutById);
+
+    List<AssignmentModel> findByDeviceId(UUID deviceId);
 }

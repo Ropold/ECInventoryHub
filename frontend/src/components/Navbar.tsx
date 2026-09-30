@@ -1,3 +1,4 @@
+import {translatedInfo} from "./utils/TranslatedInfo.ts";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import "./styles/Navbar.css";
@@ -14,6 +15,7 @@ import "./styles/Popup.css";
 type NavbarProps = {
     user:string;
     getUser: () => void;
+    language: string;
 }
 
 type NavItem = {
@@ -70,7 +72,7 @@ export default function Navbar(props: Readonly<NavbarProps>)
                     }}
                 >
                     <img src={item.logo} alt={item.alt} className="logo-image" />
-                    <h2 className="header-title">{item.title}</h2>
+                    <h2 className="header-title">{translatedInfo[item.title][props.language]}</h2>
                 </button>
             ))}
 
@@ -80,7 +82,7 @@ export default function Navbar(props: Readonly<NavbarProps>)
                 onClick={isLoggedIn ? logoutFromGithub : loginWithGithub}
             >
                 <img src={githubLogo} alt="GitHub Logo" className="logo-image" />
-                <h2 className="header-title">{isLoggedIn ? "Logout" : "Login GitHub"}</h2>
+                <h2 className="header-title">{isLoggedIn ? translatedInfo["Logout"][props.language] : translatedInfo["Login GitHub"][props.language]}</h2>
             </button>
         </nav>
     )
