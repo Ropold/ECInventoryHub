@@ -11,6 +11,7 @@ export type DeviceModel = {
     modelName: string | null;
     serialNumber: string | null;
     inventoryNumber: string | null;
+    hostname: string | null;
     purchaseDate: string | null;
     status: DeviceStatus;
     defective: boolean;
@@ -26,6 +27,7 @@ export const DefaultDevice: DeviceModel = {
     modelName: null,
     serialNumber: null,
     inventoryNumber: null,
+    hostname: null,
     purchaseDate: null,
     status: "AVAILABLE",
     defective: false,

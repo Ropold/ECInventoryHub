@@ -47,6 +47,7 @@ public class DeviceService {
                 dto.modelName(),
                 dto.serialNumber(),
                 dto.inventoryNumber(),
+                dto.hostname(),
                 dto.purchaseDate(),
                 dto.status(),
                 dto.defective(),
@@ -65,6 +66,7 @@ public class DeviceService {
         existing.setModelName(dto.modelName());
         existing.setSerialNumber(dto.serialNumber());
         existing.setInventoryNumber(dto.inventoryNumber());
+        existing.setHostname(dto.hostname());
         existing.setPurchaseDate(dto.purchaseDate());
         existing.setStatus(dto.status());
         existing.setDefective(dto.defective());

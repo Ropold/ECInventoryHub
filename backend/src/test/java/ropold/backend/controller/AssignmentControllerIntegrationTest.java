@@ -103,6 +103,7 @@ class AssignmentControllerIntegrationTest {
                 "Latitude 5420",
                 "SN-1001",
                 "INV-1001",
+                "HOST-1001",
                 LocalDate.of(2023, 1, 15),
                 DeviceStatus.ASSIGNED,
                 false,

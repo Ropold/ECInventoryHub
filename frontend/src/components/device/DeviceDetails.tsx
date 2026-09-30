@@ -90,6 +90,7 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
 
                     <h3>Identification</h3>
                     {device.inventoryNumber && <p><strong>Inventory Number:</strong> {device.inventoryNumber}</p>}
+                    {device.hostname && <p><strong>Hostname:</strong> {device.hostname}</p>}
                     {device.serialNumber && <p><strong>Serial Number:</strong> {device.serialNumber}</p>}
                     <p><strong>Purchase Date:</strong> {formatDate(device.purchaseDate ?? undefined)}</p>
 

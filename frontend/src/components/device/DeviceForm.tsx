@@ -21,6 +21,8 @@ type DeviceFormProps = {
     setSerialNumber: React.Dispatch<React.SetStateAction<string | undefined>>;
     inventoryNumber: string | undefined;
     setInventoryNumber: React.Dispatch<React.SetStateAction<string | undefined>>;
+    hostname: string | undefined;
+    setHostname: React.Dispatch<React.SetStateAction<string | undefined>>;
     purchaseDate: string | undefined;
     setPurchaseDate: React.Dispatch<React.SetStateAction<string | undefined>>;
     status: DeviceStatus;
@@ -52,6 +54,8 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
         setSerialNumber,
         inventoryNumber,
         setInventoryNumber,
+        hostname,
+        setHostname,
         purchaseDate,
         setPurchaseDate,
         status,
@@ -175,6 +179,17 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
                             type="text"
                             value={inventoryNumber ?? ""}
                             onChange={(e) => setInventoryNumber(e.target.value || undefined)}
+                        />
+                    </label>
+
+                    {/* Hostname */}
+                    <label>
+                        <span>Hostname:</span>
+                        <input
+                            className="input-small"
+                            type="text"
+                            value={hostname ?? ""}
+                            onChange={(e) => setHostname(e.target.value || undefined)}
                         />
                     </label>
 

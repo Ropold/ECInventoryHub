@@ -17,6 +17,7 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
     const [modelName, setModelName] = useState<string | undefined>(undefined);
     const [serialNumber, setSerialNumber] = useState<string | undefined>(undefined);
     const [inventoryNumber, setInventoryNumber] = useState<string | undefined>(undefined);
+    const [hostname, setHostname] = useState<string | undefined>(undefined);
     const [purchaseDate, setPurchaseDate] = useState<string | undefined>(undefined);
     const [status, setStatus] = useState<DeviceStatus>("AVAILABLE");
     const [defective, setDefective] = useState<boolean>(false);
@@ -36,6 +37,7 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
             modelName: modelName ?? null,
             serialNumber: serialNumber ?? null,
             inventoryNumber: inventoryNumber ?? null,
+            hostname: hostname ?? null,
             purchaseDate: purchaseDate ?? null,
             status: status,
             defective: defective,
@@ -68,7 +70,7 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
                 {...{
                     type, setType, manufacturer, setManufacturer,
                     modelName, setModelName, serialNumber, setSerialNumber,
-                    inventoryNumber, setInventoryNumber, purchaseDate, setPurchaseDate,
+                    inventoryNumber, setInventoryNumber, hostname, setHostname, purchaseDate, setPurchaseDate,
                     status, setStatus, defective, setDefective,
                     locationId, setLocationId, notes, setNotes,
                     newFiles, setNewFiles

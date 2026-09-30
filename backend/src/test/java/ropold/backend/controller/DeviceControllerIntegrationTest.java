@@ -111,6 +111,7 @@ class DeviceControllerIntegrationTest {
                 "Latitude 5420",
                 "SN-1001",
                 "INV-1001",
+                "HOST-1001",
                 LocalDate.of(2023, 1, 15),
                 DeviceStatus.ASSIGNED,
                 false,
@@ -126,6 +127,7 @@ class DeviceControllerIntegrationTest {
                 "iPhone 14",
                 "SN-2002",
                 "INV-2002",
+                "HOST-2002",
                 LocalDate.of(2023, 6, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -153,7 +155,8 @@ class DeviceControllerIntegrationTest {
         mockMvc.perform(get("/api/devices/" + savedDevice.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.manufacturer").value("Dell"))
-                .andExpect(jsonPath("$.serialNumber").value("SN-1001"));
+                .andExpect(jsonPath("$.serialNumber").value("SN-1001"))
+                .andExpect(jsonPath("$.hostname").value("HOST-1001"));
     }
 
     @Test
@@ -183,6 +186,7 @@ class DeviceControllerIntegrationTest {
                     "modelName": "Odyssey G7",
                     "serialNumber": "SN-3003",
                     "inventoryNumber": "INV-3003",
+                    "hostname": "HOST-3003",
                     "purchaseDate": "2024-02-01",
                     "status": "AVAILABLE",
                     "defective": false,
@@ -199,7 +203,8 @@ class DeviceControllerIntegrationTest {
                         .with(authentication(authToken)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.manufacturer").value("Samsung"))
-                .andExpect(jsonPath("$.serialNumber").value("SN-3003"));
+                .andExpect(jsonPath("$.serialNumber").value("SN-3003"))
+                .andExpect(jsonPath("$.hostname").value("HOST-3003"));
 
         List<DeviceModel> allDevices = deviceRepository.findAll();
         assertEquals(1, allDevices.size());

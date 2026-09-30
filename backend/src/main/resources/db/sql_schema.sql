@@ -54,6 +54,7 @@ CREATE TABLE devices (
     model_name       varchar,
     serial_number    varchar UNIQUE,
     inventory_number varchar UNIQUE,
+    hostname         varchar UNIQUE,
     purchase_date    date,
     status           varchar NOT NULL DEFAULT 'AVAILABLE'
                          CHECK (status IN ('AVAILABLE', 'ASSIGNED', 'IN_REPAIR', 'RETIRED')),

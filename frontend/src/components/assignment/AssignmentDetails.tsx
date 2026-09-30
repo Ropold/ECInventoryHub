@@ -75,6 +75,8 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                     <p><strong>Type:</strong> {assignment.device.type}</p>
                     {assignment.device.inventoryNumber &&
                         <p><strong>Inventory Number:</strong> {assignment.device.inventoryNumber}</p>}
+                    {assignment.device.hostname &&
+                        <p><strong>Hostname:</strong> {assignment.device.hostname}</p>}
                     {assignment.device.serialNumber &&
                         <p><strong>Serial Number:</strong> {assignment.device.serialNumber}</p>}
 

@@ -78,6 +78,7 @@ class DeviceServiceTest {
                 "Latitude 5420",
                 "SN-1001",
                 "INV-1001",
+                "HOST-1001",
                 LocalDate.of(2023, 1, 15),
                 DeviceStatus.ASSIGNED,
                 false,
@@ -93,6 +94,7 @@ class DeviceServiceTest {
                 "iPhone 14",
                 "SN-2002",
                 "INV-2002",
+                "HOST-2002",
                 LocalDate.of(2023, 6, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -139,6 +141,7 @@ class DeviceServiceTest {
                 "Odyssey G7",
                 "SN-3003",
                 "INV-3003",
+                "HOST-3003",
                 LocalDate.of(2024, 2, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -153,6 +156,7 @@ class DeviceServiceTest {
         DeviceModel result = deviceService.addDevice(deviceDTO);
 
         assertEquals(deviceDTO.manufacturer(), result.getManufacturer());
+        assertEquals("HOST-3003", result.getHostname());
         assertEquals(locationModel1, result.getLocation());
         verify(deviceRepository, times(1)).save(any(DeviceModel.class));
     }
@@ -166,6 +170,7 @@ class DeviceServiceTest {
                 "MX Master 3",
                 "SN-4004",
                 "INV-4004",
+                "HOST-4004",
                 LocalDate.of(2024, 3, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -192,6 +197,7 @@ class DeviceServiceTest {
                 "Odyssey G7",
                 "SN-3003",
                 "INV-3003",
+                "HOST-3003",
                 LocalDate.of(2024, 2, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -220,6 +226,7 @@ class DeviceServiceTest {
                 "Latitude 5430",
                 existing.getSerialNumber(),
                 existing.getInventoryNumber(),
+                "HOST-1001-NEW",
                 existing.getPurchaseDate(),
                 DeviceStatus.IN_REPAIR,
                 true,
@@ -235,6 +242,7 @@ class DeviceServiceTest {
         DeviceModel result = deviceService.updateDevice(existing.getId(), deviceDTO);
 
         assertEquals("Latitude 5430", result.getModelName());
+        assertEquals("HOST-1001-NEW", result.getHostname());
         assertEquals(DeviceStatus.IN_REPAIR, result.getStatus());
         assertEquals("Updated notes", result.getNotes());
         verify(deviceRepository, times(1)).save(existing);
@@ -245,7 +253,7 @@ class DeviceServiceTest {
         UUID nonExistentId = UUID.randomUUID();
         DeviceDTO deviceDTO = new DeviceDTO(
                 nonExistentId, DeviceType.LAPTOP, "Dell", "Latitude 5430",
-                "SN-9999", "INV-9999", LocalDate.now(), DeviceStatus.AVAILABLE,
+                "SN-9999", "INV-9999", "HOST-9999", LocalDate.now(), DeviceStatus.AVAILABLE,
                 false, null, "Notes", null
         );
 
@@ -269,6 +277,7 @@ class DeviceServiceTest {
                 existing.getModelName(),
                 existing.getSerialNumber(),
                 existing.getInventoryNumber(),
+                existing.getHostname(),
                 existing.getPurchaseDate(),
                 existing.getStatus(),
                 existing.isDefective(),

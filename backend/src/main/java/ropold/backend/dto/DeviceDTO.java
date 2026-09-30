@@ -14,6 +14,7 @@ public record DeviceDTO(
         String modelName,
         String serialNumber,
         String inventoryNumber,
+        String hostname,
         LocalDate purchaseDate,
         DeviceStatus status,
         boolean defective,

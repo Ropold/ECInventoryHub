@@ -20,6 +20,7 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
     const [modelName, setModelName] = useState<string>();
     const [serialNumber, setSerialNumber] = useState<string>();
     const [inventoryNumber, setInventoryNumber] = useState<string>();
+    const [hostname, setHostname] = useState<string>();
     const [purchaseDate, setPurchaseDate] = useState<string>();
     const [status, setStatus] = useState<DeviceStatus>("AVAILABLE");
     const [defective, setDefective] = useState<boolean>(false);
@@ -40,6 +41,7 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
                 setModelName(data.modelName ?? undefined);
                 setSerialNumber(data.serialNumber ?? undefined);
                 setInventoryNumber(data.inventoryNumber ?? undefined);
+                setHostname(data.hostname ?? undefined);
                 setPurchaseDate(data.purchaseDate ?? undefined);
                 setStatus(data.status);
                 setDefective(data.defective);
@@ -61,6 +63,7 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
             modelName: modelName ?? null,
             serialNumber: serialNumber ?? null,
             inventoryNumber: inventoryNumber ?? null,
+            hostname: hostname ?? null,
             purchaseDate: purchaseDate ?? null,
             status: status,
             defective: defective,
@@ -93,7 +96,7 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
                 {...{
                     type, setType, manufacturer, setManufacturer,
                     modelName, setModelName, serialNumber, setSerialNumber,
-                    inventoryNumber, setInventoryNumber, purchaseDate, setPurchaseDate,
+                    inventoryNumber, setInventoryNumber, hostname, setHostname, purchaseDate, setPurchaseDate,
                     status, setStatus, defective, setDefective,
                     locationId, setLocationId, notes, setNotes,
                     newFiles, setNewFiles, existingFiles, setExistingFiles

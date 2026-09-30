@@ -24,6 +24,7 @@ function filterDevices(devices: DeviceModel[], query: string): DeviceModel[] {
             device.modelName?.toLowerCase().includes(searchQuery) ||
             device.serialNumber?.toLowerCase().includes(searchQuery) ||
             device.inventoryNumber?.toLowerCase().includes(searchQuery) ||
+            device.hostname?.toLowerCase().includes(searchQuery) ||
             device.type.toLowerCase().includes(searchQuery) ||
             device.status.toLowerCase().includes(searchQuery) ||
             device.location?.name.toLowerCase().includes(searchQuery) ||
