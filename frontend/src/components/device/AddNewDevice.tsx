@@ -3,6 +3,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import type {DeviceModel, DeviceStatus, DeviceType} from "../models/DeviceModel.ts";
 import DeviceForm from "./DeviceForm.tsx";
+import {handleRequestError} from "../utils/ComponentsFunctions.tsx";
 
 type AddNewDeviceProps = {
     language: string;
@@ -17,12 +18,15 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
     const [modelName, setModelName] = useState<string | undefined>(undefined);
     const [serialNumber, setSerialNumber] = useState<string | undefined>(undefined);
     const [inventoryNumber, setInventoryNumber] = useState<string | undefined>(undefined);
+    const [hostname, setHostname] = useState<string | undefined>(undefined);
     const [purchaseDate, setPurchaseDate] = useState<string | undefined>(undefined);
     const [status, setStatus] = useState<DeviceStatus>("AVAILABLE");
     const [defective, setDefective] = useState<boolean>(false);
     const [locationId, setLocationId] = useState<string | undefined>(undefined);
     const [notes, setNotes] = useState<string | undefined>(undefined);
     const [newFiles, setNewFiles] = useState<File[]>([]);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveErrorDetails, setSaveErrorDetails] = useState<string[]>([]);
 
     const navigate = useNavigate();
 
@@ -36,6 +40,7 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
             modelName: modelName ?? null,
             serialNumber: serialNumber ?? null,
             inventoryNumber: inventoryNumber ?? null,
+            hostname: hostname ?? null,
             purchaseDate: purchaseDate ?? null,
             status: status,
             defective: defective,
@@ -54,7 +59,13 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
                 props.handleNewDeviceSubmit(response.data);
                 navigate(`/devices/${response.data.id}`);
             })
-            .catch((error) => console.error("Error creating device", error));
+            .catch((error) => {
+                console.error("Error creating device", error);
+                handleRequestError(error,
+                    "You must be logged in as User/Admin to add a device.",
+                    "Error creating device. Please try again.",
+                    setSaveError, setSaveErrorDetails);
+            });
     }
 
     const backNavigationPath = "/devices";
@@ -68,10 +79,11 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
                 {...{
                     type, setType, manufacturer, setManufacturer,
                     modelName, setModelName, serialNumber, setSerialNumber,
-                    inventoryNumber, setInventoryNumber, purchaseDate, setPurchaseDate,
+                    inventoryNumber, setInventoryNumber, hostname, setHostname, purchaseDate, setPurchaseDate,
                     status, setStatus, defective, setDefective,
                     locationId, setLocationId, notes, setNotes,
-                    newFiles, setNewFiles
+                    newFiles, setNewFiles,
+                    saveError, saveErrorDetails
                 }}
             />
         </div>

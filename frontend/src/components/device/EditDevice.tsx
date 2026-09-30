@@ -4,6 +4,7 @@ import axios from "axios";
 import type {DeviceModel, DeviceStatus, DeviceType} from "../models/DeviceModel.ts";
 import type {DeviceFileModel} from "../models/DeviceFileModel.ts";
 import DeviceForm from "./DeviceForm.tsx";
+import {handleRequestError} from "../utils/ComponentsFunctions.tsx";
 
 type EditDeviceProps = {
     language: string;
@@ -20,12 +21,15 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
     const [modelName, setModelName] = useState<string>();
     const [serialNumber, setSerialNumber] = useState<string>();
     const [inventoryNumber, setInventoryNumber] = useState<string>();
+    const [hostname, setHostname] = useState<string>();
     const [purchaseDate, setPurchaseDate] = useState<string>();
     const [status, setStatus] = useState<DeviceStatus>("AVAILABLE");
     const [defective, setDefective] = useState<boolean>(false);
     const [locationId, setLocationId] = useState<string>();
     const [notes, setNotes] = useState<string>();
     const [newFiles, setNewFiles] = useState<File[]>([]);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveErrorDetails, setSaveErrorDetails] = useState<string[]>([]);
     const [existingFiles, setExistingFiles] = useState<DeviceFileModel[]>([]);
 
     useEffect(() => {
@@ -40,6 +44,7 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
                 setModelName(data.modelName ?? undefined);
                 setSerialNumber(data.serialNumber ?? undefined);
                 setInventoryNumber(data.inventoryNumber ?? undefined);
+                setHostname(data.hostname ?? undefined);
                 setPurchaseDate(data.purchaseDate ?? undefined);
                 setStatus(data.status);
                 setDefective(data.defective);
@@ -61,6 +66,7 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
             modelName: modelName ?? null,
             serialNumber: serialNumber ?? null,
             inventoryNumber: inventoryNumber ?? null,
+            hostname: hostname ?? null,
             purchaseDate: purchaseDate ?? null,
             status: status,
             defective: defective,
@@ -79,7 +85,13 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
                 props.handleDeviceUpdate(response.data);
                 navigate(`/devices/${device.id}`);
             })
-            .catch((error) => console.error("Error updating device", error));
+            .catch((error) => {
+                console.error("Error updating device", error);
+                handleRequestError(error,
+                    "You must be logged in as User/Admin to update a device.",
+                    "Error updating device. Please try again.",
+                    setSaveError, setSaveErrorDetails);
+            });
     }
 
     const backNavigationPath = device?.id ? `/devices/${device.id}` : "/devices";
@@ -93,10 +105,11 @@ export default function EditDevice(props: Readonly<EditDeviceProps>){
                 {...{
                     type, setType, manufacturer, setManufacturer,
                     modelName, setModelName, serialNumber, setSerialNumber,
-                    inventoryNumber, setInventoryNumber, purchaseDate, setPurchaseDate,
+                    inventoryNumber, setInventoryNumber, hostname, setHostname, purchaseDate, setPurchaseDate,
                     status, setStatus, defective, setDefective,
                     locationId, setLocationId, notes, setNotes,
-                    newFiles, setNewFiles, existingFiles, setExistingFiles
+                    newFiles, setNewFiles, existingFiles, setExistingFiles,
+                    saveError, saveErrorDetails
                 }}
             />
         </div>

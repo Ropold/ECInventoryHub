@@ -21,6 +21,7 @@ class DeviceDTOTest {
         String modelName = "Latitude 5420";
         String serialNumber = "SN-1001";
         String inventoryNumber = "INV-1001";
+        String hostname = "HOST-1001";
         LocalDate purchaseDate = LocalDate.of(2023, 1, 15);
         DeviceStatus status = DeviceStatus.ASSIGNED;
         boolean defective = true;
@@ -33,7 +34,7 @@ class DeviceDTOTest {
         );
 
         DeviceDTO deviceDTO = new DeviceDTO(
-                id, type, manufacturer, modelName, serialNumber, inventoryNumber,
+                id, type, manufacturer, modelName, serialNumber, inventoryNumber, hostname,
                 purchaseDate, status, defective, location, notes, files
         );
 
@@ -43,6 +44,7 @@ class DeviceDTOTest {
         assertEquals(modelName, deviceDTO.modelName());
         assertEquals(serialNumber, deviceDTO.serialNumber());
         assertEquals(inventoryNumber, deviceDTO.inventoryNumber());
+        assertEquals(hostname, deviceDTO.hostname());
         assertEquals(purchaseDate, deviceDTO.purchaseDate());
         assertEquals(status, deviceDTO.status());
         assertTrue(deviceDTO.defective());

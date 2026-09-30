@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ropold.backend.dto.DeviceDTO;
 import ropold.backend.dto.DeviceFileDTO;
 import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
+import ropold.backend.exception.conflictexceptions.DeviceIdentifierAlreadyExistsException;
 import ropold.backend.exception.notfoundexceptions.DeviceNotFoundException;
 import ropold.backend.exception.notfoundexceptions.LocationNotFoundException;
 import ropold.backend.model.AssignmentModel;
@@ -17,9 +18,13 @@ import ropold.backend.repository.LocationRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +44,7 @@ public class DeviceService {
 
     public DeviceModel addDevice(DeviceDTO dto) {
         LocationModel location = resolveLocation(dto);
+        checkIdentifiersAreUnique(dto, null);
 
         return deviceRepository.save(new DeviceModel(
                 null,
@@ -47,6 +53,7 @@ public class DeviceService {
                 dto.modelName(),
                 dto.serialNumber(),
                 dto.inventoryNumber(),
+                dto.hostname(),
                 dto.purchaseDate(),
                 dto.status(),
                 dto.defective(),
@@ -59,12 +66,14 @@ public class DeviceService {
     public DeviceModel updateDevice(UUID id, DeviceDTO dto) {
         DeviceModel existing = getDeviceById(id);
         LocationModel location = resolveLocation(dto);
+        checkIdentifiersAreUnique(dto, id);
 
         existing.setType(dto.type());
         existing.setManufacturer(dto.manufacturer());
         existing.setModelName(dto.modelName());
         existing.setSerialNumber(dto.serialNumber());
         existing.setInventoryNumber(dto.inventoryNumber());
+        existing.setHostname(dto.hostname());
         existing.setPurchaseDate(dto.purchaseDate());
         existing.setStatus(dto.status());
         existing.setDefective(dto.defective());
@@ -91,6 +100,39 @@ public class DeviceService {
         }
 
         deviceRepository.deleteById(id);
+    }
+
+    // Seriennummer, Inventarnummer und Hostname sind in der DB UNIQUE – hier vorher prüfen,
+    // damit statt eines Datenbankfehlers eine verständliche Meldung zurückkommt
+    private void checkIdentifiersAreUnique(DeviceDTO dto, UUID ownId) {
+        List<String> conflicts = new ArrayList<>();
+        addConflict(conflicts, "Serial number", dto.serialNumber(), deviceRepository::findBySerialNumber, ownId);
+        addConflict(conflicts, "Inventory number", dto.inventoryNumber(), deviceRepository::findByInventoryNumber, ownId);
+        addConflict(conflicts, "Hostname", dto.hostname(), deviceRepository::findByHostname, ownId);
+
+        if (!conflicts.isEmpty()) {
+            throw new DeviceIdentifierAlreadyExistsException(
+                    "Device cannot be saved because some identifiers are already used by another device.",
+                    conflicts);
+        }
+    }
+
+    private static void addConflict(List<String> conflicts, String label, String value,
+                                    Function<String, Optional<DeviceModel>> finder, UUID ownId) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        finder.apply(value)
+                .filter(other -> !other.getId().equals(ownId))
+                .ifPresent(other -> conflicts.add(
+                        label + " \"" + value + "\" is already used by " + describeDevice(other)));
+    }
+
+    private static String describeDevice(DeviceModel device) {
+        String name = Stream.of(device.getManufacturer(), device.getModelName())
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(" "));
+        return name.isBlank() ? "Device ID: " + device.getId() : name + " (ID: " + device.getId() + ")";
     }
 
     private static String describeAssignment(AssignmentModel assignment) {

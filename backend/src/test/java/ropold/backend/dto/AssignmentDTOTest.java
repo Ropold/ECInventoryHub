@@ -17,7 +17,7 @@ class AssignmentDTOTest {
     void testAssignmentDTOCreation() {
         UUID id = UUID.randomUUID();
         DeviceDTO device = new DeviceDTO(
-                UUID.randomUUID(), null, "Dell", "Latitude 5420", "SN-1001", "INV-1001",
+                UUID.randomUUID(), null, "Dell", "Latitude 5420", "SN-1001", "INV-1001", "HOST-1001",
                 null, null, false, null, "Notes", null
         );
         EmployeeDTO employee = new EmployeeDTO(

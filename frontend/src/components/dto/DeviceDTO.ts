@@ -9,6 +9,7 @@ export type DeviceDTO = {
     modelName: string | null;
     serialNumber: string | null;
     inventoryNumber: string | null;
+    hostname: string | null;
     purchaseDate: string | null;
     status: DeviceStatus;
     defective: boolean;

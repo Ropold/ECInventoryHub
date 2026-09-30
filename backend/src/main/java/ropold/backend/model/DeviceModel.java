@@ -38,6 +38,9 @@ public class DeviceModel {
     @Column(name = "inventory_number", unique = true)
     private String inventoryNumber;
 
+    @Column(name = "hostname", unique = true)
+    private String hostname;
+
     @Column(name = "purchase_date")
     private LocalDate purchaseDate;
 

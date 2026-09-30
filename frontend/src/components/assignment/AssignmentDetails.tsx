@@ -3,7 +3,7 @@ import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {formatDate, handleDeleteError} from "../utils/ComponentsFunctions.tsx";
+import {formatDate, handleRequestError} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -49,7 +49,7 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
             })
             .catch((error) => {
                 console.error("Error deleting assignment", error);
-                handleDeleteError(error,
+                handleRequestError(error,
                     "You must be logged in as User/Admin to delete an assignment.",
                     "Error deleting assignment. Please try again.",
                     setDeleteError);
@@ -67,43 +67,45 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
 
     return (
         <div>
-            <h2>Assignment Details</h2>
+            <h2>{translatedInfo["Assignment Details"][props.language]}</h2>
             {assignment ? (
                 <div className="details-container">
-                    <h3>Device</h3>
-                    <p><strong>Device:</strong> {deviceName}</p>
-                    <p><strong>Type:</strong> {assignment.device.type}</p>
+                    <h3>{translatedInfo["Device"][props.language]}</h3>
+                    <p><strong>{translatedInfo["Device"][props.language]}:</strong> {deviceName}</p>
+                    <p><strong>{translatedInfo["Type"][props.language]}:</strong> {assignment.device.type}</p>
                     {assignment.device.inventoryNumber &&
-                        <p><strong>Inventory Number:</strong> {assignment.device.inventoryNumber}</p>}
+                        <p><strong>{translatedInfo["Inventory Number"][props.language]}:</strong> {assignment.device.inventoryNumber}</p>}
+                    {assignment.device.hostname &&
+                        <p><strong>{translatedInfo["Hostname"][props.language]}:</strong> {assignment.device.hostname}</p>}
                     {assignment.device.serialNumber &&
-                        <p><strong>Serial Number:</strong> {assignment.device.serialNumber}</p>}
+                        <p><strong>{translatedInfo["Serial Number"][props.language]}:</strong> {assignment.device.serialNumber}</p>}
 
-                    <h3>Employee</h3>
-                    <p><strong>Employee:</strong> {assignment.employee.name}</p>
-                    <p><strong>Department:</strong> {assignment.employee.department}</p>
+                    <h3>{translatedInfo["Employee"][props.language]}</h3>
+                    <p><strong>{translatedInfo["Employee"][props.language]}:</strong> {assignment.employee.name}</p>
+                    <p><strong>{translatedInfo["Department"][props.language]}:</strong> {assignment.employee.department}</p>
                     {assignment.handedOutBy &&
-                        <p><strong>Handed Out By:</strong> {assignment.handedOutBy.name}</p>}
+                        <p><strong>{translatedInfo["Handed Out By"][props.language]}:</strong> {assignment.handedOutBy.name}</p>}
 
-                    <h3>Period</h3>
-                    <p><strong>Assigned Date:</strong> {formatDate(assignment.assignedDate)}</p>
-                    <p><strong>Returned Date:</strong> {formatDate(assignment.returnedDate ?? undefined)}</p>
+                    <h3>{translatedInfo["Period"][props.language]}</h3>
+                    <p><strong>{translatedInfo["Assigned Date"][props.language]}:</strong> {formatDate(assignment.assignedDate)}</p>
+                    <p><strong>{translatedInfo["Returned Date"][props.language]}:</strong> {formatDate(assignment.returnedDate ?? undefined)}</p>
 
-                    <h3>Condition</h3>
-                    {assignment.conditionOut && <p><strong>Condition Out:</strong> {assignment.conditionOut}</p>}
-                    {assignment.conditionIn && <p><strong>Condition In:</strong> {assignment.conditionIn}</p>}
-                    <p><strong>Copy Handed To Employee:</strong> {assignment.copyHandedToEmployee ? 'Yes' : 'No'}</p>
-                    <p><strong>Copy Filed In Personnel File:</strong> {assignment.copyFiledInPersonnelFile ? 'Yes' : 'No'}</p>
+                    <h3>{translatedInfo["Condition"][props.language]}</h3>
+                    {assignment.conditionOut && <p><strong>{translatedInfo["Condition Out"][props.language]}:</strong> {assignment.conditionOut}</p>}
+                    {assignment.conditionIn && <p><strong>{translatedInfo["Condition In"][props.language]}:</strong> {assignment.conditionIn}</p>}
+                    <p><strong>{translatedInfo["Copy Handed To Employee"][props.language]}:</strong> {assignment.copyHandedToEmployee ? translatedInfo["Yes"][props.language] : translatedInfo["No"][props.language]}</p>
+                    <p><strong>{translatedInfo["Copy Filed In Personnel File"][props.language]}:</strong> {assignment.copyFiledInPersonnelFile ? translatedInfo["Yes"][props.language] : translatedInfo["No"][props.language]}</p>
 
                     {assignment.notes && (
                         <>
-                            <h3>Notes</h3>
+                            <h3>{translatedInfo["Notes"][props.language]}</h3>
                             <p>{assignment.notes}</p>
                         </>
                     )}
 
                     {assignment.files.length > 0 && (
                         <>
-                            <h3>Files</h3>
+                            <h3>{translatedInfo["Files"][props.language]}</h3>
                             <ul className="assignment-file-list">
                                 {assignment.files.map((file) => (
                                     <li key={file.id}>
@@ -116,8 +118,8 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                         </>
                     )}
 
-                    <h3>Metadata</h3>
-                    <p><strong>ID:</strong> {assignment.id}</p>
+                    <h3>{translatedInfo["Metadata"][props.language]}</h3>
+                    <p><strong>{translatedInfo["ID"][props.language]}:</strong> {assignment.id}</p>
 
                     <div className="details-buttons">
                         <button className="button-blue" onClick={() => withPermission(() => navigate(`/assignments/${id}/edit`))}>{translatedInfo["Edit"][props.language]}</button>
@@ -134,9 +136,8 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                     {showPopup && (
                         <div className="popup-overlay">
                             <div className="popup-content">
-                                <h3>Confirm Deletion</h3>
-                                <p>Are you sure you want to delete the assignment
-                                    for {assignment.employee.name}?</p>
+                                <h3>{translatedInfo["Confirm Deletion"][props.language]}</h3>
+                                <p>{translatedInfo["Delete assignment confirmation"][props.language].replace("{name}", assignment.employee.name)}</p>
                                 {deleteError && (
                                     <div className="popup-error">
                                         <p>{deleteError}</p>
@@ -151,7 +152,7 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
                     )}
                 </div>
             ) : (
-                <p>Loading...</p>
+                <p>{translatedInfo["Loading..."][props.language]}</p>
             )}
         </div>
     )

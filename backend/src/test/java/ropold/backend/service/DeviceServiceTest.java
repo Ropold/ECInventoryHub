@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import ropold.backend.dto.DeviceDTO;
 import ropold.backend.dto.LocationDTO;
 import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
+import ropold.backend.exception.conflictexceptions.DeviceIdentifierAlreadyExistsException;
 import ropold.backend.exception.notfoundexceptions.DeviceNotFoundException;
 import ropold.backend.exception.notfoundexceptions.LocationNotFoundException;
 import ropold.backend.model.AssignmentModel;
@@ -78,6 +79,7 @@ class DeviceServiceTest {
                 "Latitude 5420",
                 "SN-1001",
                 "INV-1001",
+                "HOST-1001",
                 LocalDate.of(2023, 1, 15),
                 DeviceStatus.ASSIGNED,
                 false,
@@ -93,6 +95,7 @@ class DeviceServiceTest {
                 "iPhone 14",
                 "SN-2002",
                 "INV-2002",
+                "HOST-2002",
                 LocalDate.of(2023, 6, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -139,6 +142,7 @@ class DeviceServiceTest {
                 "Odyssey G7",
                 "SN-3003",
                 "INV-3003",
+                "HOST-3003",
                 LocalDate.of(2024, 2, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -153,6 +157,7 @@ class DeviceServiceTest {
         DeviceModel result = deviceService.addDevice(deviceDTO);
 
         assertEquals(deviceDTO.manufacturer(), result.getManufacturer());
+        assertEquals("HOST-3003", result.getHostname());
         assertEquals(locationModel1, result.getLocation());
         verify(deviceRepository, times(1)).save(any(DeviceModel.class));
     }
@@ -166,6 +171,7 @@ class DeviceServiceTest {
                 "MX Master 3",
                 "SN-4004",
                 "INV-4004",
+                "HOST-4004",
                 LocalDate.of(2024, 3, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -192,6 +198,7 @@ class DeviceServiceTest {
                 "Odyssey G7",
                 "SN-3003",
                 "INV-3003",
+                "HOST-3003",
                 LocalDate.of(2024, 2, 1),
                 DeviceStatus.AVAILABLE,
                 false,
@@ -220,6 +227,7 @@ class DeviceServiceTest {
                 "Latitude 5430",
                 existing.getSerialNumber(),
                 existing.getInventoryNumber(),
+                "HOST-1001-NEW",
                 existing.getPurchaseDate(),
                 DeviceStatus.IN_REPAIR,
                 true,
@@ -235,9 +243,77 @@ class DeviceServiceTest {
         DeviceModel result = deviceService.updateDevice(existing.getId(), deviceDTO);
 
         assertEquals("Latitude 5430", result.getModelName());
+        assertEquals("HOST-1001-NEW", result.getHostname());
         assertEquals(DeviceStatus.IN_REPAIR, result.getStatus());
         assertEquals("Updated notes", result.getNotes());
         verify(deviceRepository, times(1)).save(existing);
+    }
+
+    @Test
+    void testAddDevice_DuplicateIdentifiers_ThrowsException() {
+        DeviceModel other = allDevices.getFirst();
+        DeviceDTO deviceDTO = new DeviceDTO(
+                null, DeviceType.MONITOR, "Samsung", "Odyssey G7",
+                other.getSerialNumber(), other.getInventoryNumber(), other.getHostname(),
+                null, DeviceStatus.AVAILABLE, false, null, null, null
+        );
+
+        when(deviceRepository.findBySerialNumber(other.getSerialNumber())).thenReturn(Optional.of(other));
+        when(deviceRepository.findByInventoryNumber(other.getInventoryNumber())).thenReturn(Optional.of(other));
+        when(deviceRepository.findByHostname(other.getHostname())).thenReturn(Optional.of(other));
+
+        DeviceIdentifierAlreadyExistsException exception = assertThrows(
+                DeviceIdentifierAlreadyExistsException.class,
+                () -> deviceService.addDevice(deviceDTO)
+        );
+
+        assertEquals(3, exception.getConflictDetails().size());
+        assertEquals("Serial number \"SN-1001\" is already used by Dell Latitude 5420 (ID: " + other.getId() + ")",
+                exception.getConflictDetails().getFirst());
+        verify(deviceRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateDevice_KeepsOwnIdentifiers() {
+        DeviceModel existing = allDevices.getFirst();
+        DeviceDTO deviceDTO = new DeviceDTO(
+                existing.getId(), existing.getType(), existing.getManufacturer(), existing.getModelName(),
+                existing.getSerialNumber(), existing.getInventoryNumber(), existing.getHostname(),
+                existing.getPurchaseDate(), existing.getStatus(), existing.isDefective(), null, existing.getNotes(), null
+        );
+
+        when(deviceRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findBySerialNumber(existing.getSerialNumber())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findByInventoryNumber(existing.getInventoryNumber())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findByHostname(existing.getHostname())).thenReturn(Optional.of(existing));
+        when(deviceRepository.save(existing)).thenReturn(existing);
+
+        deviceService.updateDevice(existing.getId(), deviceDTO);
+
+        verify(deviceRepository, times(1)).save(existing);
+    }
+
+    @Test
+    void testUpdateDevice_HostnameOfOtherDevice_ThrowsException() {
+        DeviceModel existing = allDevices.getFirst();
+        DeviceModel other = allDevices.get(1);
+        DeviceDTO deviceDTO = new DeviceDTO(
+                existing.getId(), existing.getType(), existing.getManufacturer(), existing.getModelName(),
+                existing.getSerialNumber(), existing.getInventoryNumber(), other.getHostname(),
+                existing.getPurchaseDate(), existing.getStatus(), existing.isDefective(), null, existing.getNotes(), null
+        );
+
+        when(deviceRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findByHostname(other.getHostname())).thenReturn(Optional.of(other));
+
+        DeviceIdentifierAlreadyExistsException exception = assertThrows(
+                DeviceIdentifierAlreadyExistsException.class,
+                () -> deviceService.updateDevice(existing.getId(), deviceDTO)
+        );
+
+        assertEquals(List.of("Hostname \"HOST-2002\" is already used by Apple iPhone 14 (ID: " + other.getId() + ")"),
+                exception.getConflictDetails());
+        verify(deviceRepository, never()).save(any());
     }
 
     @Test
@@ -245,7 +321,7 @@ class DeviceServiceTest {
         UUID nonExistentId = UUID.randomUUID();
         DeviceDTO deviceDTO = new DeviceDTO(
                 nonExistentId, DeviceType.LAPTOP, "Dell", "Latitude 5430",
-                "SN-9999", "INV-9999", LocalDate.now(), DeviceStatus.AVAILABLE,
+                "SN-9999", "INV-9999", "HOST-9999", LocalDate.now(), DeviceStatus.AVAILABLE,
                 false, null, "Notes", null
         );
 
@@ -269,6 +345,7 @@ class DeviceServiceTest {
                 existing.getModelName(),
                 existing.getSerialNumber(),
                 existing.getInventoryNumber(),
+                existing.getHostname(),
                 existing.getPurchaseDate(),
                 existing.getStatus(),
                 existing.isDefective(),

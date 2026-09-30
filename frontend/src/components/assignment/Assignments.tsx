@@ -25,6 +25,7 @@ function filterAssignments(assignments: AssignmentModel[], query: string): Assig
             assignment.device.modelName?.toLowerCase().includes(searchQuery) ||
             assignment.device.serialNumber?.toLowerCase().includes(searchQuery) ||
             assignment.device.inventoryNumber?.toLowerCase().includes(searchQuery) ||
+            assignment.device.hostname?.toLowerCase().includes(searchQuery) ||
             assignment.handedOutBy?.name.toLowerCase().includes(searchQuery) ||
             assignment.assignedDate.toLowerCase().includes(searchQuery) ||
             assignment.notes?.toLowerCase().includes(searchQuery) ||
