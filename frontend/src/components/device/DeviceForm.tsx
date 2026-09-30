@@ -6,6 +6,8 @@ import type {DeviceStatus, DeviceType} from "../models/DeviceModel.ts";
 import type {LocationModel} from "../models/LocationModel.ts";
 import type {DeviceFileModel} from "../models/DeviceFileModel.ts";
 import "../styles/FormStyles.css";
+import "../styles/Popup.css";
+import {renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 
 type DeviceFormProps = {
     language: string;
@@ -37,6 +39,8 @@ type DeviceFormProps = {
     setNewFiles: React.Dispatch<React.SetStateAction<File[]>>;
     existingFiles?: DeviceFileModel[];
     setExistingFiles?: React.Dispatch<React.SetStateAction<DeviceFileModel[]>>;
+    saveError: string | null;
+    saveErrorDetails: string[];
 }
 
 export default function DeviceForm(props: Readonly<DeviceFormProps>) {
@@ -282,6 +286,13 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
                             </li>
                         ))}
                     </ul>
+                )}
+
+                {props.saveError && (
+                    <div className="popup-error">
+                        <p>{props.saveError}</p>
+                        {renderBlockingList(props.saveErrorDetails)}
+                    </div>
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">

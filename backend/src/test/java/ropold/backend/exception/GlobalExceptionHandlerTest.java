@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
+import ropold.backend.exception.conflictexceptions.DeviceIdentifierAlreadyExistsException;
 import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.LocationHasDevicesException;
 import ropold.backend.exception.notfoundexceptions.*;
@@ -63,6 +64,19 @@ class GlobalExceptionHandlerTest {
         assertThat(response.code()).isEqualTo("DEVICE_HAS_ASSIGNMENTS");
         assertThat(response.message()).isEqualTo("Device cannot be deleted because there are still assignments referencing it.");
         assertThat(response.details()).containsExactly("Assignment ID: 123");
+    }
+
+    @Test
+    void testHandleDeviceIdentifierAlreadyExistsException() {
+        DeviceIdentifierAlreadyExistsException exception = new DeviceIdentifierAlreadyExistsException(
+                "Device cannot be saved because some identifiers are already used by another device.",
+                List.of("Hostname \"HOST-1\" is already used by Dell Latitude (ID: 123)"));
+
+        ErrorResponse response = globalExceptionHandler.handleDeviceIdentifierAlreadyExistsException(exception);
+
+        assertThat(response.code()).isEqualTo("DEVICE_IDENTIFIER_EXISTS");
+        assertThat(response.message()).isEqualTo("Device cannot be saved because some identifiers are already used by another device.");
+        assertThat(response.details()).containsExactly("Hostname \"HOST-1\" is already used by Dell Latitude (ID: 123)");
     }
 
     @Test

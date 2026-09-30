@@ -3,7 +3,7 @@ import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {formatDate, handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
+import {formatDate, handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -60,7 +60,7 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting device", error);
-                handleDeleteError(error,
+                handleRequestError(error,
                     "You must be logged in as User/Admin to delete a device.",
                     "Error deleting device. Please try again.",
                     setDeleteError, setBlockingAssignments);

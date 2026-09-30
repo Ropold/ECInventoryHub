@@ -4,8 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ropold.backend.model.DeviceModel;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DeviceRepository extends JpaRepository<DeviceModel, UUID> {
     List<DeviceModel> findByLocationId(UUID locationId);
+
+    Optional<DeviceModel> findBySerialNumber(String serialNumber);
+
+    Optional<DeviceModel> findByInventoryNumber(String inventoryNumber);
+
+    Optional<DeviceModel> findByHostname(String hostname);
 }

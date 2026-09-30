@@ -46,23 +46,23 @@ export function renderImagePreview(
     }
     return null;
 }
-export function handleDeleteError(
+export function handleRequestError(
     error: AxiosError<{message?: string; details?: string[]}>,
     loginMessage: string,
     genericMessage: string,
-    setDeleteError: (message: string | null) => void,
+    setError: (message: string | null) => void,
     setBlockingItems?: (items: string[]) => void
 ) {
     const status = error.response?.status;
 
     if (status === 401 || status === 403) {
-        setDeleteError(loginMessage);
+        setError(loginMessage);
         setBlockingItems?.([]);
     } else if (status === 409) {
-        setDeleteError(error.response?.data?.message ?? genericMessage);
+        setError(error.response?.data?.message ?? genericMessage);
         setBlockingItems?.(error.response?.data?.details ?? []);
     } else {
-        setDeleteError(genericMessage);
+        setError(genericMessage);
         setBlockingItems?.([]);
     }
 }

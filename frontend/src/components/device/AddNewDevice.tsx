@@ -3,6 +3,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import type {DeviceModel, DeviceStatus, DeviceType} from "../models/DeviceModel.ts";
 import DeviceForm from "./DeviceForm.tsx";
+import {handleRequestError} from "../utils/ComponentsFunctions.tsx";
 
 type AddNewDeviceProps = {
     language: string;
@@ -24,6 +25,8 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
     const [locationId, setLocationId] = useState<string | undefined>(undefined);
     const [notes, setNotes] = useState<string | undefined>(undefined);
     const [newFiles, setNewFiles] = useState<File[]>([]);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveErrorDetails, setSaveErrorDetails] = useState<string[]>([]);
 
     const navigate = useNavigate();
 
@@ -56,7 +59,13 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
                 props.handleNewDeviceSubmit(response.data);
                 navigate(`/devices/${response.data.id}`);
             })
-            .catch((error) => console.error("Error creating device", error));
+            .catch((error) => {
+                console.error("Error creating device", error);
+                handleRequestError(error,
+                    "You must be logged in as User/Admin to add a device.",
+                    "Error creating device. Please try again.",
+                    setSaveError, setSaveErrorDetails);
+            });
     }
 
     const backNavigationPath = "/devices";
@@ -73,7 +82,8 @@ export default function AddNewDevice(props: Readonly<AddNewDeviceProps>) {
                     inventoryNumber, setInventoryNumber, hostname, setHostname, purchaseDate, setPurchaseDate,
                     status, setStatus, defective, setDefective,
                     locationId, setLocationId, notes, setNotes,
-                    newFiles, setNewFiles
+                    newFiles, setNewFiles,
+                    saveError, saveErrorDetails
                 }}
             />
         </div>

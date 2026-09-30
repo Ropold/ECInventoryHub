@@ -211,6 +211,45 @@ class DeviceControllerIntegrationTest {
     }
 
     @Test
+    void testAddDevice_duplicateIdentifiers_shouldReturnConflict() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User,
+                List.of(new SimpleGrantedAuthority("USER")),
+                "github"
+        );
+
+        // Seriennummer und Hostname gehören schon zu den Geräten aus setUp()
+        String newDeviceJson = """
+                {
+                    "type": "MONITOR",
+                    "manufacturer": "Samsung",
+                    "modelName": "Odyssey G7",
+                    "serialNumber": "SN-2002",
+                    "inventoryNumber": "INV-3003",
+                    "hostname": "HOST-1001",
+                    "status": "AVAILABLE",
+                    "defective": false
+                }
+                """;
+
+        MockMultipartFile deviceDtoPart = new MockMultipartFile(
+                "deviceDTO", "", "application/json", newDeviceJson.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart("/api/devices")
+                        .file(deviceDtoPart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DEVICE_IDENTIFIER_EXISTS"))
+                .andExpect(jsonPath("$.details.length()").value(2));
+
+        assertEquals(2, deviceRepository.findAll().size());
+    }
+
+    @Test
     void testAddDevice_unauthenticated_shouldReturnUnauthorized() throws Exception {
         String newDeviceJson = """
                 {
@@ -550,6 +589,51 @@ class DeviceControllerIntegrationTest {
         verify(cloudinaryService).deleteImage("https://cloudinary.test/old-image.png");
         verify(cloudinaryService, never()).deleteFile(anyString());
         assertTrue(deviceFileRepository.findAll().isEmpty());
+    }
+
+    @Test
+    void testUpdateDevice_duplicateIdentifier_shouldReturnConflictAndKeepFiles() throws Exception {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        OAuth2AuthenticationToken authToken = new OAuth2AuthenticationToken(
+                mockOAuth2User, List.of(new SimpleGrantedAuthority("USER")), "github"
+        );
+
+        DeviceModel existingDevice = deviceRepository.findAll().getFirst();
+        deviceFileRepository.save(new DeviceFileModel(
+                null, existingDevice, "https://cloudinary.test/old-image.png", "image/png", LocalDateTime.now()
+        ));
+        entityManager.flush();
+        entityManager.clear();
+
+        // Seriennummer gehört zum zweiten Gerät -> Update wird abgelehnt,
+        // die Datei (nicht in keepIds) darf dann auch nicht aus Cloudinary gelöscht werden
+        String updatedDeviceJson = """
+                {
+                    "type": "LAPTOP",
+                    "manufacturer": "Dell",
+                    "modelName": "Latitude 5430",
+                    "serialNumber": "SN-2002",
+                    "inventoryNumber": "INV-1001",
+                    "status": "IN_REPAIR",
+                    "defective": true
+                }
+                """;
+
+        MockMultipartFile deviceDtoPart = new MockMultipartFile(
+                "deviceDTO", "", "application/json", updatedDeviceJson.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/devices/" + existingDevice.getId())
+                        .file(deviceDtoPart)
+                        .with(authentication(authToken)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DEVICE_IDENTIFIER_EXISTS"))
+                .andExpect(jsonPath("$.details.length()").value(1));
+
+        verify(cloudinaryService, never()).deleteImage(anyString());
+        verify(cloudinaryService, never()).deleteFile(anyString());
+        assertEquals(1, deviceFileRepository.findAll().size());
     }
 
     @Test

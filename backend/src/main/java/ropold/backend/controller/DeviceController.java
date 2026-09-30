@@ -84,13 +84,14 @@ public class DeviceController {
                 : Collections.emptySet();
 
         DeviceModel existing = deviceService.getDeviceById(id);
-        for (DeviceFileModel existingFile : existing.getFiles()) {
-            if (!keepIds.contains(existingFile.getId())) {
-                deleteFileFromCloudinary(existingFile);
-            }
-        }
+        List<DeviceFileModel> filesToDelete = existing.getFiles().stream()
+                .filter(existingFile -> !keepIds.contains(existingFile.getId()))
+                .toList();
 
         DeviceModel updated = deviceService.updateDevice(id, deviceDTO);
+
+        // Erst nach erfolgreichem Update aus Cloudinary löschen, sonst gehen Dateien verloren, wenn das Update scheitert
+        filesToDelete.forEach(this::deleteFileFromCloudinary);
 
         if (files != null) {
             for (MultipartFile file : files) {

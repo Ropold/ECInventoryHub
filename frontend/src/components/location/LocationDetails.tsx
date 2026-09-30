@@ -3,7 +3,7 @@ import type {LocationModel} from "../models/LocationModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
+import {handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -60,7 +60,7 @@ export default function LocationDetails(props: Readonly<LocationDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting location", error);
-                handleDeleteError(error,
+                handleRequestError(error,
                     "You must be logged in as User/Admin to delete a location.",
                     "Error deleting location. Please try again.",
                     setDeleteError, setBlockingDevices);

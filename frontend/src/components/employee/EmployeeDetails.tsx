@@ -3,7 +3,7 @@ import type {EmployeeModel} from "../models/EmployeeModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {handleDeleteError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
+import {handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 
@@ -60,7 +60,7 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
             })
             .catch((error) => {
                 console.error("Error deleting employee", error);
-                handleDeleteError(error,
+                handleRequestError(error,
                     "You must be logged in as User/Admin to delete an employee.",
                     "Error deleting employee. Please try again.",
                     setDeleteError, setBlockingAssignments);
