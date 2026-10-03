@@ -7,8 +7,8 @@
     display: flex; /* Setzt alle Kinder in eine Zeile */
     align-items: center; /* Zentriert sie vertikal */
     gap: 10px; /* Abstand zwischen den Elementen */
-    box-sizing: border-box; /* Padding zählt zu den 600px */
-    width: 600px;
+    box-sizing: border-box; /* Padding zählt zu den 450px */
+    width: 450px;
     max-width: 100%; /* auf kleinen Bildschirmen nicht überstehen */
     height: auto; /* Höhe dynamisch halten */
 }
@@ -30,11 +30,48 @@
 
 .search-add-new-button{
     display: flex;
+    flex-wrap: wrap; /* auf schmalen Bildschirmen umbrechen statt überstehen */
     align-items: center;
     justify-content: center;
     gap: 10px; /* Abstand zwischen Searchbar und Button */
 }
 
+/* Eigene Zeile für Filter unter der Suchzeile (z. B. Gerätestatus) */
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+/* Aktiv / Zurückgegeben / Alle als zusammenhängende Button-Gruppe */
+.filter-toggle {
+    display: flex;
+    flex-shrink: 0;
+}
+
+.filter-toggle button {
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+.filter-toggle button:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+.filter-toggle button:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+.filter-select {
+    width: auto; /* hebt width: 100% aus FormStyles.css auf */
+    height: 40px;
+    padding: 0 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 .search-bar-row {
-    margin: 7px 35px 0 0; /* hebt die auto-Margins aus .search-bar auf */
+    margin: 7px 0 0; /* hebt die auto-Margins aus .search-bar auf */
 }

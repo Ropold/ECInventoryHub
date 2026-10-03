@@ -1,6 +1,8 @@
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useNavigate} from "react-router-dom";
 import {getDeviceLabel} from "../utils/ComponentsFunctions.tsx";
+import {deviceStatusLabelKeys} from "../utils/DeviceFilters.ts";
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import "../styles/device/DeviceCard.css";
 
 type DeviceCardProps = {
@@ -29,7 +31,7 @@ export default function DeviceCard(props: Readonly<DeviceCardProps>){
                 />
             )}
             <p className="device-card-inventory">{deviceName}</p>
-            <p className="device-card-status">{props.device.status}</p>
+            <p className="device-card-status">{translatedInfo[deviceStatusLabelKeys[props.device.status]][props.language]}</p>
         </button>
     )
 }

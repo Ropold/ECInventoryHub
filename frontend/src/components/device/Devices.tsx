@@ -1,11 +1,17 @@
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useState} from "react";
-import {useAutoScrollToTop} from "../utils/ComponentsFunctions.tsx";
+import {useAutoScrollToTop, useSessionState} from "../utils/ComponentsFunctions.tsx";
 import SearchBar from "../SearchBar.tsx";
 import DeviceCard from "./DeviceCard.tsx";
 import {useNavigate} from "react-router-dom";
 import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
+import {
+    type DeviceStatusFilter,
+    type DeviceTypeFilter,
+    deviceStatusFilters,
+    deviceTypeFilters
+} from "../utils/DeviceFilters.ts";
 
 type DeviceProps = {
     language: string;
@@ -13,12 +19,19 @@ type DeviceProps = {
     devices: DeviceModel[];
 }
 
-function filterDevices(devices: DeviceModel[], query: string): DeviceModel[] {
+function filterDevices(
+    devices: DeviceModel[],
+    query: string,
+    statusFilter: DeviceStatusFilter,
+    typeFilter: DeviceTypeFilter
+): DeviceModel[] {
     if (!devices) return [];
 
     const searchQuery = query.toLowerCase();
 
     return devices.filter(device => {
+        if (statusFilter !== "ALL" && device.status !== statusFilter) return false;
+        if (typeFilter !== "ALL" && device.type !== typeFilter) return false;
         return (
             device.manufacturer?.toLowerCase().includes(searchQuery) ||
             device.modelName?.toLowerCase().includes(searchQuery) ||
@@ -38,8 +51,10 @@ export default function Devices(props: Readonly<DeviceProps>){
     useAutoScrollToTop();
     const navigate = useNavigate();
 
-    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [searchQuery, setSearchQuery] = useSessionState<string>("devices.searchQuery", "");
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
+    const [statusFilter, setStatusFilter] = useSessionState<DeviceStatusFilter>("devices.statusFilter", "AVAILABLE");
+    const [typeFilter, setTypeFilter] = useSessionState<DeviceTypeFilter>("devices.typeFilter", "ALL");
 
     function handleAddNewClick() {
         if (props.role === "VIEWER") {
@@ -50,7 +65,7 @@ export default function Devices(props: Readonly<DeviceProps>){
     }
 
 
-    const filteredDevices = filterDevices(props.devices, searchQuery);
+    const filteredDevices = filterDevices(props.devices, searchQuery, statusFilter, typeFilter);
 
     return(
         <>
@@ -61,8 +76,40 @@ export default function Devices(props: Readonly<DeviceProps>){
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     language={props.language}
+                    hasActiveFilters={statusFilter !== "AVAILABLE" || typeFilter !== "ALL"}
+                    onReset={() => {
+                        setStatusFilter("AVAILABLE");
+                        setTypeFilter("ALL");
+                    }}
                 />
+                <select
+                    className="filter-select"
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value as DeviceTypeFilter)}
+                >
+                    {deviceTypeFilters.map((filter) => (
+                        <option key={filter.value} value={filter.value}>
+                            {translatedInfo[filter.labelKey][props.language]}
+                        </option>
+                    ))}
+                </select>
                 <button className="button-blue" onClick={handleAddNewClick}>{translatedInfo["New Device"][props.language]}</button>
+            </div>
+
+            <div className="filter-row">
+                <div className="filter-toggle" role="group">
+                    {deviceStatusFilters.map((filter) => (
+                        <button
+                            key={filter.value}
+                            type="button"
+                            className={statusFilter === filter.value ? "button-blue" : "button-grey"}
+                            aria-pressed={statusFilter === filter.value}
+                            onClick={() => setStatusFilter(filter.value)}
+                        >
+                            {translatedInfo[filter.labelKey][props.language]}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {showNoPermission && (

@@ -32,7 +32,16 @@ export default function AssignmentCard(props: Readonly<AssignmentCardProps>){
     const isActive = !returnedDate;
     const deviceLabel = `${deviceTypeIcons[device.type]} ${getDeviceLabel(device)}`;
     const deviceName = [device.manufacturer, device.modelName].filter(Boolean).join(" ");
-    const documentsMissing = !props.assignment.copyHandedToEmployee || !props.assignment.copyFiledInPersonnelFile;
+    // Nur bei aktiven Zuweisungen warnen; der Tooltip listet auf, welche Kopie noch fehlt
+    const missingDocuments = [
+        !props.assignment.copyHandedToEmployee && translatedInfo["Copy Handed To Employee"][props.language],
+        !props.assignment.copyFiledInPersonnelFile && translatedInfo["Copy Filed In Personnel File"][props.language],
+    ].filter(Boolean);
+    const showDocumentsWarning = isActive && missingDocuments.length > 0;
+    const documentsTooltip = [
+        translatedInfo["Documents missing"][props.language] + ":",
+        ...missingDocuments.map((document) => `• ${document}`),
+    ].join("\n");
     const dateText = isActive
         ? formatDate(assignedDate)
         : `${formatDate(assignedDate)} – ${formatDate(returnedDate ?? undefined)}`;
@@ -43,10 +52,10 @@ export default function AssignmentCard(props: Readonly<AssignmentCardProps>){
             className={`assignment-card${isActive ? "" : " assignment-card-returned"}`}
             onClick={handleCardClick}
         >
-            {documentsMissing && (
+            {showDocumentsWarning && (
                 <span
                     className="assignment-card-warning"
-                    title={translatedInfo["Documents missing"][props.language]}
+                    title={documentsTooltip}
                 >
                     ⚠️
                 </span>

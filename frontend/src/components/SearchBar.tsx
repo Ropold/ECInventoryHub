@@ -5,12 +5,18 @@ type SearchBarProps = {
     searchQuery: string;
     setSearchQuery: (value: string) => void;
     language: string;
+    // Optional: weitere Filter der Seite (z. B. Gerätetyp), die mit zurückgesetzt werden
+    hasActiveFilters?: boolean;
+    onReset?: () => void;
 }
 
 export default function SearchBar(props: Readonly<SearchBarProps>) {
 
+    const isFiltered = props.searchQuery !== "" || props.hasActiveFilters === true;
+
     function handleReset() {
         props.setSearchQuery("");
+        props.onReset?.();
     }
 
     return (
@@ -25,7 +31,7 @@ export default function SearchBar(props: Readonly<SearchBarProps>) {
 
             <button
                 onClick={handleReset}
-                className={`${props.searchQuery ? "button-group-button" : "button-grey-search"}`}
+                className={isFiltered ? "button-group-button" : "button-grey-search"}
             >
                 {translatedInfo["Reset Filters"][props.language]}
             </button>

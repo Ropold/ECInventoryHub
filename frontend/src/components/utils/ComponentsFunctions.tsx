@@ -1,5 +1,5 @@
 import type {AxiosError} from "axios";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {translatedInfo} from "./TranslatedInfo.ts";
@@ -43,6 +43,28 @@ export function getDeviceLabel(device: DeviceModel): string {
     const label = candidates.find((value) => value && value.trim() !== "");
     if (label) return label;
     return [device.manufacturer, device.modelName].filter(Boolean).join(" ") || "—";
+}
+
+// Wie useState, aber der Wert überlebt Seitenwechsel und Reload (bis der Tab geschlossen wird)
+export function useSessionState<T>(key: string, initialValue: T): [T, (value: T) => void] {
+    const [value, setValue] = useState<T>(() => {
+        try {
+            const stored = sessionStorage.getItem(key);
+            return stored === null ? initialValue : JSON.parse(stored) as T;
+        } catch {
+            return initialValue;
+        }
+    });
+
+    useEffect(() => {
+        try {
+            sessionStorage.setItem(key, JSON.stringify(value));
+        } catch {
+            // Storage nicht verfügbar (z. B. privater Modus) – dann eben nur im Speicher
+        }
+    }, [key, value]);
+
+    return [value, setValue];
 }
 
 export const useAutoScrollToTop = () => {
