@@ -12,8 +12,9 @@
     font: inherit;
     color: inherit;
     cursor: pointer;
-    height: 180px;
-    width: 180px;
+    height: 200px;
+    width: 200px;
+    overflow: hidden; /* nichts darf aus der Karte herauslaufen */
     border: 2px solid #ff9e00;
     border-radius: 12px;
     padding: 10px;
@@ -34,10 +35,24 @@
     cursor: pointer;
 }
 
-.location-card-image {
+/* Texte behalten ihre Höhe – nur das Bild darf schrumpfen */
+.location-card > * {
+    flex-shrink: 0;
+}
+
+.location-card .location-card-image {
     width: 100px;
-    max-height: 70px;
+    height: 70px;
+    min-height: 0;
+    flex-shrink: 1; /* nimmt nur den Platz, der neben den Texten übrig bleibt */
+    margin-top: 4px;
     object-fit: cover;
     border: 2px solid black;
     border-radius: 5px;
+}
+
+/* Adressen sind oft lang – hier ist Platz für drei statt zwei Zeilen */
+.location-card .card-subtitle {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
 }

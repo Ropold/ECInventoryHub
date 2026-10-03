@@ -39,7 +39,7 @@ export default function DeviceCard(props: Readonly<DeviceCardProps>){
             <h2 className="card-title">{deviceTypeIcons[props.device.type]} {getDeviceLabel(props.device)}</h2>
             {deviceName && <p className="card-subtitle">{deviceName}</p>}
             {identifiers.map((identifier) => (
-                <p key={identifier.labelKey} className="device-card-identifier">
+                <p key={identifier.labelKey} className="card-detail">
                     {translatedInfo[identifier.labelKey][props.language]}: {identifier.value}
                 </p>
             ))}

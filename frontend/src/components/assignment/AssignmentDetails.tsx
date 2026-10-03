@@ -3,7 +3,8 @@ import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {formatDate, handleRequestError} from "../utils/ComponentsFunctions.tsx";
+import {departmentLabelKeys, formatDate, handleRequestError} from "../utils/ComponentsFunctions.tsx";
+import {deviceTypeLabelKeys} from "../utils/DeviceFilters.ts";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 import DeviceCard from "../device/DeviceCard.tsx";
@@ -75,7 +76,7 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
 
                     <h3>{translatedInfo["Device"][props.language]}</h3>
                     <p><strong>{translatedInfo["Device"][props.language]}:</strong> {deviceName}</p>
-                    <p><strong>{translatedInfo["Type"][props.language]}:</strong> {assignment.device.type}</p>
+                    <p><strong>{translatedInfo["Type"][props.language]}:</strong> {translatedInfo[deviceTypeLabelKeys[assignment.device.type]][props.language]}</p>
                     {assignment.device.inventoryNumber &&
                         <p><strong>{translatedInfo["Inventory Number"][props.language]}:</strong> {assignment.device.inventoryNumber}</p>}
                     {assignment.device.hostname &&
@@ -102,7 +103,7 @@ export default function AssignmentDetails(props: Readonly<AssignmentDetailsProps
 
                     <h3>{translatedInfo["Employee"][props.language]}</h3>
                     <p><strong>{translatedInfo["Employee"][props.language]}:</strong> {assignment.employee.name}</p>
-                    <p><strong>{translatedInfo["Department"][props.language]}:</strong> {assignment.employee.department}</p>
+                    <p><strong>{translatedInfo["Department"][props.language]}:</strong> {translatedInfo[departmentLabelKeys[assignment.employee.department]][props.language]}</p>
                     {assignment.handedOutBy &&
                         <p><strong>{translatedInfo["Handed Out By"][props.language]}:</strong> {assignment.handedOutBy.name}</p>}
 

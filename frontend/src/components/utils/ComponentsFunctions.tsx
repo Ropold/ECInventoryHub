@@ -2,6 +2,7 @@ import type {AxiosError} from "axios";
 import {useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import type {DeviceModel} from "../models/DeviceModel.ts";
+import type {Department} from "../models/EmployeeModel.ts";
 import {translatedInfo} from "./TranslatedInfo.ts";
 
 export function onFileChange(
@@ -25,6 +26,26 @@ export function onImageCancel(setImage: (file: File | null) => void) {
 export function formatDate(dateString: string | undefined): string {
     if (!dateString) return "—";
     return new Date(dateString).toLocaleDateString('de-DE');
+}
+
+export const departmentLabelKeys: Record<Department, string> = {
+    MARKETING: "Marketing",
+    ACCOUNTING: "Accounting",
+    HR: "HR",
+    DEVELOPMENT: "Development",
+    MANAGEMENT: "Management",
+};
+
+// Feste Reihenfolge der Standorte in Auswahllisten (nach Namen). Nicht aufgeführte
+// Standorte folgen alphabetisch dahinter – bei Umbenennung hier mitändern.
+const LOCATION_ORDER = ["Meerbusch", "Essen", "Home Office"];
+
+export function compareLocationNames(a: string, b: string): number {
+    const rank = (name: string) => {
+        const index = LOCATION_ORDER.indexOf(name);
+        return index === -1 ? LOCATION_ORDER.length : index;
+    };
+    return rank(a) - rank(b) || a.localeCompare(b);
 }
 
 export function getDeviceLabel(device: DeviceModel): string {

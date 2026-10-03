@@ -6,14 +6,18 @@ import type {DeviceStatus, DeviceType} from "../models/DeviceModel.ts";
 export type DeviceTypeFilter = DeviceType | "ALL";
 export type DeviceStatusFilter = DeviceStatus | "ALL";
 
+export const deviceTypeLabelKeys: Record<DeviceType, string> = {
+    LAPTOP: "Laptop",
+    PHONE: "Mobile phone",
+    TABLET: "Tablet",
+    MONITOR: "Monitor",
+    ACCESSORY: "Accessory",
+    OTHER: "Other device",
+};
+
 export const deviceTypeFilters: {value: DeviceTypeFilter; labelKey: string}[] = [
     {value: "ALL", labelKey: "All types"},
-    {value: "LAPTOP", labelKey: "Laptop"},
-    {value: "PHONE", labelKey: "Mobile phone"},
-    {value: "TABLET", labelKey: "Tablet"},
-    {value: "MONITOR", labelKey: "Monitor"},
-    {value: "ACCESSORY", labelKey: "Accessory"},
-    {value: "OTHER", labelKey: "Other device"},
+    ...(Object.keys(deviceTypeLabelKeys) as DeviceType[]).map((type) => ({value: type, labelKey: deviceTypeLabelKeys[type]})),
 ];
 
 export const deviceStatusLabelKeys: Record<DeviceStatus, string> = {

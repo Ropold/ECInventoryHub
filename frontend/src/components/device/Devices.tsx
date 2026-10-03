@@ -1,6 +1,6 @@
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useState} from "react";
-import {useAutoScrollToTop, useSessionState} from "../utils/ComponentsFunctions.tsx";
+import {compareLocationNames, useAutoScrollToTop, useSessionState} from "../utils/ComponentsFunctions.tsx";
 import SearchBar from "../SearchBar.tsx";
 import DeviceCard from "./DeviceCard.tsx";
 import {useNavigate} from "react-router-dom";
@@ -19,11 +19,28 @@ type DeviceProps = {
     devices: DeviceModel[];
 }
 
+// "ALL", "NONE" (Geräte ohne Standort) oder die ID eines Standorts
+type LocationFilter = string;
+
+// Alle Standorte, an denen mindestens ein Gerät steht, in der festen Standort-Reihenfolge
+function getLocationOptions(devices: DeviceModel[]): {id: string; name: string}[] {
+    const byId = new Map<string, string>();
+    devices.forEach((device) => {
+        if (device.location) {
+            byId.set(device.location.id, device.location.name);
+        }
+    });
+    return [...byId.entries()]
+        .map(([id, name]) => ({id, name}))
+        .sort((a, b) => compareLocationNames(a.name, b.name));
+}
+
 function filterDevices(
     devices: DeviceModel[],
     query: string,
     statusFilter: DeviceStatusFilter,
-    typeFilter: DeviceTypeFilter
+    typeFilter: DeviceTypeFilter,
+    locationFilter: LocationFilter
 ): DeviceModel[] {
     if (!devices) return [];
 
@@ -32,6 +49,8 @@ function filterDevices(
     return devices.filter(device => {
         if (statusFilter !== "ALL" && device.status !== statusFilter) return false;
         if (typeFilter !== "ALL" && device.type !== typeFilter) return false;
+        if (locationFilter === "NONE" && device.location) return false;
+        if (locationFilter !== "ALL" && locationFilter !== "NONE" && device.location?.id !== locationFilter) return false;
         return (
             device.manufacturer?.toLowerCase().includes(searchQuery) ||
             device.modelName?.toLowerCase().includes(searchQuery) ||
@@ -55,6 +74,7 @@ export default function Devices(props: Readonly<DeviceProps>){
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
     const [statusFilter, setStatusFilter] = useSessionState<DeviceStatusFilter>("devices.statusFilter", "AVAILABLE");
     const [typeFilter, setTypeFilter] = useSessionState<DeviceTypeFilter>("devices.typeFilter", "ALL");
+    const [locationFilter, setLocationFilter] = useSessionState<LocationFilter>("devices.locationFilter", "ALL");
 
     function handleAddNewClick() {
         if (props.role === "VIEWER") {
@@ -65,7 +85,9 @@ export default function Devices(props: Readonly<DeviceProps>){
     }
 
 
-    const filteredDevices = filterDevices(props.devices, searchQuery, statusFilter, typeFilter);
+    const locationOptions = getLocationOptions(props.devices);
+    const locationLabel = translatedInfo["Location"][props.language];
+    const filteredDevices = filterDevices(props.devices, searchQuery, statusFilter, typeFilter, locationFilter);
 
     return(
         <>
@@ -76,10 +98,11 @@ export default function Devices(props: Readonly<DeviceProps>){
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     language={props.language}
-                    hasActiveFilters={statusFilter !== "AVAILABLE" || typeFilter !== "ALL"}
+                    hasActiveFilters={statusFilter !== "AVAILABLE" || typeFilter !== "ALL" || locationFilter !== "ALL"}
                     onReset={() => {
                         setStatusFilter("AVAILABLE");
                         setTypeFilter("ALL");
+                        setLocationFilter("ALL");
                     }}
                 />
                 <select
@@ -92,6 +115,20 @@ export default function Devices(props: Readonly<DeviceProps>){
                             {translatedInfo[filter.labelKey][props.language]}
                         </option>
                     ))}
+                </select>
+                <select
+                    className="filter-select"
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                    aria-label={locationLabel}
+                >
+                    <option value="ALL">{locationLabel}: {translatedInfo["All"][props.language]}</option>
+                    {locationOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                            {locationLabel}: {option.name}
+                        </option>
+                    ))}
+                    <option value="NONE">{locationLabel}: {translatedInfo["None"][props.language]}</option>
                 </select>
                 <button className="button-blue" onClick={handleAddNewClick}>{translatedInfo["New Device"][props.language]}</button>
             </div>

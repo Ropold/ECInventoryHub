@@ -7,7 +7,7 @@ import type {LocationModel} from "../models/LocationModel.ts";
 import type {DeviceFileModel} from "../models/DeviceFileModel.ts";
 import "../styles/FormStyles.css";
 import "../styles/Popup.css";
-import {renderBlockingList} from "../utils/ComponentsFunctions.tsx";
+import {compareLocationNames, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 
 type DeviceFormProps = {
     language: string;
@@ -104,47 +104,47 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
     return (
         <div>
-            <h2>{isEditMode ? "Edit Device" : "Add Device"}</h2>
+            <h2>{isEditMode ? translatedInfo["Edit Device"][props.language] : translatedInfo["Add Device"][props.language]}</h2>
 
             <form onSubmit={handleSubmit}>
                 <div className="edit-form">
                     {/* Type */}
                     <label>
-                        <span>Type:</span>
+                        <span>{translatedInfo["Type"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={type}
                             onChange={(e) => setType(e.target.value as DeviceType)}
                             required
                         >
-                            <option value="LAPTOP">Laptop</option>
-                            <option value="PHONE">Phone</option>
-                            <option value="TABLET">Tablet</option>
-                            <option value="MONITOR">Monitor</option>
-                            <option value="ACCESSORY">Accessory</option>
-                            <option value="OTHER">Other</option>
+                            <option value="LAPTOP">{translatedInfo["Laptop"][props.language]}</option>
+                            <option value="PHONE">{translatedInfo["Mobile phone"][props.language]}</option>
+                            <option value="TABLET">{translatedInfo["Tablet"][props.language]}</option>
+                            <option value="MONITOR">{translatedInfo["Monitor"][props.language]}</option>
+                            <option value="ACCESSORY">{translatedInfo["Accessory"][props.language]}</option>
+                            <option value="OTHER">{translatedInfo["Other device"][props.language]}</option>
                         </select>
                     </label>
 
                     {/* Status */}
                     <label>
-                        <span>Status:</span>
+                        <span>{translatedInfo["Status"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={status}
                             onChange={(e) => setStatus(e.target.value as DeviceStatus)}
                             required
                         >
-                            <option value="AVAILABLE">Available</option>
-                            <option value="ASSIGNED">Assigned</option>
-                            <option value="IN_REPAIR">In Repair</option>
-                            <option value="RETIRED">Retired</option>
+                            <option value="AVAILABLE">{translatedInfo["Available"][props.language]}</option>
+                            <option value="ASSIGNED">{translatedInfo["Assigned"][props.language]}</option>
+                            <option value="IN_REPAIR">{translatedInfo["In repair"][props.language]}</option>
+                            <option value="RETIRED">{translatedInfo["Retired"][props.language]}</option>
                         </select>
                     </label>
 
                     {/* Manufacturer */}
                     <label>
-                        <span>Manufacturer:</span>
+                        <span>{translatedInfo["Manufacturer"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -155,7 +155,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Model Name */}
                     <label>
-                        <span>Model Name:</span>
+                        <span>{translatedInfo["Model Name"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -166,7 +166,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Serial Number */}
                     <label>
-                        <span>Serial Number:</span>
+                        <span>{translatedInfo["Serial Number"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -177,7 +177,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Inventory Number */}
                     <label>
-                        <span>Inventory Number:</span>
+                        <span>{translatedInfo["Inventory Number"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -188,7 +188,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Hostname */}
                     <label>
-                        <span>Hostname:</span>
+                        <span>{translatedInfo["Hostname"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -199,7 +199,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Purchase Date */}
                     <label>
-                        <span>Purchase Date:</span>
+                        <span>{translatedInfo["Purchase Date"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="date"
@@ -210,14 +210,14 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Location */}
                     <label>
-                        <span>Location:</span>
+                        <span>{translatedInfo["Location"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={locationId ?? ""}
                             onChange={(e) => setLocationId(e.target.value || undefined)}
                         >
-                            <option value="">-- none --</option>
-                            {locations.map((location) => (
+                            <option value="">-- {translatedInfo["None"][props.language]} --</option>
+                            {[...locations].sort((a, b) => compareLocationNames(a.name, b.name)).map((location) => (
                                 <option key={location.id} value={location.id}>{location.name}</option>
                             ))}
                         </select>
@@ -225,7 +225,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Defective */}
                     <label>
-                        <span>Defective:</span>
+                        <span>{translatedInfo["Defective"][props.language]}:</span>
                         <input
                             type="checkbox"
                             checked={defective}
@@ -235,7 +235,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Notes */}
                     <label>
-                        <span>Notes:</span>
+                        <span>{translatedInfo["Notes"][props.language]}:</span>
                         <textarea
                             className="input-small"
                             value={notes ?? ""}
@@ -245,7 +245,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
 
                     {/* Files */}
                     <label>
-                        <span>Files:</span>
+                        <span>{translatedInfo["Files"][props.language]}:</span>
                         <input
                             type="file"
                             multiple

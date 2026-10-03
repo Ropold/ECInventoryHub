@@ -9,6 +9,7 @@ import NoPermissionPopup from "../NoPermissionPopup.tsx";
 import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import EmployeeCard from "../employee/EmployeeCard.tsx";
 import AssignmentCard from "../assignment/AssignmentCard.tsx";
+import {deviceStatusLabelKeys, deviceTypeLabelKeys} from "../utils/DeviceFilters.ts";
 
 type DeviceDetailsProps = {
     language: string;
@@ -94,8 +95,8 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                 <div className="details-container">
                     <h3>{translatedInfo["Basic Information"][props.language]}</h3>
                     <p><strong>{translatedInfo["Device"][props.language]}:</strong> {deviceName}</p>
-                    <p><strong>{translatedInfo["Type"][props.language]}:</strong> {device.type}</p>
-                    <p><strong>{translatedInfo["Status"][props.language]}:</strong> {device.status}</p>
+                    <p><strong>{translatedInfo["Type"][props.language]}:</strong> {translatedInfo[deviceTypeLabelKeys[device.type]][props.language]}</p>
+                    <p><strong>{translatedInfo["Status"][props.language]}:</strong> {translatedInfo[deviceStatusLabelKeys[device.status]][props.language]}</p>
                     <p><strong>{translatedInfo["Defective"][props.language]}:</strong> {device.defective ? translatedInfo["Yes"][props.language] : translatedInfo["No"][props.language]}</p>
                     <h3>{translatedInfo["Identification"][props.language]}</h3>
                     {device.inventoryNumber && <p><strong>{translatedInfo["Inventory Number"][props.language]}:</strong> {device.inventoryNumber}</p>}

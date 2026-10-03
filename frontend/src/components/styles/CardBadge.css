@@ -58,6 +58,17 @@
     overflow: hidden;
 }
 
+/* Kleine Detailzeile (z. B. "Seriennummer: …"), zu lange Werte werden mit … gekürzt */
+.card-detail {
+    margin: 1px 0;
+    font-size: 0.75rem;
+    text-align: center;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* ⚠️ oben rechts auf einer Karte (CardWarning), die Karte braucht position: relative */
 .card-warning {
     position: absolute;

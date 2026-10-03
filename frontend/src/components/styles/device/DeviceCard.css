@@ -56,16 +56,6 @@
     flex-shrink: 0;
 }
 
-.device-card-identifier {
-    margin: 1px 0;
-    font-size: 0.75rem;
-    text-align: center;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* zu lange Seriennummern werden mit … gekürzt */
-}
-
 .device-card .device-card-image {
     width: 100px;
     height: 45px;

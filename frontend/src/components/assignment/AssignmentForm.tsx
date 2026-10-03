@@ -121,20 +121,20 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
     return (
         <div>
-            <h2>{isEditMode ? "Edit Assignment" : "Add Assignment"}</h2>
+            <h2>{isEditMode ? translatedInfo["Edit Assignment"][props.language] : translatedInfo["Add Assignment"][props.language]}</h2>
 
             <form onSubmit={handleSubmit}>
                 <div className="edit-form">
                     {/* Device */}
                     <label>
-                        <span>Device:</span>
+                        <span>{translatedInfo["Device"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={deviceId}
                             onChange={(e) => setDeviceId(e.target.value)}
                             required
                         >
-                            <option value="">-- select device --</option>
+                            <option value="">-- {translatedInfo["Select device"][props.language]} --</option>
                             {devices.map((device) => (
                                 <option key={device.id} value={device.id}>{getDeviceLabel(device)}</option>
                             ))}
@@ -143,34 +143,34 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Employee */}
                     <label>
-                        <span>Employee:</span>
+                        <span>{translatedInfo["Employee"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={employeeId}
                             onChange={(e) => setEmployeeId(e.target.value)}
                             required
                         >
-                            <option value="">-- select employee --</option>
+                            <option value="">-- {translatedInfo["Select employee"][props.language]} --</option>
                             {employeeOptions}
                         </select>
                     </label>
 
                     {/* Handed Out By */}
                     <label>
-                        <span>Handed Out By:</span>
+                        <span>{translatedInfo["Handed Out By"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={handedOutById ?? ""}
                             onChange={(e) => setHandedOutById(e.target.value || undefined)}
                         >
-                            <option value="">-- none --</option>
+                            <option value="">-- {translatedInfo["None"][props.language]} --</option>
                             {employeeOptions}
                         </select>
                     </label>
 
                     {/* Assigned Date */}
                     <label>
-                        <span>Assigned Date:</span>
+                        <span>{translatedInfo["Assigned Date"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="date"
@@ -182,7 +182,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Returned Date */}
                     <label>
-                        <span>Returned Date:</span>
+                        <span>{translatedInfo["Returned Date"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="date"
@@ -194,7 +194,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Condition Out */}
                     <label>
-                        <span>Condition Out:</span>
+                        <span>{translatedInfo["Condition Out"][props.language]}:</span>
                         <textarea
                             className="input-small"
                             value={conditionOut ?? ""}
@@ -204,7 +204,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Condition In */}
                     <label>
-                        <span>Condition In:</span>
+                        <span>{translatedInfo["Condition In"][props.language]}:</span>
                         <textarea
                             className="input-small"
                             value={conditionIn ?? ""}
@@ -214,7 +214,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Notes */}
                     <label>
-                        <span>Notes:</span>
+                        <span>{translatedInfo["Notes"][props.language]}:</span>
                         <textarea
                             className="input-small"
                             value={notes ?? ""}
@@ -224,7 +224,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Copy Handed To Employee */}
                     <label>
-                        <span>Copy Handed To Employee:</span>
+                        <span>{translatedInfo["Copy Handed To Employee"][props.language]}:</span>
                         <input
                             type="checkbox"
                             checked={copyHandedToEmployee}
@@ -234,7 +234,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Copy Filed In Personnel File */}
                     <label>
-                        <span>Copy Filed In Personnel File:</span>
+                        <span>{translatedInfo["Copy Filed In Personnel File"][props.language]}:</span>
                         <input
                             type="checkbox"
                             checked={copyFiledInPersonnelFile}
@@ -244,7 +244,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
 
                     {/* Files */}
                     <label>
-                        <span>Files:</span>
+                        <span>{translatedInfo["Files"][props.language]}:</span>
                         <input
                             type="file"
                             multiple
