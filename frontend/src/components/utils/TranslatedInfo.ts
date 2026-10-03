@@ -1461,5 +1461,27 @@ export const translatedInfo: Record<string, Record<string, string>> = {
         "pt": "Sem coordenadas",
         "ru": "Нет координат",
         "tr": "Koordinat yok",
+    },
+    "Move up": {
+        "de": "Nach oben",
+        "en": "Move up",
+        "pl": "W górę",
+        "es": "Subir",
+        "fr": "Monter",
+        "it": "Sposta su",
+        "pt": "Mover para cima",
+        "ru": "Вверх",
+        "tr": "Yukarı taşı",
+    },
+    "Move down": {
+        "de": "Nach unten",
+        "en": "Move down",
+        "pl": "W dół",
+        "es": "Bajar",
+        "fr": "Descendre",
+        "it": "Sposta giù",
+        "pt": "Mover para baixo",
+        "ru": "Вниз",
+        "tr": "Aşağı taşı",
     }
 }

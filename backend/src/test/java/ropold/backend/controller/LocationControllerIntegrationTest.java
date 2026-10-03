@@ -40,6 +40,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -79,7 +80,8 @@ class LocationControllerIntegrationTest {
                 "Notes for location one",
                 null,
                 null,
-                "https://example.com/location1.jpg"
+                "https://example.com/location1.jpg",
+                1
         );
 
         LocationModel locationModel2 = new LocationModel(
@@ -91,7 +93,8 @@ class LocationControllerIntegrationTest {
                 "Notes for location two",
                 null,
                 null,
-                "https://example.com/location2.jpg"
+                "https://example.com/location2.jpg",
+                2
         );
 
         locationRepository.saveAll(List.of(locationModel1, locationModel2));
@@ -514,5 +517,73 @@ class LocationControllerIntegrationTest {
         device.setModelName("XPS 13");
         device.setLocation(location);
         return deviceRepository.save(device);
+    }
+
+    private OAuth2AuthenticationToken authTokenWithAuthority(String authority) {
+        OAuth2User mockOAuth2User = mock(OAuth2User.class);
+        when(mockOAuth2User.getName()).thenReturn("test-user");
+        return new OAuth2AuthenticationToken(mockOAuth2User, List.of(new SimpleGrantedAuthority(authority)), "github");
+    }
+
+    @Test
+    void testGetAllLocations_sortedBySortOrder() throws Exception {
+        LocationModel first = locationRepository.findAllByOrderBySortOrderAscNameAsc().getFirst();
+        first.setSortOrder(99);
+        locationRepository.save(first);
+
+        mockMvc.perform(get("/api/locations"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Location Two"))
+                .andExpect(jsonPath("$[1].name").value("Location One"));
+    }
+
+    @Test
+    void testMoveLocation_down_shouldSwapOrder() throws Exception {
+        LocationModel first = locationRepository.findAllByOrderBySortOrderAscNameAsc().getFirst();
+
+        mockMvc.perform(put("/api/locations/" + first.getId() + "/move")
+                        .param("direction", "DOWN")
+                        .with(authentication(authTokenWithAuthority("USER"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Location Two"))
+                .andExpect(jsonPath("$[0].sortOrder").value(1))
+                .andExpect(jsonPath("$[1].name").value("Location One"))
+                .andExpect(jsonPath("$[1].sortOrder").value(2));
+
+        List<LocationModel> ordered = locationRepository.findAllByOrderBySortOrderAscNameAsc();
+        assertEquals("Location Two", ordered.get(0).getName());
+        assertEquals("Location One", ordered.get(1).getName());
+    }
+
+    @Test
+    void testMoveLocation_invalidDirection_shouldReturnBadRequest() throws Exception {
+        LocationModel first = locationRepository.findAllByOrderBySortOrderAscNameAsc().getFirst();
+
+        mockMvc.perform(put("/api/locations/" + first.getId() + "/move")
+                        .param("direction", "SIDEWAYS")
+                        .with(authentication(authTokenWithAuthority("USER"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_PARAMETER"));
+    }
+
+    @Test
+    void testMoveLocation_asViewer_shouldReturnForbidden() throws Exception {
+        LocationModel first = locationRepository.findAllByOrderBySortOrderAscNameAsc().getFirst();
+
+        mockMvc.perform(put("/api/locations/" + first.getId() + "/move")
+                        .param("direction", "DOWN")
+                        .with(authentication(authTokenWithAuthority("VIEWER"))))
+                .andExpect(status().isForbidden());
+
+        assertEquals("Location One", locationRepository.findAllByOrderBySortOrderAscNameAsc().getFirst().getName());
+    }
+
+    @Test
+    void testMoveLocation_unauthenticated_shouldReturnUnauthorized() throws Exception {
+        LocationModel first = locationRepository.findAllByOrderBySortOrderAscNameAsc().getFirst();
+
+        mockMvc.perform(put("/api/locations/" + first.getId() + "/move")
+                        .param("direction", "DOWN"))
+                .andExpect(status().isUnauthorized());
     }
 }

@@ -7,6 +7,7 @@ import ropold.backend.exception.notfoundexceptions.LocationNotFoundException;
 import ropold.backend.model.DeviceModel;
 import ropold.backend.model.DeviceType;
 import ropold.backend.model.LocationModel;
+import ropold.backend.model.MoveDirection;
 import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.LocationRepository;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +46,8 @@ class LocationServiceTest {
                 "Notes for location one",
                 null,
                 null,
-                "https://example.com/location1.jpg"
+                "https://example.com/location1.jpg",
+                1
         );
 
         LocationModel locationModel2 = new LocationModel(
@@ -56,11 +59,13 @@ class LocationServiceTest {
                 "Notes for location two",
                 null,
                 null,
-                null
+                null,
+                2
         );
 
         allLocations = List.of(locationModel1, locationModel2);
-        when(locationRepository.findAll()).thenReturn(allLocations);
+        when(locationRepository.findAllByOrderBySortOrderAscNameAsc()).thenReturn(allLocations);
+        when(locationRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -88,7 +93,8 @@ class LocationServiceTest {
                 "None",
                 null,
                 null,
-                null
+                null,
+                0
         );
 
         LocationModel savedLocation = new LocationModel(
@@ -100,7 +106,8 @@ class LocationServiceTest {
                 newLocation.getNotes(),
                 null,
                 null,
-                newLocation.getImageUrl()
+                newLocation.getImageUrl(),
+                0
         );
 
         when(locationRepository.save(newLocation)).thenReturn(savedLocation);
@@ -120,7 +127,8 @@ class LocationServiceTest {
                 existingLocation.getNotes(),
                 null,
                 null,
-                existingLocation.getImageUrl()
+                existingLocation.getImageUrl(),
+                0
         );
 
         when(locationRepository.existsById(updatedLocation.getId())).thenReturn(true);
@@ -243,5 +251,74 @@ class LocationServiceTest {
         );
 
         verify(locationRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void testNextSortOrder_AppendsAfterHighest() {
+        when(locationRepository.findTopByOrderBySortOrderDesc()).thenReturn(Optional.of(allLocations.getLast()));
+        assertEquals(3, locationService.nextSortOrder());
+    }
+
+    @Test
+    void testNextSortOrder_NoLocations_StartsAtOne() {
+        when(locationRepository.findTopByOrderBySortOrderDesc()).thenReturn(Optional.empty());
+        assertEquals(1, locationService.nextSortOrder());
+    }
+
+    @Test
+    void testMoveLocation_Down_SwapsWithNextAndRenumbers() {
+        LocationModel first = allLocations.getFirst();
+        LocationModel second = allLocations.getLast();
+
+        List<LocationModel> result = locationService.moveLocation(first.getId(), MoveDirection.DOWN);
+
+        assertSame(second, result.get(0));
+        assertSame(first, result.get(1));
+        assertEquals(1, second.getSortOrder());
+        assertEquals(2, first.getSortOrder());
+        verify(locationRepository, times(1)).saveAll(any());
+    }
+
+    @Test
+    void testMoveLocation_Up_SwapsWithPrevious() {
+        LocationModel first = allLocations.getFirst();
+        LocationModel second = allLocations.getLast();
+
+        List<LocationModel> result = locationService.moveLocation(second.getId(), MoveDirection.UP);
+
+        assertSame(second, result.get(0));
+        assertSame(first, result.get(1));
+    }
+
+    @Test
+    void testMoveLocation_FirstUp_KeepsOrder() {
+        LocationModel first = allLocations.getFirst();
+
+        List<LocationModel> result = locationService.moveLocation(first.getId(), MoveDirection.UP);
+
+        assertSame(first, result.get(0));
+        assertEquals(1, first.getSortOrder());
+    }
+
+    @Test
+    void testMoveLocation_EqualSortOrders_RenumbersSequentially() {
+        allLocations.forEach(location -> location.setSortOrder(0));
+
+        locationService.moveLocation(allLocations.getFirst().getId(), MoveDirection.UP);
+
+        assertEquals(1, allLocations.getFirst().getSortOrder());
+        assertEquals(2, allLocations.getLast().getSortOrder());
+    }
+
+    @Test
+    void testMoveLocation_NotFound() {
+        UUID nonExistentId = UUID.randomUUID();
+
+        assertThrows(
+                LocationNotFoundException.class,
+                () -> locationService.moveLocation(nonExistentId, MoveDirection.DOWN)
+        );
+
+        verify(locationRepository, never()).saveAll(any());
     }
 }

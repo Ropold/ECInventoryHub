@@ -99,7 +99,8 @@ class DeviceControllerIntegrationTest {
                 "Notes for location one",
                 null,
                 null,
-                "https://example.com/location1.jpg"
+                "https://example.com/location1.jpg",
+                0
         );
 
         LocationModel savedLocation = locationRepository.save(locationModel1);

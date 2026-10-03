@@ -20,10 +20,10 @@ INSERT INTO employees (id, personnel_number, name, email, phone, address, depart
     ('55555555-5555-5555-5555-555555555555', 'P-1005', 'Eva Fischer',  'eva.fischer@ec.de',  '+49 151 1000005', NULL,                             'MANAGEMENT',  true,  'Geschäftsführung', NULL);
 
 -- 2. LOCATIONS
-INSERT INTO locations (id, name, address, phone, email, notes, latitude, longitude, image_url) VALUES
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Meerbusch',   'Meerbuscher Str. 70-72, 40667 Meerbusch, Deutschland', '+49 2159 100000', 'meerbusch@ec.de', 'Zentrale',         51.26776404327255, 6.6280980981685165, NULL),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Essen',       'Langenberger Str. 590, 45127 Essen, Deutschland',     '+49 201 200000',  'essen@ec.de',     NULL,               51.41352072337824, 7.0773141310505485, NULL),
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Home Office', NULL,                                                   NULL,              NULL,              'Remote-Kategorie', NULL,              NULL,               NULL);
+INSERT INTO locations (id, name, address, phone, email, notes, latitude, longitude, sort_order, image_url) VALUES
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Meerbusch',   'Meerbuscher Str. 70-72, 40667 Meerbusch, Deutschland', '+49 2159 100000', 'meerbusch@ec.de', 'Zentrale',         51.26776404327255, 6.6280980981685165, 1, NULL),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Essen',       'Langenberger Str. 590, 45127 Essen, Deutschland',     '+49 201 200000',  'essen@ec.de',     NULL,               51.41352072337824, 7.0773141310505485, 2, NULL),
+    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Home Office', NULL,                                                   NULL,              NULL,              'Remote-Kategorie', NULL,              NULL,                3, NULL);
 
 -- 3. DEVICES (referenzieren locations)
 -- status passt zu den Zuweisungen: ASSIGNED genau dann, wenn es eine offene Zuweisung gibt

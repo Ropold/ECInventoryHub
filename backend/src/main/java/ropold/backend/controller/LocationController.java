@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ropold.backend.dto.LocationDTO;
 import ropold.backend.model.LocationModel;
+import ropold.backend.model.MoveDirection;
 import ropold.backend.service.CloudinaryService;
 import ropold.backend.service.ImageUploadUtil;
 import ropold.backend.service.LocationService;
@@ -60,7 +61,8 @@ public class LocationController {
                 locationDTO.notes(),
                 locationDTO.latitude(),
                 locationDTO.longitude(),
-                imageUrl
+                imageUrl,
+                locationService.nextSortOrder()
         ));
     }
 
@@ -88,8 +90,22 @@ public class LocationController {
                 locationDTO.notes(),
                 locationDTO.latitude(),
                 locationDTO.longitude(),
-                newImageUrl
+                newImageUrl,
+                existing.getSortOrder()
         ));
+    }
+
+    // Verschiebt den Standort um eine Position nach oben/unten und liefert die neue Reihenfolge
+    @PutMapping("/{id}/move")
+    public List<LocationModel> moveLocation(
+            @PathVariable UUID id,
+            @RequestParam MoveDirection direction,
+            @AuthenticationPrincipal OAuth2User authentication) {
+
+        if (authentication == null) {
+            throw new AccessDeniedException("User not authenticated");
+        }
+        return locationService.moveLocation(id, direction);
     }
 
     @DeleteMapping("/{id}")

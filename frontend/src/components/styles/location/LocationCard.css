@@ -56,3 +56,41 @@
     -webkit-line-clamp: 3;
     line-clamp: 3;
 }
+
+/* ▲/▼ zum Umsortieren, oben rechts übereinander */
+.card-move {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.card-move-arrow {
+    font-size: 0.8rem;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: #007bff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.card-move-arrow:hover {
+    background-color: rgba(0, 123, 255, 0.15);
+}
+
+.card-move-arrow-disabled {
+    color: #bbb;
+    cursor: default;
+}
+
+.card-move-arrow-disabled:hover {
+    background-color: transparent;
+}
+
+/* Titel hält Abstand zu den Pfeilen */
+.card-move ~ .card-title {
+    padding: 0 18px;
+}

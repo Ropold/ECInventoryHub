@@ -42,6 +42,7 @@ CREATE TABLE locations (
     notes   text,
     latitude  double precision,
     longitude double precision,
+    sort_order integer NOT NULL DEFAULT 0,
     image_url varchar
 );
 

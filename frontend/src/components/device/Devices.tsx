@@ -1,6 +1,7 @@
 import type {DeviceModel} from "../models/DeviceModel.ts";
+import type {LocationModel} from "../models/LocationModel.ts";
 import {useState} from "react";
-import {compareLocationNames, useAutoScrollToTop, useSessionState} from "../utils/ComponentsFunctions.tsx";
+import {useAutoScrollToTop, useSessionState} from "../utils/ComponentsFunctions.tsx";
 import SearchBar from "../SearchBar.tsx";
 import DeviceCard from "./DeviceCard.tsx";
 import {useNavigate} from "react-router-dom";
@@ -17,22 +18,15 @@ type DeviceProps = {
     language: string;
     role: string;
     devices: DeviceModel[];
+    locations: LocationModel[];
 }
 
 // "ALL", "NONE" (Geräte ohne Standort) oder die ID eines Standorts
 type LocationFilter = string;
 
-// Alle Standorte, an denen mindestens ein Gerät steht, in der festen Standort-Reihenfolge
-function getLocationOptions(devices: DeviceModel[]): {id: string; name: string}[] {
-    const byId = new Map<string, string>();
-    devices.forEach((device) => {
-        if (device.location) {
-            byId.set(device.location.id, device.location.name);
-        }
-    });
-    return [...byId.entries()]
-        .map(([id, name]) => ({id, name}))
-        .sort((a, b) => compareLocationNames(a.name, b.name));
+// Alle Standorte, an denen mindestens ein Gerät steht – in der Reihenfolge aus der Datenbank (sort_order)
+function getLocationOptions(locations: LocationModel[], devices: DeviceModel[]): LocationModel[] {
+    return locations.filter((location) => devices.some((device) => device.location?.id === location.id));
 }
 
 function filterDevices(
@@ -85,7 +79,7 @@ export default function Devices(props: Readonly<DeviceProps>){
     }
 
 
-    const locationOptions = getLocationOptions(props.devices);
+    const locationOptions = getLocationOptions(props.locations, props.devices);
     const locationLabel = translatedInfo["Location"][props.language];
     const filteredDevices = filterDevices(props.devices, searchQuery, statusFilter, typeFilter, locationFilter);
 

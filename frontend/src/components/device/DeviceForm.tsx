@@ -7,7 +7,7 @@ import type {LocationModel} from "../models/LocationModel.ts";
 import type {DeviceFileModel} from "../models/DeviceFileModel.ts";
 import "../styles/FormStyles.css";
 import "../styles/Popup.css";
-import {compareLocationNames, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
+import {renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 
 type DeviceFormProps = {
     language: string;
@@ -217,7 +217,7 @@ export default function DeviceForm(props: Readonly<DeviceFormProps>) {
                             onChange={(e) => setLocationId(e.target.value || undefined)}
                         >
                             <option value="">-- {translatedInfo["None"][props.language]} --</option>
-                            {[...locations].sort((a, b) => compareLocationNames(a.name, b.name)).map((location) => (
+                            {locations.map((location) => (
                                 <option key={location.id} value={location.id}>{location.name}</option>
                             ))}
                         </select>

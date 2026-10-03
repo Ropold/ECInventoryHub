@@ -203,6 +203,11 @@ export default function App() {
         replaceDeviceLocation(updatedLocation.id, updatedLocation);
     }
 
+    // Neue Reihenfolge nach ▲/▼ auf der Standortseite (Backend liefert die komplette Liste)
+    function handleLocationsReorder(reorderedLocations: LocationModel[]) {
+        setLocations(reorderedLocations);
+    }
+
     function handleLocationDelete(deletedLocationId: string) {
         setLocations((prevLocations) =>
             prevLocations.filter((location) => location.id !== deletedLocationId)
@@ -250,11 +255,11 @@ export default function App() {
           <Route path="/assignments/add-new-assignment" element={<AddNewAssignment language={language} role={role} handleNewAssignmentSubmit={handleNewAssignment}/>} />
           <Route path="/assignments/:id" element={<AssignmentDetails language={language} role={role} handleAssignmentUpdate={handleAssignmentUpdate} handleAssignmentDelete={handleAssignmentDelete}/>} />
           <Route path="/assignments/:id/edit" element={<EditAssignment language={language} handleAssignmentUpdate={handleAssignmentUpdate} />} />
-          <Route path="/devices" element={<Devices language={language} role={role} devices={devices}/>} />
+          <Route path="/devices" element={<Devices language={language} role={role} devices={devices} locations={locations}/>} />
           <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
           <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete} assignments={assignments}/>} />
           <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
-          <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} />} />
+          <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} handleLocationsReorder={handleLocationsReorder} />} />
           <Route path="/locations/add-new-location" element={<AddNewLocation language={language} role={role} handleNewLocationSubmit={handleNewLocation}/>} />
           <Route path="/locations/:id" element={<LocationDetails language={language} role={role} handleLocationUpdate={handleLocationUpdate} handleLocationDelete={handleLocationDelete}/>} />
           <Route path="/locations/:id/edit" element={<EditLocation language={language} handleLocationUpdate={handleLocationUpdate} />} />

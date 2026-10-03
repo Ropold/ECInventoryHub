@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ropold.backend.exception.badrequestexceptions.InvalidAssignmentDatesException;
 import ropold.backend.exception.conflictexceptions.DeviceAlreadyAssignedException;
 import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
@@ -29,6 +30,14 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleInvalidAssignmentDatesException(InvalidAssignmentDatesException e) {
         log.warn("Bad request: {}", e.getMessage());
         return new ErrorResponse("INVALID_ASSIGNMENT_DATES", e.getMessage());
+    }
+
+    // z. B. ?direction=SIDEWAYS bei einem Enum-Parameter
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.warn("Bad request: invalid value '{}' for parameter '{}'", e.getValue(), e.getName());
+        return new ErrorResponse("INVALID_PARAMETER", "Invalid value '" + e.getValue() + "' for parameter '" + e.getName() + "'.");
     }
 
     @ExceptionHandler(EmployeeHasAssignmentsException.class)

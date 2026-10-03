@@ -69,7 +69,8 @@ class DeviceServiceTest {
                 "Notes for location one",
                 null,
                 null,
-                "http://example.com/location1.jpg"
+                "http://example.com/location1.jpg",
+                0
         );
 
         DeviceModel deviceModel1 = new DeviceModel(
