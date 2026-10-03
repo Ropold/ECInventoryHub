@@ -26,7 +26,15 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
     const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
 
-    const employeeAssignments = props.assignments.filter((assignment) => assignment.employee.id === id);
+    const byNewestFirst = (a: AssignmentModel, b: AssignmentModel) => b.assignedDate.localeCompare(a.assignedDate);
+    // Geräte, die der Mitarbeiter selbst hat bzw. hatte
+    const employeeAssignments = props.assignments
+        .filter((assignment) => assignment.employee.id === id)
+        .sort(byNewestFirst);
+    // Zuweisungen, die der Mitarbeiter an andere ausgegeben hat
+    const handedOutAssignments = props.assignments
+        .filter((assignment) => assignment.handedOutBy?.id === id)
+        .sort(byNewestFirst);
 
     function handleEditClick() {
         if (props.role === "VIEWER") {
@@ -123,6 +131,19 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                                 ))}
                             </div>
                         </>
+                    )}
+
+                    {handedOutAssignments.length > 0 && (
+                        <details className="details-collapsible">
+                            <summary>
+                                {translatedInfo["Handed out assignments"][props.language]} ({handedOutAssignments.length})
+                            </summary>
+                            <div className="assignment-card-container">
+                                {handedOutAssignments.map((assignment) => (
+                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} />
+                                ))}
+                            </div>
+                        </details>
                     )}
 
                     <h3>{translatedInfo["Basic Information"][props.language]}</h3>

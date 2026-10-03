@@ -1,6 +1,8 @@
 import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import type {DeviceType} from "../models/DeviceModel.ts";
 import {useNavigate} from "react-router-dom";
+import {useState} from "react";
+import MissingDocumentsPopup from "./MissingDocumentsPopup.tsx";
 import {formatDate, getDeviceLabel} from "../utils/ComponentsFunctions.tsx";
 import {translatedInfo} from "../utils/TranslatedInfo.ts";
 import "../styles/assignment/AssignmentCard.css";
@@ -23,6 +25,7 @@ const deviceTypeIcons: Record<DeviceType, string> = {
 
 export default function AssignmentCard(props: Readonly<AssignmentCardProps>){
     const navigate = useNavigate();
+    const [showDocumentsPopup, setShowDocumentsPopup] = useState<boolean>(false);
 
     const handleCardClick = () => {
         navigate(`/assignments/${props.assignment.id}`);
@@ -32,16 +35,26 @@ export default function AssignmentCard(props: Readonly<AssignmentCardProps>){
     const isActive = !returnedDate;
     const deviceLabel = `${deviceTypeIcons[device.type]} ${getDeviceLabel(device)}`;
     const deviceName = [device.manufacturer, device.modelName].filter(Boolean).join(" ");
-    // Nur bei aktiven Zuweisungen warnen; der Tooltip listet auf, welche Kopie noch fehlt
+    // Nur bei aktiven Zuweisungen warnen; das Popup listet auf, welche Kopie noch fehlt
     const missingDocuments = [
         !props.assignment.copyHandedToEmployee && translatedInfo["Copy Handed To Employee"][props.language],
         !props.assignment.copyFiledInPersonnelFile && translatedInfo["Copy Filed In Personnel File"][props.language],
-    ].filter(Boolean);
+    ].filter((document): document is string => Boolean(document));
     const showDocumentsWarning = isActive && missingDocuments.length > 0;
-    const documentsTooltip = [
-        translatedInfo["Documents missing"][props.language] + ":",
-        ...missingDocuments.map((document) => `• ${document}`),
-    ].join("\n");
+
+    // Das ⚠️ liegt innerhalb der Karte (selbst ein Button) – Klick/Taste darf die Karte nicht öffnen
+    function handleWarningClick(e: React.MouseEvent) {
+        e.stopPropagation();
+        setShowDocumentsPopup(true);
+    }
+
+    function handleWarningKeyDown(e: React.KeyboardEvent) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowDocumentsPopup(true);
+        }
+    }
     const dateText = isActive
         ? formatDate(assignedDate)
         : `${formatDate(assignedDate)} – ${formatDate(returnedDate ?? undefined)}`;
@@ -55,10 +68,22 @@ export default function AssignmentCard(props: Readonly<AssignmentCardProps>){
             {showDocumentsWarning && (
                 <span
                     className="assignment-card-warning"
-                    title={documentsTooltip}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={translatedInfo["Documents missing"][props.language]}
+                    title={translatedInfo["Documents missing"][props.language]}
+                    onClick={handleWarningClick}
+                    onKeyDown={handleWarningKeyDown}
                 >
                     ⚠️
                 </span>
+            )}
+            {showDocumentsPopup && (
+                <MissingDocumentsPopup
+                    language={props.language}
+                    missingDocuments={missingDocuments}
+                    onClose={() => setShowDocumentsPopup(false)}
+                />
             )}
             {props.hideEmployee && <h2>{deviceLabel}</h2>}
             {props.hideDevice && <h2>{employee.name}</h2>}

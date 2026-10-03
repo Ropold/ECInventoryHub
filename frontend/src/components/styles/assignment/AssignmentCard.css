@@ -109,4 +109,10 @@
     top: 6px;
     right: 8px;
     font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.assignment-card-warning:hover {
+    transform: scale(1.3);
 }

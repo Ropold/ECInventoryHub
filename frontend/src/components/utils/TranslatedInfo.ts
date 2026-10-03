@@ -1230,5 +1230,16 @@ export const translatedInfo: Record<string, Record<string, string>> = {
         "pt": "Desativado",
         "ru": "Списано",
         "tr": "Kullanım dışı",
+    },
+    "Handed out assignments": {
+        "de": "Ausgegebene Zuweisungen",
+        "en": "Handed out assignments",
+        "pl": "Wydane przypisania",
+        "es": "Asignaciones entregadas",
+        "fr": "Attributions remises",
+        "it": "Assegnazioni consegnate",
+        "pt": "Atribuições entregues",
+        "ru": "Выданные назначения",
+        "tr": "Teslim edilen atamalar",
     }
 }
