@@ -183,7 +183,7 @@ export default function MapBoxCard(props: Readonly<MapBoxCardProps>) {
             <div>
                 {geocodeError && <div>{geocodeError}</div>}
                 {locationsWithoutCoordinates.length > 0 && (
-                    <div>No coordinates: {locationsWithoutCoordinates.join(", ")}</div>
+                    <div>{translatedInfo["No coordinates"][props.language]}: {locationsWithoutCoordinates.join(", ")}</div>
                 )}
                 <div ref={mapContainerRef} className="mapbox-details-container" />
             </div>

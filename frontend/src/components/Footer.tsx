@@ -67,9 +67,9 @@ export default function Footer(props: Readonly<FooterProps>) {
                         className="popup-content"
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Select Language"
+                        aria-label={translatedInfo["Select Language"][props.language]}
                     >
-                        <h2>Select Language</h2>
+                        <h2>{translatedInfo["Select Language"][props.language]}</h2>
                         <div className="popup-language-options">
                             {["en", "de", "pl", "es", "fr", "it", "pt", "ru", "tr"].map((lang) => (
                                 <button

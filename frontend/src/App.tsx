@@ -240,8 +240,8 @@ export default function App() {
     <>
       <Navbar user={user} getUser={getUser} language={language}/>
       <Routes>
-          <Route path="*" element={<NotFound />} />
-          <Route path="/" element={<Welcome />}/>
+          <Route path="*" element={<NotFound language={language} />} />
+          <Route path="/" element={<Welcome language={language} />}/>
           <Route path="/employees" element={<Employees language={language} role={role} employees={employees}/>} />
           <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role} handleNewEmployeeSubmit={handleNewEmployee}/>} />
           <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeUpdate={handleEmployeeUpdate} handleEmployeeDelete={handleEmployeeDelete} assignments={assignments}/>} />

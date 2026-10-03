@@ -101,7 +101,7 @@ export default function Assignments(props:Readonly<AssignmentProps>){
 
     return(
         <>
-            <h2>Assignments</h2>
+            <h2>{translatedInfo["Assignments"][props.language]}</h2>
 
             <div className={"search-add-new-button"}>
                 <SearchBar

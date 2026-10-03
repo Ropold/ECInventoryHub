@@ -91,7 +91,7 @@ export default function Devices(props: Readonly<DeviceProps>){
 
     return(
         <>
-            <h2>Devices</h2>
+            <h2>{translatedInfo["Devices"][props.language]}</h2>
 
             <div className={"search-add-new-button"}>
                 <SearchBar

@@ -51,7 +51,7 @@ export default function Employees(props:Readonly<EmployeeProps>){
 
     return(
         <>
-            <h2>Employees</h2>
+            <h2>{translatedInfo["Employees"][props.language]}</h2>
 
             <div className={"search-add-new-button"}>
                 <SearchBar

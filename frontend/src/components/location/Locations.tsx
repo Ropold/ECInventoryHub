@@ -52,7 +52,7 @@ export default function Locations(props: Readonly<LocationsProps>) {
 
     return (
         <>
-            <h2>Locations</h2>
+            <h2>{translatedInfo["Locations"][props.language]}</h2>
 
             <MapBoxCard locations={props.locations} devices={props.devices} language={props.language} />
 

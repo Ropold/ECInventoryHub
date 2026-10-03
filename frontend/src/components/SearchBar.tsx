@@ -23,7 +23,7 @@ export default function SearchBar(props: Readonly<SearchBarProps>) {
         <div className="search-bar search-bar-row">
             <input
                 type="text"
-                placeholder="Search by Name or other fields..."
+                placeholder={translatedInfo["Search placeholder"][props.language]}
                 value={props.searchQuery}
                 onChange={(e) => props.setSearchQuery(e.target.value)}
                 className="search-input"
