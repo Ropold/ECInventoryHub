@@ -1,11 +1,16 @@
 import welcomePic from '../assets/ec-logo.png';
 import "./styles/Welcome.css"
+import {translatedInfo} from "./utils/TranslatedInfo.ts";
 
-export default function Welcome() {
+type WelcomeProps = {
+    language: string;
+}
+
+export default function Welcome(props: Readonly<WelcomeProps>) {
     return (
         <>
-            <h1>Welcome</h1>
-            <h2>to The EC Inventory Hub</h2>
+            <h1>{translatedInfo["Welcome"][props.language]}</h1>
+            <h2>{translatedInfo["to The EC Inventory Hub"][props.language]}</h2>
             <div className="image-wrapper margin-top-20">
                 <img
                     src={welcomePic}

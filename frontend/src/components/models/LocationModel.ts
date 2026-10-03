@@ -9,6 +9,7 @@ export type LocationModel = {
     latitude: number | null;
     longitude: number | null;
     imageUrl: string | null;
+    sortOrder: number;
 };
 
 export const DefaultLocation: LocationModel = {
@@ -21,4 +22,5 @@ export const DefaultLocation: LocationModel = {
     latitude: null,
     longitude: null,
     imageUrl: null,
+    sortOrder: 0,
 };

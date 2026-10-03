@@ -3,6 +3,8 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import AssignmentForm from "./AssignmentForm.tsx";
+import {assignmentErrorMessages, handleRequestError} from "../utils/ComponentsFunctions.tsx";
+import {translatedInfo} from "../utils/TranslatedInfo.ts";
 
 type AddNewAssignmentProps = {
     language: string;
@@ -23,6 +25,8 @@ export default function AddNewAssignment(props: Readonly<AddNewAssignmentProps>)
     const [copyHandedToEmployee, setCopyHandedToEmployee] = useState<boolean>(false);
     const [copyFiledInPersonnelFile, setCopyFiledInPersonnelFile] = useState<boolean>(false);
     const [newFiles, setNewFiles] = useState<File[]>([]);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveErrorDetails, setSaveErrorDetails] = useState<string[]>([]);
 
     const navigate = useNavigate();
 
@@ -54,7 +58,14 @@ export default function AddNewAssignment(props: Readonly<AddNewAssignmentProps>)
                 props.handleNewAssignmentSubmit(response.data);
                 navigate(`/assignments/${response.data.id}`);
             })
-            .catch((error) => console.error("Error creating assignment", error));
+            .catch((error) => {
+                console.error("Error creating assignment", error);
+                handleRequestError(error,
+                    translatedInfo["Login required to save assignment"][props.language],
+                    translatedInfo["Error saving assignment"][props.language],
+                    setSaveError, setSaveErrorDetails,
+                    assignmentErrorMessages(props.language));
+            });
     }
 
     const backNavigationPath = "/assignments";
@@ -71,7 +82,8 @@ export default function AddNewAssignment(props: Readonly<AddNewAssignmentProps>)
                     returnedDate, setReturnedDate, conditionOut, setConditionOut,
                     conditionIn, setConditionIn, notes, setNotes,
                     copyHandedToEmployee, setCopyHandedToEmployee, copyFiledInPersonnelFile, setCopyFiledInPersonnelFile,
-                    newFiles, setNewFiles
+                    newFiles, setNewFiles,
+                    saveError, saveErrorDetails
                 }}
             />
         </div>

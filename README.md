@@ -28,6 +28,10 @@
   - **Authentication & roles** – GitHub OAuth2 login; read access is public, write access requires
     `USER`/`ADMIN` role
 
+  ### 🗄️ Database Schema
+  The entity-relationship diagram is available on dbdiagram.io:
+  [🔗 ECInventoryHub database diagram](https://dbdiagram.io/d/Ec-Inventory-Hub-6a3a5b763b9b0de599552efb)
+
   ---
 
   ## 📊 Code Quality
@@ -90,3 +94,13 @@
   - **GitHub Actions** - CI/CD pipeline automation
   - **Render** - Cloud platform for hosting
   - **SonarCloud** - Code quality and security analysis
+
+  ---
+
+  ## 🗺️ Roadmap
+
+  Planned improvements:
+  - [ ] **Mobile view** – check and optimize forms and detail pages on phones and tablets
+        (e.g. when handing out a device with an iPad)
+  - [ ] **CSV export for inventory checks** – export e.g. all active assignments or all devices
+        at a given location as a file

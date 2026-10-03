@@ -117,7 +117,7 @@ export default function LocationsForm(props: Readonly<LocationsFormProps>) {
                 {renderImagePreview(image, existingImageUrl, imageDeleted)}
 
                 {hasImage && (
-                    <button type="button" className="button-blue margin-top-20" onClick={() => {
+                    <button type="button" className="button-blue margin-top-20 margin-right-10" onClick={() => {
                         onImageCancel(setImage);
                         if (existingImageUrl) setImageDeleted(true);
                     }}>

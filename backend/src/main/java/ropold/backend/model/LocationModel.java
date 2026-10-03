@@ -42,4 +42,8 @@ public class LocationModel {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    // Reihenfolge in Listen und Auswahlfeldern (aufsteigend), änderbar über PUT /api/locations/{id}/move
+    @Column(name = "sort_order", nullable = false)
+    private int sortOrder;
 }

@@ -71,13 +71,13 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
     return (
         <div>
-            <h2>{isEditMode ? "Edit Employee" : "Add Employee"}</h2>
+            <h2>{isEditMode ? translatedInfo["Edit Employee"][props.language] : translatedInfo["Add Employee"][props.language]}</h2>
 
             <form onSubmit={handleSubmit}>
                 <div className="edit-form">
                     {/* Name */}
                     <label>
-                        <span>Name:</span>
+                        <span>{translatedInfo["Name"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -89,7 +89,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Personnel Number */}
                     <label>
-                        <span>Personnel Number:</span>
+                        <span>{translatedInfo["Personnel Number"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -100,24 +100,24 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Department */}
                     <label>
-                        <span>Department:</span>
+                        <span>{translatedInfo["Department"][props.language]}:</span>
                         <select
                             className="input-small"
                             value={department}
                             onChange={(e) => setDepartment(e.target.value as Department)}
                             required
                         >
-                            <option value="MARKETING">Marketing</option>
-                            <option value="ACCOUNTING">Accounting</option>
-                            <option value="HR">HR</option>
-                            <option value="DEVELOPMENT">Development</option>
-                            <option value="MANAGEMENT">Management</option>
+                            <option value="MARKETING">{translatedInfo["Marketing"][props.language]}</option>
+                            <option value="ACCOUNTING">{translatedInfo["Accounting"][props.language]}</option>
+                            <option value="HR">{translatedInfo["HR"][props.language]}</option>
+                            <option value="DEVELOPMENT">{translatedInfo["Development"][props.language]}</option>
+                            <option value="MANAGEMENT">{translatedInfo["Management"][props.language]}</option>
                         </select>
                     </label>
 
                     {/* Active */}
                     <label>
-                        <span>Active:</span>
+                        <span>{translatedInfo["Active"][props.language]}:</span>
                         <input
                             type="checkbox"
                             checked={active}
@@ -127,7 +127,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Email */}
                     <label>
-                        <span>Email:</span>
+                        <span>{translatedInfo["Email"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="email"
@@ -138,7 +138,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Phone */}
                     <label>
-                        <span>Phone:</span>
+                        <span>{translatedInfo["Phone"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -149,7 +149,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Address */}
                     <label>
-                        <span>Address:</span>
+                        <span>{translatedInfo["Address"][props.language]}:</span>
                         <input
                             className="input-small"
                             type="text"
@@ -160,7 +160,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Notes */}
                     <label>
-                        <span>Notes:</span>
+                        <span>{translatedInfo["Notes"][props.language]}:</span>
                         <textarea
                             className="input-small"
                             value={notes ?? ""}
@@ -170,7 +170,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
 
                     {/* Image */}
                     <label>
-                        <span>Image:</span>
+                        <span>{translatedInfo["Image"][props.language]}:</span>
                         <input
                             type="file"
                             onChange={(e) => {
@@ -184,7 +184,7 @@ export default function EmployeeForm(props: Readonly<EmployeeFormProps>) {
                 {renderImagePreview(image, existingImageUrl, imageDeleted)}
 
                 {(image || (existingImageUrl && !imageDeleted)) && (
-                    <button type="button" className="button-blue margin-top-20" onClick={handleImageCancel}>
+                    <button type="button" className="button-blue margin-top-20 margin-right-10" onClick={handleImageCancel}>
                         {translatedInfo["remove image"][props.language]}
                     </button>
                 )}

@@ -3,15 +3,18 @@ import type {EmployeeModel} from "../models/EmployeeModel.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
+import {departmentLabelKeys, handleRequestError, renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
+import type {AssignmentModel} from "../models/AssignmentModel.ts";
+import AssignmentCard from "../assignment/AssignmentCard.tsx";
 
 type EmployeeDetailsProps = {
     language: string;
     role: string;
     handleEmployeeUpdate: (updatedEmployee: EmployeeModel) => void;
     handleEmployeeDelete: (deletedEmployeeId: string) => void;
+    assignments: AssignmentModel[];
 }
 
 export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
@@ -22,6 +25,16 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
     const [deleteError, setDeleteError] = useState<string | null>(null);
     const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
+
+    const byNewestFirst = (a: AssignmentModel, b: AssignmentModel) => b.assignedDate.localeCompare(a.assignedDate);
+    // Geräte, die der Mitarbeiter selbst hat bzw. hatte
+    const employeeAssignments = props.assignments
+        .filter((assignment) => assignment.employee.id === id)
+        .sort(byNewestFirst);
+    // Zuweisungen, die der Mitarbeiter an andere ausgegeben hat
+    const handedOutAssignments = props.assignments
+        .filter((assignment) => assignment.handedOutBy?.id === id)
+        .sort(byNewestFirst);
 
     function handleEditClick() {
         if (props.role === "VIEWER") {
@@ -109,10 +122,34 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                         </div>
                     )}
 
+                    {employeeAssignments.length > 0 && (
+                        <>
+                            <h3>{translatedInfo["Assignments"][props.language]}</h3>
+                            <div className="assignment-card-container">
+                                {employeeAssignments.map((assignment) => (
+                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} hideEmployee />
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {handedOutAssignments.length > 0 && (
+                        <details className="details-collapsible">
+                            <summary>
+                                {translatedInfo["Handed out assignments"][props.language]} ({handedOutAssignments.length})
+                            </summary>
+                            <div className="assignment-card-container">
+                                {handedOutAssignments.map((assignment) => (
+                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} />
+                                ))}
+                            </div>
+                        </details>
+                    )}
+
                     <h3>{translatedInfo["Basic Information"][props.language]}</h3>
                     <p><strong>{translatedInfo["Name"][props.language]}:</strong> {employee.name}</p>
                     {employee.personnelNumber && <p><strong>{translatedInfo["Personnel Number"][props.language]}:</strong> {employee.personnelNumber}</p>}
-                    <p><strong>{translatedInfo["Department"][props.language]}:</strong> {employee.department}</p>
+                    <p><strong>{translatedInfo["Department"][props.language]}:</strong> {translatedInfo[departmentLabelKeys[employee.department]][props.language]}</p>
                     <p><strong>{translatedInfo["Status"][props.language]}:</strong> {employee.active ? translatedInfo["Active"][props.language] : translatedInfo["Inactive"][props.language]}</p>
 
                     <h3>{translatedInfo["Contact Information"][props.language]}</h3>

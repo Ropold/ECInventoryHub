@@ -1,6 +1,7 @@
 import type {LocationModel} from "../models/LocationModel.ts";
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useState} from "react";
+import axios from "axios";
 import {useAutoScrollToTop} from "../utils/ComponentsFunctions.tsx";
 import SearchBar from "../SearchBar.tsx";
 import LocationCard from "./LocationCard.tsx";
@@ -14,7 +15,10 @@ type LocationsProps = {
     role: string;
     locations: LocationModel[];
     devices: DeviceModel[];
+    handleLocationsReorder: (reorderedLocations: LocationModel[]) => void;
 }
+
+type MoveDirection = "UP" | "DOWN";
 
 function filterLocations(locations: LocationModel[], query: string): LocationModel[] {
     if (!locations) return [];
@@ -48,11 +52,29 @@ export default function Locations(props: Readonly<LocationsProps>) {
         navigate(`/locations/add-new-location`);
     }
 
+    function handleMove(locationId: string, direction: MoveDirection) {
+        if (props.role === "VIEWER") {
+            setShowNoPermission(true);
+            return;
+        }
+        axios
+            .put(`/api/locations/${locationId}/move`, null, {params: {direction}})
+            .then((response) => props.handleLocationsReorder(response.data))
+            .catch((error) => {
+                console.error("Error moving location", error);
+                if (error.response?.status === 401 || error.response?.status === 403) {
+                    setShowNoPermission(true);
+                }
+            });
+    }
+
     const filteredLocations = filterLocations(props.locations, searchQuery);
+    // Verschieben nur ohne Suchbegriff: sonst würde mit einem ausgeblendeten Nachbarn getauscht
+    const canReorder = searchQuery === "";
 
     return (
         <>
-            <h2>Locations</h2>
+            <h2>{translatedInfo["Locations"][props.language]}</h2>
 
             <MapBoxCard locations={props.locations} devices={props.devices} language={props.language} />
 
@@ -73,8 +95,14 @@ export default function Locations(props: Readonly<LocationsProps>) {
             )}
 
             <div className="location-card-container">
-                {filteredLocations.map((location) => (
-                    <LocationCard key={location.id} location={location} language={props.language} />
+                {filteredLocations.map((location, index) => (
+                    <LocationCard
+                        key={location.id}
+                        location={location}
+                        language={props.language}
+                        onMoveUp={canReorder && index > 0 ? () => handleMove(location.id, "UP") : undefined}
+                        onMoveDown={canReorder && index < filteredLocations.length - 1 ? () => handleMove(location.id, "DOWN") : undefined}
+                    />
                 ))}
             </div>
         </>

@@ -28,8 +28,9 @@
     font: inherit;
     color: inherit;
     cursor: pointer;
-    height: 180px;
-    width: 180px;
+    height: 200px;
+    width: 200px;
+    overflow: hidden; /* nichts darf aus der Karte herauslaufen */
     border: 2px solid #ff9e00;
     border-radius: 12px;
     padding: 10px;
@@ -50,12 +51,24 @@
     cursor: pointer;
 }
 
-.assignment-card-device {
-    font-size: 0.9rem;
+.assignment-card-label {
+    margin: 2px 0;
+    font-size: 1rem;
+    font-weight: bold;
     text-align: center;
+    overflow-wrap: anywhere;
 }
 
 .assignment-card-date {
+    margin: 4px 0;
     font-size: 0.8rem;
     opacity: 0.8;
+}
+
+.assignment-card-returned {
+    opacity: 0.6;
+}
+
+.assignment-card-returned:hover {
+    opacity: 1;
 }

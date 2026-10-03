@@ -153,22 +153,30 @@ export default function App() {
                     assignment.handedOutBy?.id === deletedEmployeeId ? {...assignment, handedOutBy: null} : assignment
                 )
         );
+        // Das Backend passt den Gerätestatus beim Löschen der Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleNewAssignment(newAssignment: AssignmentModel) {
         setAssignments((prevAssignments) => [...prevAssignments, newAssignment]);
+        // Das Backend passt den Gerätestatus an die Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleAssignmentUpdate(updatedAssignment: AssignmentModel) {
         setAssignments((prevAssignments) =>
             prevAssignments.map((assignment) => assignment.id === updatedAssignment.id ? updatedAssignment : assignment)
         );
+        // Das Backend passt den Gerätestatus an die Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleAssignmentDelete(deletedAssignmentId: string) {
         setAssignments((prevAssignments) =>
             prevAssignments.filter((assignment) => assignment.id !== deletedAssignmentId)
         );
+        // Das Backend passt den Gerätestatus an die Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleNewDevice(newDevice: DeviceModel) {
@@ -201,6 +209,11 @@ export default function App() {
             prevLocations.map((location) => location.id === updatedLocation.id ? updatedLocation : location)
         );
         replaceDeviceLocation(updatedLocation.id, updatedLocation);
+    }
+
+    // Neue Reihenfolge nach ▲/▼ auf der Standortseite (Backend liefert die komplette Liste)
+    function handleLocationsReorder(reorderedLocations: LocationModel[]) {
+        setLocations(reorderedLocations);
     }
 
     function handleLocationDelete(deletedLocationId: string) {
@@ -240,21 +253,21 @@ export default function App() {
     <>
       <Navbar user={user} getUser={getUser} language={language}/>
       <Routes>
-          <Route path="*" element={<NotFound />} />
-          <Route path="/" element={<Welcome />}/>
+          <Route path="*" element={<NotFound language={language} />} />
+          <Route path="/" element={<Welcome language={language} />}/>
           <Route path="/employees" element={<Employees language={language} role={role} employees={employees}/>} />
           <Route path="/employees/add-new-employee" element={<AddNewEmployee language={language} role={role} handleNewEmployeeSubmit={handleNewEmployee}/>} />
-          <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeUpdate={handleEmployeeUpdate} handleEmployeeDelete={handleEmployeeDelete}/>} />
+          <Route path="/employees/:id" element={<EmployeeDetails language={language} role={role} handleEmployeeUpdate={handleEmployeeUpdate} handleEmployeeDelete={handleEmployeeDelete} assignments={assignments}/>} />
           <Route path="/employees/:id/edit" element={<EditEmployee language={language} handleEmployeeUpdate={handleEmployeeUpdate} />} />
           <Route path="/assignments" element={<Assignments language={language} role={role} assignments={assignments}/>} />
           <Route path="/assignments/add-new-assignment" element={<AddNewAssignment language={language} role={role} handleNewAssignmentSubmit={handleNewAssignment}/>} />
           <Route path="/assignments/:id" element={<AssignmentDetails language={language} role={role} handleAssignmentUpdate={handleAssignmentUpdate} handleAssignmentDelete={handleAssignmentDelete}/>} />
           <Route path="/assignments/:id/edit" element={<EditAssignment language={language} handleAssignmentUpdate={handleAssignmentUpdate} />} />
-          <Route path="/devices" element={<Devices language={language} role={role} devices={devices}/>} />
+          <Route path="/devices" element={<Devices language={language} role={role} devices={devices} locations={locations}/>} />
           <Route path="/devices/add-new-device" element={<AddNewDevice language={language} role={role} handleNewDeviceSubmit={handleNewDevice}/>} />
-          <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete}/>} />
+          <Route path="/devices/:id" element={<DeviceDetails language={language} role={role} handleDeviceUpdate={handleDeviceUpdate} handleDeviceDelete={handleDeviceDelete} assignments={assignments}/>} />
           <Route path="/devices/:id/edit" element={<EditDevice language={language} handleDeviceUpdate={handleDeviceUpdate} />} />
-          <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} />} />
+          <Route path="/locations" element={<Locations language={language} role={role} locations={locations} devices={devices} handleLocationsReorder={handleLocationsReorder} />} />
           <Route path="/locations/add-new-location" element={<AddNewLocation language={language} role={role} handleNewLocationSubmit={handleNewLocation}/>} />
           <Route path="/locations/:id" element={<LocationDetails language={language} role={role} handleLocationUpdate={handleLocationUpdate} handleLocationDelete={handleLocationDelete}/>} />
           <Route path="/locations/:id/edit" element={<EditLocation language={language} handleLocationUpdate={handleLocationUpdate} />} />

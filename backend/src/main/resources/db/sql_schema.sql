@@ -42,6 +42,7 @@ CREATE TABLE locations (
     notes   text,
     latitude  double precision,
     longitude double precision,
+    sort_order integer NOT NULL DEFAULT 0,
     image_url varchar
 );
 
@@ -75,7 +76,9 @@ CREATE TABLE assignments (
     condition_in                 text,
     notes                        text,
     copy_handed_to_employee      boolean NOT NULL DEFAULT false,
-    copy_filed_in_personnel_file boolean NOT NULL DEFAULT false
+    copy_filed_in_personnel_file boolean NOT NULL DEFAULT false,
+    CONSTRAINT chk_returned_after_assigned
+        CHECK (returned_date IS NULL OR returned_date >= assigned_date)
 );
 
 -- 6. device_files (verweist auf devices)
@@ -101,3 +104,8 @@ CREATE INDEX idx_assignments_device          ON assignments(device_id);
 CREATE INDEX idx_assignments_employee        ON assignments(employee_id);
 CREATE INDEX idx_device_files_device         ON device_files(device_id);
 CREATE INDEX idx_assignment_files_assignment ON assignment_files(assignment_id);
+
+-- Pro Gerät höchstens eine offene Zuweisung (ohne Rückgabedatum)
+CREATE UNIQUE INDEX uq_assignment_open_per_device
+    ON assignments(device_id)
+    WHERE returned_date IS NULL;
