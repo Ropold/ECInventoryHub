@@ -23,6 +23,23 @@ export const deviceStatusLabelKeys: Record<DeviceStatus, string> = {
     RETIRED: "Retired",
 };
 
+// Farbe des Status-Badges auf der Gerätekarte (Klassen aus CardBadge.css)
+export const deviceStatusBadgeClasses: Record<DeviceStatus, string> = {
+    AVAILABLE: "card-badge-green",
+    ASSIGNED: "card-badge-blue",
+    IN_REPAIR: "card-badge-yellow",
+    RETIRED: "card-badge-red",
+};
+
+export const deviceTypeIcons: Record<DeviceType, string> = {
+    LAPTOP: "💻",
+    PHONE: "📱",
+    TABLET: "📱",
+    MONITOR: "🖥️",
+    ACCESSORY: "🖱️",
+    OTHER: "📦",
+};
+
 export const deviceStatusFilters: {value: DeviceStatusFilter; labelKey: string}[] = [
     {value: "AVAILABLE", labelKey: deviceStatusLabelKeys.AVAILABLE},
     {value: "ASSIGNED", labelKey: deviceStatusLabelKeys.ASSIGNED},

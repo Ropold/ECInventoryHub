@@ -28,8 +28,9 @@
     font: inherit;
     color: inherit;
     cursor: pointer;
-    height: 180px;
-    width: 180px;
+    height: 200px;
+    width: 200px;
+    overflow: hidden; /* nichts darf aus der Karte herauslaufen */
     border: 2px solid #ff9e00;
     border-radius: 12px;
     padding: 10px;
@@ -50,20 +51,28 @@
     cursor: pointer;
 }
 
-.device-card-image {
+/* Texte und Badge behalten ihre Höhe – nur das Bild darf schrumpfen */
+.device-card > * {
+    flex-shrink: 0;
+}
+
+.device-card-identifier {
+    margin: 1px 0;
+    font-size: 0.75rem;
+    text-align: center;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* zu lange Seriennummern werden mit … gekürzt */
+}
+
+.device-card .device-card-image {
     width: 100px;
-    max-height: 70px;
+    height: 45px;
+    min-height: 0;
+    flex-shrink: 1; /* nimmt nur den Platz, der neben den Texten übrig bleibt */
     object-fit: cover;
     border: 2px solid black;
     border-radius: 5px;
-}
-
-.device-card-inventory {
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-.device-card-status {
-    font-size: 0.8rem;
-    opacity: 0.8;
+    margin: 4px 0;
 }
