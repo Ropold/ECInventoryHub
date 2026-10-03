@@ -1,6 +1,7 @@
 import type {AxiosError} from "axios";
 import {useEffect} from "react";
 import {useLocation} from "react-router-dom";
+import type {DeviceModel} from "../models/DeviceModel.ts";
 
 export function onFileChange(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -23,6 +24,24 @@ export function onImageCancel(setImage: (file: File | null) => void) {
 export function formatDate(dateString: string | undefined): string {
     if (!dateString) return "—";
     return new Date(dateString).toLocaleDateString('de-DE');
+}
+
+export function getDeviceLabel(device: DeviceModel): string {
+    let candidates: (string | null)[];
+    switch (device.type) {
+        case "LAPTOP":
+            candidates = [device.hostname, device.serialNumber, device.inventoryNumber];
+            break;
+        case "PHONE":
+        case "TABLET":
+            candidates = [device.serialNumber, device.inventoryNumber, device.hostname];
+            break;
+        default:
+            candidates = [device.inventoryNumber, device.serialNumber, device.hostname];
+    }
+    const label = candidates.find((value) => value && value.trim() !== "");
+    if (label) return label;
+    return [device.manufacturer, device.modelName].filter(Boolean).join(" ") || "—";
 }
 
 export const useAutoScrollToTop = () => {

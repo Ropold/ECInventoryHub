@@ -1032,5 +1032,27 @@ export const translatedInfo: Record<string, Record<string, string>> = {
         "pt": "Tem certeza de que deseja excluir a atribuição de {name}?",
         "ru": "Вы уверены, что хотите удалить назначение для {name}?",
         "tr": "{name} için atama silinsin mi?",
+    },
+    "Returned": {
+        "de": "Zurückgegeben",
+        "en": "Returned",
+        "pl": "Zwrócono",
+        "es": "Devuelto",
+        "fr": "Rendu",
+        "it": "Restituito",
+        "pt": "Devolvido",
+        "ru": "Возвращено",
+        "tr": "İade edildi",
+    },
+    "Documents missing": {
+        "de": "Dokumente fehlen",
+        "en": "Documents missing",
+        "pl": "Brak dokumentów",
+        "es": "Faltan documentos",
+        "fr": "Documents manquants",
+        "it": "Documenti mancanti",
+        "pt": "Documentos em falta",
+        "ru": "Нет документов",
+        "tr": "Belgeler eksik",
     }
 }

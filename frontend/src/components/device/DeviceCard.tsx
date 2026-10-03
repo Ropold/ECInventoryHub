@@ -1,5 +1,6 @@
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import {useNavigate} from "react-router-dom";
+import {getDeviceLabel} from "../utils/ComponentsFunctions.tsx";
 import "../styles/device/DeviceCard.css";
 
 type DeviceCardProps = {
@@ -19,7 +20,7 @@ export default function DeviceCard(props: Readonly<DeviceCardProps>){
 
     return (
         <button type="button" className="device-card" onClick={handleCardClick}>
-            <h2>{deviceName}</h2>
+            <h2>{getDeviceLabel(props.device)}</h2>
             {imageFile && (
                 <img
                     className="device-card-image"
@@ -27,7 +28,7 @@ export default function DeviceCard(props: Readonly<DeviceCardProps>){
                     alt={deviceName}
                 />
             )}
-            <p className="device-card-inventory">{props.device.inventoryNumber}</p>
+            <p className="device-card-inventory">{deviceName}</p>
             <p className="device-card-status">{props.device.status}</p>
         </button>
     )

@@ -119,7 +119,7 @@ export default function EmployeeDetails(props: Readonly<EmployeeDetailsProps>) {
                             <h3>{translatedInfo["Assignments"][props.language]}</h3>
                             <div className="assignment-card-container">
                                 {employeeAssignments.map((assignment) => (
-                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} />
+                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} hideEmployee />
                                 ))}
                             </div>
                         </>
