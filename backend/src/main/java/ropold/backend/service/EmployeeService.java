@@ -5,11 +5,15 @@ import org.springframework.stereotype.Service;
 import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
 import ropold.backend.exception.notfoundexceptions.EmployeeNotFoundException;
 import ropold.backend.model.AssignmentModel;
+import ropold.backend.model.DeviceModel;
+import ropold.backend.model.DeviceStatus;
 import ropold.backend.model.EmployeeModel;
 import ropold.backend.repository.AssignmentRepository;
+import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.EmployeeRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -18,6 +22,7 @@ import java.util.stream.Stream;
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final AssignmentRepository assignmentRepository;
+    private final DeviceRepository deviceRepository;
 
     public List<EmployeeModel> findAllEmployees() {
         return employeeRepository.findAll();
@@ -60,6 +65,16 @@ public class EmployeeService {
 
         List<AssignmentModel> assignmentsToDelete = assignmentRepository.findByEmployeeId(id);
         assignmentRepository.deleteAll(assignmentsToDelete);
+
+        // Geräte aus gelöschten offenen Zuweisungen sind wieder frei (pro Gerät gibt es nur eine offene Zuweisung)
+        List<DeviceModel> freedDevices = assignmentsToDelete.stream()
+                .filter(assignment -> assignment.getReturnedDate() == null)
+                .map(AssignmentModel::getDevice)
+                .filter(Objects::nonNull)
+                .filter(device -> device.getStatus() == DeviceStatus.ASSIGNED)
+                .toList();
+        freedDevices.forEach(device -> device.setStatus(DeviceStatus.AVAILABLE));
+        deviceRepository.saveAll(freedDevices);
 
         // Assignments this employee only handed out are kept, just without the "handed out by" reference
         List<AssignmentModel> assignmentsToDetach = assignmentRepository.findByHandedOutById(id).stream()

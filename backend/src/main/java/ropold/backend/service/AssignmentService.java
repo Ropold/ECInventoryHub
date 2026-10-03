@@ -2,6 +2,7 @@ package ropold.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ropold.backend.dto.AssignmentDTO;
 import ropold.backend.dto.AssignmentFileDTO;
 import ropold.backend.exception.badrequestexceptions.InvalidAssignmentDatesException;
@@ -11,6 +12,7 @@ import ropold.backend.exception.notfoundexceptions.DeviceNotFoundException;
 import ropold.backend.exception.notfoundexceptions.EmployeeNotFoundException;
 import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.DeviceModel;
+import ropold.backend.model.DeviceStatus;
 import ropold.backend.model.EmployeeModel;
 import ropold.backend.repository.AssignmentRepository;
 import ropold.backend.repository.DeviceRepository;
@@ -40,6 +42,7 @@ public class AssignmentService {
                 .orElseThrow(() -> new AssignmentNotFoundException("Assignment not found with id: " + id));
     }
 
+    @Transactional
     public AssignmentModel addAssignment(AssignmentDTO dto) {
         DeviceModel device = deviceRepository.findById(dto.device().id())
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with id: " + dto.device().id()));
@@ -55,7 +58,7 @@ public class AssignmentService {
         checkDatesAreValid(dto.assignedDate(), dto.returnedDate());
         checkDeviceHasNoOpenAssignment(device.getId(), dto.returnedDate(), null);
 
-        return assignmentRepository.save(new AssignmentModel(
+        AssignmentModel saved = assignmentRepository.save(new AssignmentModel(
                 null,
                 device,
                 employee,
@@ -69,8 +72,11 @@ public class AssignmentService {
                 dto.copyFiledInPersonnelFile(),
                 new ArrayList<>()
         ));
+        syncDeviceStatus(device, saved.getReturnedDate() == null || hasOtherOpenAssignment(device.getId(), saved.getId()));
+        return saved;
     }
 
+    @Transactional
     public AssignmentModel updateAssignment(UUID id, AssignmentDTO dto) {
         AssignmentModel existing = getAssignmentById(id);
 
@@ -88,6 +94,7 @@ public class AssignmentService {
         checkDatesAreValid(dto.assignedDate(), dto.returnedDate());
         checkDeviceHasNoOpenAssignment(device.getId(), dto.returnedDate(), existing.getId());
 
+        DeviceModel previousDevice = existing.getDevice();
         existing.setDevice(device);
         existing.setEmployee(employee);
         existing.setHandedOutBy(handedOutBy);
@@ -104,13 +111,42 @@ public class AssignmentService {
                 : Collections.emptySet();
         existing.getFiles().removeIf(f -> !keepIds.contains(f.getId()));
 
-        return assignmentRepository.save(existing);
+        AssignmentModel saved = assignmentRepository.save(existing);
+        syncDeviceStatus(device, saved.getReturnedDate() == null || hasOtherOpenAssignment(device.getId(), saved.getId()));
+        // Gerät in der Zuweisung getauscht: das alte Gerät ist ggf. wieder frei
+        if (previousDevice != null && !previousDevice.getId().equals(device.getId())) {
+            syncDeviceStatus(previousDevice, hasOtherOpenAssignment(previousDevice.getId(), saved.getId()));
+        }
+        return saved;
     }
 
+    @Transactional
     public void deleteAssignment(UUID id) {
-        assignmentRepository.findById(id)
+        AssignmentModel assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new AssignmentNotFoundException("Assignment not found with id: " + id));
         assignmentRepository.deleteById(id);
+        syncDeviceStatus(assignment.getDevice(), hasOtherOpenAssignment(assignment.getDevice().getId(), id));
+    }
+
+    // Gerätestatus folgt den Zuweisungen: offene Zuweisung -> ASSIGNED, keine mehr -> AVAILABLE.
+    // IN_REPAIR und RETIRED werden bewusst von Hand gesetzt und hier nicht überschrieben.
+    private void syncDeviceStatus(DeviceModel device, boolean hasOpenAssignment) {
+        DeviceStatus current = device.getStatus();
+        DeviceStatus target = current;
+        if (hasOpenAssignment && current == DeviceStatus.AVAILABLE) {
+            target = DeviceStatus.ASSIGNED;
+        } else if (!hasOpenAssignment && current == DeviceStatus.ASSIGNED) {
+            target = DeviceStatus.AVAILABLE;
+        }
+        if (target != current) {
+            device.setStatus(target);
+            deviceRepository.save(device);
+        }
+    }
+
+    private boolean hasOtherOpenAssignment(UUID deviceId, UUID ownId) {
+        return assignmentRepository.findByDeviceIdAndReturnedDateIsNull(deviceId).stream()
+                .anyMatch(other -> !other.getId().equals(ownId));
     }
 
     // Pro Gerät ist in der DB nur eine offene Zuweisung erlaubt (uq_assignment_open_per_device) –

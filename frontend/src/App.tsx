@@ -153,22 +153,30 @@ export default function App() {
                     assignment.handedOutBy?.id === deletedEmployeeId ? {...assignment, handedOutBy: null} : assignment
                 )
         );
+        // Das Backend passt den Gerätestatus beim Löschen der Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleNewAssignment(newAssignment: AssignmentModel) {
         setAssignments((prevAssignments) => [...prevAssignments, newAssignment]);
+        // Das Backend passt den Gerätestatus an die Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleAssignmentUpdate(updatedAssignment: AssignmentModel) {
         setAssignments((prevAssignments) =>
             prevAssignments.map((assignment) => assignment.id === updatedAssignment.id ? updatedAssignment : assignment)
         );
+        // Das Backend passt den Gerätestatus an die Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleAssignmentDelete(deletedAssignmentId: string) {
         setAssignments((prevAssignments) =>
             prevAssignments.filter((assignment) => assignment.id !== deletedAssignmentId)
         );
+        // Das Backend passt den Gerätestatus an die Zuweisungen an – Geräte neu laden
+        getAllDevices();
     }
 
     function handleNewDevice(newDevice: DeviceModel) {

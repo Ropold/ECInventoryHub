@@ -6,8 +6,11 @@ import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsExcepti
 import ropold.backend.exception.notfoundexceptions.EmployeeNotFoundException;
 import ropold.backend.model.AssignmentModel;
 import ropold.backend.model.Department;
+import ropold.backend.model.DeviceModel;
+import ropold.backend.model.DeviceStatus;
 import ropold.backend.model.EmployeeModel;
 import ropold.backend.repository.AssignmentRepository;
+import ropold.backend.repository.DeviceRepository;
 import ropold.backend.repository.EmployeeRepository;
 
 import java.time.LocalDate;
@@ -29,7 +32,8 @@ class EmployeeServiceTest {
 
     EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
     AssignmentRepository assignmentRepository = mock(AssignmentRepository.class);
-    EmployeeService employeeService = new EmployeeService(employeeRepository, assignmentRepository);
+    DeviceRepository deviceRepository = mock(DeviceRepository.class);
+    EmployeeService employeeService = new EmployeeService(employeeRepository, assignmentRepository, deviceRepository);
 
     List<EmployeeModel> allEmployees;
 
@@ -262,6 +266,37 @@ class EmployeeServiceTest {
 
         verify(assignmentRepository, times(1)).deleteAll(blockingAssignments);
         verify(employeeRepository, times(1)).deleteById(employeeToDelete.getId());
+    }
+
+    @Test
+    void testForceDeleteEmployee_FreesDevicesOfOpenAssignments() {
+        EmployeeModel employeeToDelete = allEmployees.getFirst();
+        when(employeeRepository.findById(employeeToDelete.getId())).thenReturn(Optional.of(employeeToDelete));
+
+        DeviceModel openDevice = new DeviceModel();
+        openDevice.setId(UUID.randomUUID());
+        openDevice.setStatus(DeviceStatus.ASSIGNED);
+        AssignmentModel openAssignment = new AssignmentModel();
+        openAssignment.setId(UUID.randomUUID());
+        openAssignment.setDevice(openDevice);
+        openAssignment.setAssignedDate(LocalDate.of(2024, 1, 1));
+
+        DeviceModel repairDevice = new DeviceModel();
+        repairDevice.setId(UUID.randomUUID());
+        repairDevice.setStatus(DeviceStatus.IN_REPAIR);
+        AssignmentModel repairAssignment = new AssignmentModel();
+        repairAssignment.setId(UUID.randomUUID());
+        repairAssignment.setDevice(repairDevice);
+        repairAssignment.setAssignedDate(LocalDate.of(2024, 2, 1));
+
+        when(assignmentRepository.findByEmployeeId(employeeToDelete.getId()))
+                .thenReturn(List.of(openAssignment, repairAssignment));
+
+        employeeService.forceDeleteEmployee(employeeToDelete.getId());
+
+        assertEquals(DeviceStatus.AVAILABLE, openDevice.getStatus());
+        assertEquals(DeviceStatus.IN_REPAIR, repairDevice.getStatus());
+        verify(deviceRepository, times(1)).saveAll(List.of(openDevice));
     }
 
     @Test

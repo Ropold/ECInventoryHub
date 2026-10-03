@@ -402,11 +402,16 @@ class AssignmentServiceTest {
         when(deviceRepository.findById(deviceModel1.getId())).thenReturn(Optional.of(deviceModel1));
         when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
         when(assignmentRepository.save(any(AssignmentModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        // Das Gerät ist aktuell an jemand anderen vergeben – für eine nachgetragene, bereits
+        // zurückgegebene Zuweisung ist das kein Konflikt
+        AssignmentModel currentOpen = allAssignments.getFirst();
+        currentOpen.setReturnedDate(null);
+        when(assignmentRepository.findByDeviceIdAndReturnedDateIsNull(deviceModel1.getId())).thenReturn(List.of(currentOpen));
 
         assignmentService.addAssignment(assignmentDTO);
 
-        verify(assignmentRepository, never()).findByDeviceIdAndReturnedDateIsNull(any());
         verify(assignmentRepository, times(1)).save(any(AssignmentModel.class));
+        assertEquals(DeviceStatus.ASSIGNED, deviceModel1.getStatus());
     }
 
     @Test
@@ -518,5 +523,113 @@ class AssignmentServiceTest {
         );
 
         verify(assignmentRepository, never()).deleteById(any());
+    }
+
+    // --- Gerätestatus folgt den Zuweisungen ---
+
+    private DeviceModel deviceWithStatus(DeviceStatus status) {
+        DeviceModel device = new DeviceModel();
+        device.setId(UUID.randomUUID());
+        device.setType(DeviceType.LAPTOP);
+        device.setStatus(status);
+        return device;
+    }
+
+    private AssignmentDTO openAssignmentDTO(UUID id, DeviceModel device, LocalDate returnedDate) {
+        return new AssignmentDTO(
+                id, toDeviceDTO(device), toEmployeeDTO(employeeModel1), null,
+                LocalDate.of(2024, 5, 1), returnedDate, null, null, null,
+                true, true, null
+        );
+    }
+
+    @Test
+    void testAddAssignment_Open_SetsDeviceAssigned() {
+        DeviceModel device = deviceWithStatus(DeviceStatus.AVAILABLE);
+        when(deviceRepository.findById(device.getId())).thenReturn(Optional.of(device));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.save(any(AssignmentModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assignmentService.addAssignment(openAssignmentDTO(null, device, null));
+
+        assertEquals(DeviceStatus.ASSIGNED, device.getStatus());
+        verify(deviceRepository, times(1)).save(device);
+    }
+
+    @Test
+    void testAddAssignment_AlreadyReturned_KeepsDeviceAvailable() {
+        DeviceModel device = deviceWithStatus(DeviceStatus.AVAILABLE);
+        when(deviceRepository.findById(device.getId())).thenReturn(Optional.of(device));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.save(any(AssignmentModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assignmentService.addAssignment(openAssignmentDTO(null, device, LocalDate.of(2024, 6, 1)));
+
+        assertEquals(DeviceStatus.AVAILABLE, device.getStatus());
+        verify(deviceRepository, never()).save(any());
+    }
+
+    @Test
+    void testAddAssignment_DeviceInRepair_StatusUntouched() {
+        DeviceModel device = deviceWithStatus(DeviceStatus.IN_REPAIR);
+        when(deviceRepository.findById(device.getId())).thenReturn(Optional.of(device));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.save(any(AssignmentModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assignmentService.addAssignment(openAssignmentDTO(null, device, null));
+
+        assertEquals(DeviceStatus.IN_REPAIR, device.getStatus());
+        verify(deviceRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateAssignment_Returned_SetsDeviceAvailable() {
+        DeviceModel device = deviceWithStatus(DeviceStatus.ASSIGNED);
+        AssignmentModel existing = allAssignments.getFirst();
+        existing.setDevice(device);
+        existing.setReturnedDate(null);
+
+        when(assignmentRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findById(device.getId())).thenReturn(Optional.of(device));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.save(existing)).thenReturn(existing);
+
+        assignmentService.updateAssignment(existing.getId(), openAssignmentDTO(existing.getId(), device, LocalDate.of(2024, 6, 1)));
+
+        assertEquals(DeviceStatus.AVAILABLE, device.getStatus());
+        verify(deviceRepository, times(1)).save(device);
+    }
+
+    @Test
+    void testUpdateAssignment_DeviceSwapped_FreesOldAndAssignsNew() {
+        DeviceModel oldDevice = deviceWithStatus(DeviceStatus.ASSIGNED);
+        DeviceModel newDevice = deviceWithStatus(DeviceStatus.AVAILABLE);
+        AssignmentModel existing = allAssignments.getFirst();
+        existing.setDevice(oldDevice);
+        existing.setReturnedDate(null);
+
+        when(assignmentRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findById(newDevice.getId())).thenReturn(Optional.of(newDevice));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.save(existing)).thenReturn(existing);
+
+        assignmentService.updateAssignment(existing.getId(), openAssignmentDTO(existing.getId(), newDevice, null));
+
+        assertEquals(DeviceStatus.ASSIGNED, newDevice.getStatus());
+        assertEquals(DeviceStatus.AVAILABLE, oldDevice.getStatus());
+    }
+
+    @Test
+    void testDeleteAssignment_Open_SetsDeviceAvailable() {
+        DeviceModel device = deviceWithStatus(DeviceStatus.ASSIGNED);
+        AssignmentModel existing = allAssignments.getFirst();
+        existing.setDevice(device);
+        existing.setReturnedDate(null);
+        when(assignmentRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+
+        assignmentService.deleteAssignment(existing.getId());
+
+        assertEquals(DeviceStatus.AVAILABLE, device.getStatus());
+        verify(deviceRepository, times(1)).save(device);
     }
 }
