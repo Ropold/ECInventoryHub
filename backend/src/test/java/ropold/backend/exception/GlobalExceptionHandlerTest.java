@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
+import ropold.backend.exception.badrequestexceptions.InvalidAssignmentDatesException;
+import ropold.backend.exception.conflictexceptions.DeviceAlreadyAssignedException;
 import ropold.backend.exception.conflictexceptions.DeviceIdentifierAlreadyExistsException;
 import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.LocationHasDevicesException;
@@ -77,6 +79,31 @@ class GlobalExceptionHandlerTest {
         assertThat(response.code()).isEqualTo("DEVICE_IDENTIFIER_EXISTS");
         assertThat(response.message()).isEqualTo("Device cannot be saved because some identifiers are already used by another device.");
         assertThat(response.details()).containsExactly("Hostname \"HOST-1\" is already used by Dell Latitude (ID: 123)");
+    }
+
+    @Test
+    void testHandleDeviceAlreadyAssignedException() {
+        DeviceAlreadyAssignedException exception = new DeviceAlreadyAssignedException(
+                "Device cannot be assigned because it has not been returned from its current assignment yet.",
+                List.of("Max Mustermann (2026-02-02)"));
+
+        ErrorResponse response = globalExceptionHandler.handleDeviceAlreadyAssignedException(exception);
+
+        assertThat(response.code()).isEqualTo("DEVICE_ALREADY_ASSIGNED");
+        assertThat(response.message()).isEqualTo("Device cannot be assigned because it has not been returned from its current assignment yet.");
+        assertThat(response.details()).containsExactly("Max Mustermann (2026-02-02)");
+    }
+
+    @Test
+    void testHandleInvalidAssignmentDatesException() {
+        InvalidAssignmentDatesException exception = new InvalidAssignmentDatesException(
+                "Returned date (2024-04-01) must not be before assigned date (2024-05-01).");
+
+        ErrorResponse response = globalExceptionHandler.handleInvalidAssignmentDatesException(exception);
+
+        assertThat(response.code()).isEqualTo("INVALID_ASSIGNMENT_DATES");
+        assertThat(response.message()).isEqualTo("Returned date (2024-04-01) must not be before assigned date (2024-05-01).");
+        assertThat(response.details()).isEmpty();
     }
 
     @Test

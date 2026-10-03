@@ -2,6 +2,7 @@ import type {AxiosError} from "axios";
 import {useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import type {DeviceModel} from "../models/DeviceModel.ts";
+import {translatedInfo} from "./TranslatedInfo.ts";
 
 export function onFileChange(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -65,25 +66,37 @@ export function renderImagePreview(
     }
     return null;
 }
+// messagesByCode: optionale übersetzte Meldungen je Backend-Fehlercode (z. B. "DEVICE_ALREADY_ASSIGNED"),
+// ohne Eintrag wird die englische Meldung aus dem Backend angezeigt
 export function handleRequestError(
-    error: AxiosError<{message?: string; details?: string[]}>,
+    error: AxiosError<{code?: string; message?: string; details?: string[]}>,
     loginMessage: string,
     genericMessage: string,
     setError: (message: string | null) => void,
-    setBlockingItems?: (items: string[]) => void
+    setBlockingItems?: (items: string[]) => void,
+    messagesByCode?: Record<string, string>
 ) {
     const status = error.response?.status;
 
     if (status === 401 || status === 403) {
         setError(loginMessage);
         setBlockingItems?.([]);
-    } else if (status === 409) {
-        setError(error.response?.data?.message ?? genericMessage);
+    } else if (status === 400 || status === 409) {
+        const code = error.response?.data?.code;
+        const translated = code ? messagesByCode?.[code] : undefined;
+        setError(translated ?? error.response?.data?.message ?? genericMessage);
         setBlockingItems?.(error.response?.data?.details ?? []);
     } else {
         setError(genericMessage);
         setBlockingItems?.([]);
     }
+}
+
+export function assignmentErrorMessages(language: string): Record<string, string> {
+    return {
+        DEVICE_ALREADY_ASSIGNED: translatedInfo["Device already assigned"][language],
+        INVALID_ASSIGNMENT_DATES: translatedInfo["Returned date before assigned date"][language],
+    };
 }
 
 export function renderBlockingList(items: string[]) {

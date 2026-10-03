@@ -5,6 +5,7 @@ import axios from "axios";
 import type {DeviceModel} from "../models/DeviceModel.ts";
 import type {EmployeeModel} from "../models/EmployeeModel.ts";
 import type {AssignmentFileModel} from "../models/AssignmentFileModel.ts";
+import {renderBlockingList} from "../utils/ComponentsFunctions.tsx";
 import "../styles/FormStyles.css";
 
 type AssignmentFormProps = {
@@ -35,6 +36,8 @@ type AssignmentFormProps = {
     setNewFiles: React.Dispatch<React.SetStateAction<File[]>>;
     existingFiles?: AssignmentFileModel[];
     setExistingFiles?: React.Dispatch<React.SetStateAction<AssignmentFileModel[]>>;
+    saveError: string | null;
+    saveErrorDetails: string[];
 }
 
 function getDeviceLabel(device: DeviceModel): string {
@@ -184,6 +187,7 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                             className="input-small"
                             type="date"
                             value={returnedDate ?? ""}
+                            min={assignedDate || undefined}
                             onChange={(e) => setReturnedDate(e.target.value || undefined)}
                         />
                     </label>
@@ -260,6 +264,13 @@ export default function AssignmentForm(props: Readonly<AssignmentFormProps>) {
                             </li>
                         ))}
                     </ul>
+                )}
+
+                {props.saveError && (
+                    <div className="popup-error">
+                        <p>{props.saveError}</p>
+                        {renderBlockingList(props.saveErrorDetails)}
+                    </div>
                 )}
 
                 <button type="submit" className="button-blue margin-top-50">

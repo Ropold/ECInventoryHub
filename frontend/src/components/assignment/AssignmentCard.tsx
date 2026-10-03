@@ -9,6 +9,7 @@ type AssignmentCardProps = {
     assignment: AssignmentModel;
     language: string;
     hideEmployee?: boolean;
+    hideDevice?: boolean;
 }
 
 const deviceTypeIcons: Record<DeviceType, string> = {
@@ -50,15 +51,15 @@ export default function AssignmentCard(props: Readonly<AssignmentCardProps>){
                     ⚠️
                 </span>
             )}
-            {props.hideEmployee ? (
-                <h2>{deviceLabel}</h2>
-            ) : (
+            {props.hideEmployee && <h2>{deviceLabel}</h2>}
+            {props.hideDevice && <h2>{employee.name}</h2>}
+            {!props.hideEmployee && !props.hideDevice && (
                 <>
                     <h2>{employee.name}</h2>
                     <p className="assignment-card-label">{deviceLabel}</p>
                 </>
             )}
-            {deviceName && <p className="assignment-card-device">{deviceName}</p>}
+            {!props.hideDevice && deviceName && <p className="assignment-card-device">{deviceName}</p>}
             <p className="assignment-card-date">{dateText}</p>
             <span className={`assignment-card-badge ${isActive ? "assignment-card-badge-active" : "assignment-card-badge-returned"}`}>
                 {translatedInfo[isActive ? "Active" : "Returned"][props.language]}

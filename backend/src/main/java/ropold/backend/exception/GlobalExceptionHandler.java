@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ropold.backend.exception.badrequestexceptions.InvalidAssignmentDatesException;
+import ropold.backend.exception.conflictexceptions.DeviceAlreadyAssignedException;
 import ropold.backend.exception.conflictexceptions.DeviceHasAssignmentsException;
 import ropold.backend.exception.conflictexceptions.DeviceIdentifierAlreadyExistsException;
 import ropold.backend.exception.conflictexceptions.EmployeeHasAssignmentsException;
@@ -20,6 +22,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleAccessDeniedException(AccessDeniedException e) {
         log.warn("Access denied: {}", e.getMessage());
         return new ErrorResponse("ACCESS_DENIED", e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAssignmentDatesException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidAssignmentDatesException(InvalidAssignmentDatesException e) {
+        log.warn("Bad request: {}", e.getMessage());
+        return new ErrorResponse("INVALID_ASSIGNMENT_DATES", e.getMessage());
     }
 
     @ExceptionHandler(EmployeeHasAssignmentsException.class)
@@ -41,6 +50,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleDeviceIdentifierAlreadyExistsException(DeviceIdentifierAlreadyExistsException e) {
         log.warn("Conflict: {}", e.getMessage());
         return new ErrorResponse("DEVICE_IDENTIFIER_EXISTS", e.getMessage(), e.getConflictDetails());
+    }
+
+    @ExceptionHandler(DeviceAlreadyAssignedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDeviceAlreadyAssignedException(DeviceAlreadyAssignedException e) {
+        log.warn("Conflict: {}", e.getMessage());
+        return new ErrorResponse("DEVICE_ALREADY_ASSIGNED", e.getMessage(), e.getAssignmentDetails());
     }
 
     @ExceptionHandler(LocationHasDevicesException.class)

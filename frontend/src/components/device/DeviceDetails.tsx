@@ -8,6 +8,7 @@ import "../styles/Details.css";
 import NoPermissionPopup from "../NoPermissionPopup.tsx";
 import type {AssignmentModel} from "../models/AssignmentModel.ts";
 import EmployeeCard from "../employee/EmployeeCard.tsx";
+import AssignmentCard from "../assignment/AssignmentCard.tsx";
 
 type DeviceDetailsProps = {
     language: string;
@@ -26,8 +27,11 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
     const [blockingAssignments, setBlockingAssignments] = useState<string[]>([]);
     const [showNoPermission, setShowNoPermission] = useState<boolean>(false);
 
-    // Aktuelle Zuweisung: noch nicht zurückgegeben
-    const currentAssignment = props.assignments.find((assignment) => assignment.device.id === id && !assignment.returnedDate);
+    // Alle Zuweisungen dieses Geräts, neueste zuerst – die aktuelle ist die ohne Rückgabedatum
+    const deviceAssignments = props.assignments
+        .filter((assignment) => assignment.device.id === id)
+        .sort((a, b) => b.assignedDate.localeCompare(a.assignedDate));
+    const currentAssignment = deviceAssignments.find((assignment) => !assignment.returnedDate);
 
     function handleEditClick() {
         if (props.role === "VIEWER") {
@@ -112,6 +116,17 @@ export default function DeviceDetails(props: Readonly<DeviceDetailsProps>) {
                                 </div>
                             )}
                         </div>
+                    )}
+
+                    {deviceAssignments.length > 0 && (
+                        <>
+                            <h3>{translatedInfo["Assignment History"][props.language]}</h3>
+                            <div className="assignment-card-container">
+                                {deviceAssignments.map((assignment) => (
+                                    <AssignmentCard key={assignment.id} assignment={assignment} language={props.language} hideDevice />
+                                ))}
+                            </div>
+                        </>
                     )}
 
                     {device.location && (

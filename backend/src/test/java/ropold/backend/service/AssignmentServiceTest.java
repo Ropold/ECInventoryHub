@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import ropold.backend.dto.AssignmentDTO;
 import ropold.backend.dto.DeviceDTO;
 import ropold.backend.dto.EmployeeDTO;
+import ropold.backend.exception.badrequestexceptions.InvalidAssignmentDatesException;
+import ropold.backend.exception.conflictexceptions.DeviceAlreadyAssignedException;
 import ropold.backend.exception.notfoundexceptions.AssignmentNotFoundException;
 import ropold.backend.exception.notfoundexceptions.DeviceNotFoundException;
 import ropold.backend.exception.notfoundexceptions.EmployeeNotFoundException;
@@ -320,6 +322,114 @@ class AssignmentServiceTest {
         assertEquals(employeeModel1, result.getHandedOutBy());
         assertEquals("Updated notes", result.getNotes());
         assertEquals("Returned with minor damage", result.getConditionIn());
+        verify(assignmentRepository, times(1)).save(existing);
+    }
+
+    @Test
+    void testAddAssignment_DeviceAlreadyAssigned() {
+        AssignmentModel openAssignment = allAssignments.getFirst();
+        openAssignment.setReturnedDate(null);
+
+        AssignmentDTO assignmentDTO = new AssignmentDTO(
+                null, toDeviceDTO(deviceModel1), toEmployeeDTO(employeeModel2), null,
+                LocalDate.of(2024, 5, 1), null, null, null, null,
+                false, false, null
+        );
+
+        when(deviceRepository.findById(deviceModel1.getId())).thenReturn(Optional.of(deviceModel1));
+        when(employeeRepository.findById(employeeModel2.getId())).thenReturn(Optional.of(employeeModel2));
+        when(assignmentRepository.findByDeviceIdAndReturnedDateIsNull(deviceModel1.getId()))
+                .thenReturn(List.of(openAssignment));
+
+        DeviceAlreadyAssignedException exception = assertThrows(
+                DeviceAlreadyAssignedException.class,
+                () -> assignmentService.addAssignment(assignmentDTO)
+        );
+
+        assertEquals(1, exception.getAssignmentDetails().size());
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void testAddAssignment_ReturnedBeforeAssigned() {
+        AssignmentDTO assignmentDTO = new AssignmentDTO(
+                null, toDeviceDTO(deviceModel1), toEmployeeDTO(employeeModel1), null,
+                LocalDate.of(2024, 5, 1), LocalDate.of(2024, 4, 1), null, null, null,
+                false, false, null
+        );
+
+        when(deviceRepository.findById(deviceModel1.getId())).thenReturn(Optional.of(deviceModel1));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+
+        assertThrows(
+                InvalidAssignmentDatesException.class,
+                () -> assignmentService.addAssignment(assignmentDTO)
+        );
+
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateAssignment_ReturnedBeforeAssigned() {
+        AssignmentModel existing = allAssignments.getFirst();
+
+        AssignmentDTO assignmentDTO = new AssignmentDTO(
+                existing.getId(), toDeviceDTO(deviceModel1), toEmployeeDTO(employeeModel1), null,
+                LocalDate.of(2024, 5, 1), LocalDate.of(2024, 4, 30), null, null, null,
+                false, false, null
+        );
+
+        when(assignmentRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findById(deviceModel1.getId())).thenReturn(Optional.of(deviceModel1));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+
+        assertThrows(
+                InvalidAssignmentDatesException.class,
+                () -> assignmentService.updateAssignment(existing.getId(), assignmentDTO)
+        );
+
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void testAddAssignment_AlreadyReturned_SkipsOpenAssignmentCheck() {
+        AssignmentDTO assignmentDTO = new AssignmentDTO(
+                null, toDeviceDTO(deviceModel1), toEmployeeDTO(employeeModel1), null,
+                LocalDate.of(2023, 1, 1), LocalDate.of(2023, 6, 1), null, null, null,
+                false, false, null
+        );
+
+        when(deviceRepository.findById(deviceModel1.getId())).thenReturn(Optional.of(deviceModel1));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.save(any(AssignmentModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assignmentService.addAssignment(assignmentDTO);
+
+        verify(assignmentRepository, never()).findByDeviceIdAndReturnedDateIsNull(any());
+        verify(assignmentRepository, times(1)).save(any(AssignmentModel.class));
+    }
+
+    @Test
+    void testUpdateAssignment_OwnOpenAssignmentIsNoConflict() {
+        AssignmentModel existing = allAssignments.getFirst();
+        existing.setReturnedDate(null);
+
+        AssignmentDTO assignmentDTO = new AssignmentDTO(
+                existing.getId(), toDeviceDTO(deviceModel1), toEmployeeDTO(employeeModel1), null,
+                existing.getAssignedDate(), null, null, null, "Only notes changed",
+                false, false, null
+        );
+
+        when(assignmentRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(deviceRepository.findById(deviceModel1.getId())).thenReturn(Optional.of(deviceModel1));
+        when(employeeRepository.findById(employeeModel1.getId())).thenReturn(Optional.of(employeeModel1));
+        when(assignmentRepository.findByDeviceIdAndReturnedDateIsNull(deviceModel1.getId()))
+                .thenReturn(List.of(existing));
+        when(assignmentRepository.save(existing)).thenReturn(existing);
+
+        AssignmentModel result = assignmentService.updateAssignment(existing.getId(), assignmentDTO);
+
+        assertEquals("Only notes changed", result.getNotes());
         verify(assignmentRepository, times(1)).save(existing);
     }
 

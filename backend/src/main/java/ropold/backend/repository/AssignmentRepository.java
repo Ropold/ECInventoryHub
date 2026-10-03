@@ -12,4 +12,6 @@ public interface AssignmentRepository extends JpaRepository<AssignmentModel, UUI
     List<AssignmentModel> findByHandedOutById(UUID handedOutById);
 
     List<AssignmentModel> findByDeviceId(UUID deviceId);
+
+    List<AssignmentModel> findByDeviceIdAndReturnedDateIsNull(UUID deviceId);
 }
